@@ -75,9 +75,10 @@ function Configuracoes() {
     },
   });
 
+  const grokFn = useServerFn(grokStatus);
   const grok = useQuery({
     queryKey: ["grok_status"],
-    queryFn: useServerFn(grokStatus),
+    queryFn: () => grokFn(),
   });
 
   const setGlobalMode = async (mode: string) => {
