@@ -12,7 +12,8 @@ import { AUTH_ENABLED, SECRETS_STATUS, GROK_OPTIONAL_NOTE } from "@/lib/config";
 import { supabase } from "@/integrations/supabase/client";
 import { testTelegramBot } from "@/lib/telegram.functions";
 import { sendCaktoTestEvent } from "@/lib/cakto.functions";
-import { grokStatus } from "@/lib/grok.functions";
+import { grokStatus, pingGrok } from "@/lib/grok.functions";
+import { useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/configuracoes")({ component: Configuracoes });
 
@@ -79,6 +80,21 @@ function Configuracoes() {
   const grok = useQuery({
     queryKey: ["grok_status"],
     queryFn: () => grokFn(),
+  });
+
+  const [grokTestResult, setGrokTestResult] = useState<{ ok: boolean; text?: string; error?: string; model?: string } | null>(null);
+  const pingGrokFn = useServerFn(pingGrok);
+  const testGrok = useMutation({
+    mutationFn: () => pingGrokFn({} as any),
+    onSuccess: (r: any) => {
+      setGrokTestResult(r);
+      if (r?.ok) toast.success("Grok respondeu");
+      else toast.error(r?.error ?? "Falha ao testar Grok");
+    },
+    onError: (e: any) => {
+      setGrokTestResult({ ok: false, error: e?.message ?? "erro" });
+      toast.error(e?.message ?? "Erro");
+    },
   });
 
   const setGlobalMode = async (mode: string) => {
@@ -206,8 +222,8 @@ function Configuracoes() {
             </div>
 
             <div className="flex flex-wrap gap-2 mt-3">
-              <Button size="sm" variant="outline" disabled={!grok.data?.hasKey}>
-                <Play className="h-3.5 w-3.5 mr-1" />Testar Grok
+              <Button size="sm" variant="outline" disabled={!grok.data?.hasKey || testGrok.isPending} onClick={() => testGrok.mutate()}>
+                <Play className="h-3.5 w-3.5 mr-1" />{testGrok.isPending ? "Testando..." : "Testar Grok"}
               </Button>
               <Button size="sm" variant="outline" onClick={() => setGlobalMode("off")}>
                 <Pause className="h-3.5 w-3.5 mr-1" />Pausar Grok globalmente
@@ -216,6 +232,20 @@ function Configuracoes() {
                 <Play className="h-3.5 w-3.5 mr-1" />Ativar Grok globalmente
               </Button>
             </div>
+
+            {grokTestResult && (
+              <div className={`mt-3 p-3 rounded-lg border text-xs ${grokTestResult.ok ? "bg-success/10 border-success/30" : "bg-destructive/10 border-destructive/30"}`}>
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <strong className={grokTestResult.ok ? "text-success" : "text-destructive"}>
+                    {grokTestResult.ok ? "Resposta do Grok" : "Erro"}
+                  </strong>
+                  {grokTestResult.model && <span className="text-muted-foreground">{grokTestResult.model}</span>}
+                </div>
+                <pre className="whitespace-pre-wrap font-mono text-xs text-foreground">
+                  {grokTestResult.ok ? grokTestResult.text : grokTestResult.error}
+                </pre>
+              </div>
+            )}
 
             <div className="mt-3 p-3 rounded-lg bg-muted/40 border border-border">
               <div className="flex gap-2">
