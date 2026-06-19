@@ -101,7 +101,7 @@ export const callGrok = createServerFn({ method: "POST" })
       `PROIBIDO: ${(profile as any)?.forbidden_promises ?? "Não prometa o que não está cadastrado."}`,
       memories?.length ? `Memórias do lead:\n${memories.map((m: any) => `- ${m.title}: ${m.content}`).join("\n")}` : "",
       chosenStory
-        ? `HISTÓRIA DISPONÍVEL (ainda não usada com este lead — "${chosenStory.name}", variação ${chosenStory.variation}):\n"${chosenStory.text}"\n\nSe fizer sentido no contexto da conversa, incorpore essa história de forma natural (pode adaptar palavras, mas mantenha a essência). Se não couber agora, ignore.`
+        ? `HISTÓRIA DISPONÍVEL (ainda não usada com este lead — "${chosenStory.name}", variação ${chosenStory.variation}):\n"${chosenStory.text}"\n\nUse essa história de forma natural e fluida, adaptando ao contexto da conversa. NÃO force se não couber naturalmente. Priorize sempre conexão emocional antes de escalar.`
         : "",
     ].filter(Boolean).join("\n\n");
 
