@@ -19,12 +19,15 @@ export type Database = {
           access_type: string
           content_id: string | null
           created_at: string
+          delivery_payload: string | null
           expires_at: string | null
           id: string
           invite_link: string | null
+          lead_id: string | null
           order_id: string | null
           plan_id: string | null
           revoked_at: string | null
+          seller_profile_id: string | null
           starts_at: string
           status: string
           telegram_group_id: string | null
@@ -34,12 +37,15 @@ export type Database = {
           access_type: string
           content_id?: string | null
           created_at?: string
+          delivery_payload?: string | null
           expires_at?: string | null
           id?: string
           invite_link?: string | null
+          lead_id?: string | null
           order_id?: string | null
           plan_id?: string | null
           revoked_at?: string | null
+          seller_profile_id?: string | null
           starts_at?: string
           status?: string
           telegram_group_id?: string | null
@@ -49,12 +55,15 @@ export type Database = {
           access_type?: string
           content_id?: string | null
           created_at?: string
+          delivery_payload?: string | null
           expires_at?: string | null
           id?: string
           invite_link?: string | null
+          lead_id?: string | null
           order_id?: string | null
           plan_id?: string | null
           revoked_at?: string | null
+          seller_profile_id?: string | null
           starts_at?: string
           status?: string
           telegram_group_id?: string | null
@@ -69,6 +78,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "access_grants_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "access_grants_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
@@ -80,6 +96,13 @@ export type Database = {
             columns: ["plan_id"]
             isOneToOne: false
             referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "access_grants_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -104,6 +127,7 @@ export type Database = {
           description: string | null
           id: string
           metadata: Json | null
+          seller_profile_id: string | null
           telegram_user_id: string | null
           type: string
         }
@@ -112,6 +136,7 @@ export type Database = {
           description?: string | null
           id?: string
           metadata?: Json | null
+          seller_profile_id?: string | null
           telegram_user_id?: string | null
           type: string
         }
@@ -120,10 +145,18 @@ export type Database = {
           description?: string | null
           id?: string
           metadata?: Json | null
+          seller_profile_id?: string | null
           telegram_user_id?: string | null
           type?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "activity_logs_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "activity_logs_telegram_user_id_fkey"
             columns: ["telegram_user_id"]
@@ -135,39 +168,72 @@ export type Database = {
       }
       ai_learnings: {
         Row: {
+          approved_at: string | null
+          approved_by_admin: boolean | null
+          confidence: number | null
           content: string
           created_at: string
+          description: string | null
           evidence: Json
           id: string
           kind: string
+          learning_type: string | null
+          seller_profile_id: string | null
           status: Database["public"]["Enums"]["learning_status"]
+          suggested_action: string | null
+          title: string | null
           updated_at: string
         }
         Insert: {
+          approved_at?: string | null
+          approved_by_admin?: boolean | null
+          confidence?: number | null
           content: string
           created_at?: string
+          description?: string | null
           evidence?: Json
           id?: string
           kind: string
+          learning_type?: string | null
+          seller_profile_id?: string | null
           status?: Database["public"]["Enums"]["learning_status"]
+          suggested_action?: string | null
+          title?: string | null
           updated_at?: string
         }
         Update: {
+          approved_at?: string | null
+          approved_by_admin?: boolean | null
+          confidence?: number | null
           content?: string
           created_at?: string
+          description?: string | null
           evidence?: Json
           id?: string
           kind?: string
+          learning_type?: string | null
+          seller_profile_id?: string | null
           status?: Database["public"]["Enums"]["learning_status"]
+          suggested_action?: string | null
+          title?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ai_learnings_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ai_settings: {
         Row: {
           cost_estimate_cents: number
           created_at: string
           enable_ai: boolean
+          enable_auto_reply: boolean | null
           fallback_message: string | null
           grok_global_mode: Database["public"]["Enums"]["grok_global_mode"]
           id: string
@@ -175,7 +241,10 @@ export type Database = {
           messages_today: number
           model: string
           provider: string
+          require_approval_for_funnel_changes: boolean | null
+          require_approval_for_offers: boolean | null
           seller_profile: Json
+          seller_profile_id: string | null
           system_prompt: string | null
           tone: string | null
           updated_at: string
@@ -185,6 +254,7 @@ export type Database = {
           cost_estimate_cents?: number
           created_at?: string
           enable_ai?: boolean
+          enable_auto_reply?: boolean | null
           fallback_message?: string | null
           grok_global_mode?: Database["public"]["Enums"]["grok_global_mode"]
           id?: string
@@ -192,7 +262,10 @@ export type Database = {
           messages_today?: number
           model?: string
           provider?: string
+          require_approval_for_funnel_changes?: boolean | null
+          require_approval_for_offers?: boolean | null
           seller_profile?: Json
+          seller_profile_id?: string | null
           system_prompt?: string | null
           tone?: string | null
           updated_at?: string
@@ -202,6 +275,7 @@ export type Database = {
           cost_estimate_cents?: number
           created_at?: string
           enable_ai?: boolean
+          enable_auto_reply?: boolean | null
           fallback_message?: string | null
           grok_global_mode?: Database["public"]["Enums"]["grok_global_mode"]
           id?: string
@@ -209,55 +283,89 @@ export type Database = {
           messages_today?: number
           model?: string
           provider?: string
+          require_approval_for_funnel_changes?: boolean | null
+          require_approval_for_offers?: boolean | null
           seller_profile?: Json
+          seller_profile_id?: string | null
           system_prompt?: string | null
           tone?: string | null
           updated_at?: string
           xai_api_key_set?: boolean
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ai_settings_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       automation_rules: {
         Row: {
+          action_type: string | null
           actions: Json
+          condition_json: Json | null
           created_at: string
+          delay_minutes: number | null
           id: string
           is_active: boolean
           message: string | null
           name: string
+          seller_profile_id: string | null
           timing_unit: string | null
           timing_value: number | null
           trigger: Database["public"]["Enums"]["automation_trigger"] | null
+          trigger_event: string | null
           type: string
           updated_at: string
         }
         Insert: {
+          action_type?: string | null
           actions?: Json
+          condition_json?: Json | null
           created_at?: string
+          delay_minutes?: number | null
           id?: string
           is_active?: boolean
           message?: string | null
           name: string
+          seller_profile_id?: string | null
           timing_unit?: string | null
           timing_value?: number | null
           trigger?: Database["public"]["Enums"]["automation_trigger"] | null
+          trigger_event?: string | null
           type: string
           updated_at?: string
         }
         Update: {
+          action_type?: string | null
           actions?: Json
+          condition_json?: Json | null
           created_at?: string
+          delay_minutes?: number | null
           id?: string
           is_active?: boolean
           message?: string | null
           name?: string
+          seller_profile_id?: string | null
           timing_unit?: string | null
           timing_value?: number | null
           trigger?: Database["public"]["Enums"]["automation_trigger"] | null
+          trigger_event?: string | null
           type?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "automation_rules_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cakto_events: {
         Row: {
@@ -272,6 +380,7 @@ export type Database = {
           notes: string | null
           payload: Json
           received_at: string
+          seller_profile_id: string | null
           status: string | null
           updated_at: string
         }
@@ -287,6 +396,7 @@ export type Database = {
           notes?: string | null
           payload: Json
           received_at?: string
+          seller_profile_id?: string | null
           status?: string | null
           updated_at?: string
         }
@@ -302,6 +412,7 @@ export type Database = {
           notes?: string | null
           payload?: Json
           received_at?: string
+          seller_profile_id?: string | null
           status?: string | null
           updated_at?: string
         }
@@ -311,6 +422,215 @@ export type Database = {
             columns: ["linked_payment_id"]
             isOneToOne: false
             referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cakto_events_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cakto_webhook_events: {
+        Row: {
+          created_at: string
+          event_id: string | null
+          event_type: string | null
+          id: string
+          payload: Json
+          processed: boolean
+          processed_at: string | null
+          processing_error: string | null
+          provider_order_id: string | null
+          provider_payment_id: string | null
+          seller_profile_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_id?: string | null
+          event_type?: string | null
+          id?: string
+          payload: Json
+          processed?: boolean
+          processed_at?: string | null
+          processing_error?: string | null
+          provider_order_id?: string | null
+          provider_payment_id?: string | null
+          seller_profile_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_id?: string | null
+          event_type?: string | null
+          id?: string
+          payload?: Json
+          processed?: boolean
+          processed_at?: string | null
+          processing_error?: string | null
+          provider_order_id?: string | null
+          provider_payment_id?: string | null
+          seller_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cakto_webhook_events_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_events: {
+        Row: {
+          conversation_id: string | null
+          created_at: string
+          event_label: string | null
+          event_type: string
+          extracted_text: string | null
+          id: string
+          lead_id: string | null
+          message_id: string | null
+          metadata: Json | null
+          seller_profile_id: string | null
+          signal_strength: number
+        }
+        Insert: {
+          conversation_id?: string | null
+          created_at?: string
+          event_label?: string | null
+          event_type: string
+          extracted_text?: string | null
+          id?: string
+          lead_id?: string | null
+          message_id?: string | null
+          metadata?: Json | null
+          seller_profile_id?: string | null
+          signal_strength?: number
+        }
+        Update: {
+          conversation_id?: string | null
+          created_at?: string
+          event_label?: string | null
+          event_type?: string
+          extracted_text?: string | null
+          id?: string
+          lead_id?: string | null
+          message_id?: string | null
+          metadata?: Json | null
+          seller_profile_id?: string | null
+          signal_strength?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_events_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_events_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_events_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_events_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_profiles: {
+        Row: {
+          best_conversion_angle: string | null
+          buying_motivation: string | null
+          buying_stage: string | null
+          created_at: string
+          discount_sensitivity: number
+          id: string
+          last_commercial_summary: string | null
+          lead_id: string | null
+          preferred_offer_type: string | null
+          preferred_price_range: string | null
+          primary_persona: string | null
+          products_of_interest: Json | null
+          recurring_objections: Json | null
+          secondary_persona: string | null
+          seller_profile_id: string | null
+          trust_barrier_level: number
+          updated_at: string
+          upsell_potential_score: number
+          urgency_level: number
+        }
+        Insert: {
+          best_conversion_angle?: string | null
+          buying_motivation?: string | null
+          buying_stage?: string | null
+          created_at?: string
+          discount_sensitivity?: number
+          id?: string
+          last_commercial_summary?: string | null
+          lead_id?: string | null
+          preferred_offer_type?: string | null
+          preferred_price_range?: string | null
+          primary_persona?: string | null
+          products_of_interest?: Json | null
+          recurring_objections?: Json | null
+          secondary_persona?: string | null
+          seller_profile_id?: string | null
+          trust_barrier_level?: number
+          updated_at?: string
+          upsell_potential_score?: number
+          urgency_level?: number
+        }
+        Update: {
+          best_conversion_angle?: string | null
+          buying_motivation?: string | null
+          buying_stage?: string | null
+          created_at?: string
+          discount_sensitivity?: number
+          id?: string
+          last_commercial_summary?: string | null
+          lead_id?: string | null
+          preferred_offer_type?: string | null
+          preferred_price_range?: string | null
+          primary_persona?: string | null
+          products_of_interest?: Json | null
+          recurring_objections?: Json | null
+          secondary_persona?: string | null
+          seller_profile_id?: string | null
+          trust_barrier_level?: number
+          updated_at?: string
+          upsell_potential_score?: number
+          urgency_level?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_profiles_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: true
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_profiles_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -332,6 +652,7 @@ export type Database = {
           name: string
           post_purchase_message: string | null
           price_cents: number
+          seller_profile_id: string | null
           tags: string[]
           updated_at: string
           upsell_content_id: string | null
@@ -352,6 +673,7 @@ export type Database = {
           name: string
           post_purchase_message?: string | null
           price_cents: number
+          seller_profile_id?: string | null
           tags?: string[]
           updated_at?: string
           upsell_content_id?: string | null
@@ -372,11 +694,19 @@ export type Database = {
           name?: string
           post_purchase_message?: string | null
           price_cents?: number
+          seller_profile_id?: string | null
           tags?: string[]
           updated_at?: string
           upsell_content_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "contents_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "contents_upsell_content_id_fkey"
             columns: ["upsell_content_id"]
@@ -394,13 +724,16 @@ export type Database = {
           current_funnel_id: string | null
           current_step: number | null
           current_story_id: string | null
+          grok_enabled: boolean | null
           grok_mode: Database["public"]["Enums"]["grok_conv_mode"]
           id: string
           last_interaction_at: string | null
           last_message_at: string | null
+          lead_id: string | null
           needs_human: boolean
           score_buy: number
           score_relationship: number
+          seller_profile_id: string | null
           status: string
           telegram_user_id: string | null
           temperature: Database["public"]["Enums"]["lead_temperature"]
@@ -413,13 +746,16 @@ export type Database = {
           current_funnel_id?: string | null
           current_step?: number | null
           current_story_id?: string | null
+          grok_enabled?: boolean | null
           grok_mode?: Database["public"]["Enums"]["grok_conv_mode"]
           id?: string
           last_interaction_at?: string | null
           last_message_at?: string | null
+          lead_id?: string | null
           needs_human?: boolean
           score_buy?: number
           score_relationship?: number
+          seller_profile_id?: string | null
           status?: string
           telegram_user_id?: string | null
           temperature?: Database["public"]["Enums"]["lead_temperature"]
@@ -432,13 +768,16 @@ export type Database = {
           current_funnel_id?: string | null
           current_step?: number | null
           current_story_id?: string | null
+          grok_enabled?: boolean | null
           grok_mode?: Database["public"]["Enums"]["grok_conv_mode"]
           id?: string
           last_interaction_at?: string | null
           last_message_at?: string | null
+          lead_id?: string | null
           needs_human?: boolean
           score_buy?: number
           score_relationship?: number
+          seller_profile_id?: string | null
           status?: string
           telegram_user_id?: string | null
           temperature?: Database["public"]["Enums"]["lead_temperature"]
@@ -446,10 +785,191 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "conversations_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "conversations_telegram_user_id_fkey"
             columns: ["telegram_user_id"]
             isOneToOne: false
             referencedRelation: "telegram_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      emotional_memories: {
+        Row: {
+          content: string
+          conversation_id: string | null
+          created_at: string
+          follow_up_after: string | null
+          id: string
+          importance: number
+          is_active: boolean
+          is_sensitive: boolean
+          last_used_at: string | null
+          lead_id: string | null
+          memory_type: string
+          message_id: string | null
+          person_name: string | null
+          relationship_to_lead: string | null
+          seller_profile_id: string | null
+          sentiment: string | null
+          should_follow_up: boolean
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          conversation_id?: string | null
+          created_at?: string
+          follow_up_after?: string | null
+          id?: string
+          importance?: number
+          is_active?: boolean
+          is_sensitive?: boolean
+          last_used_at?: string | null
+          lead_id?: string | null
+          memory_type: string
+          message_id?: string | null
+          person_name?: string | null
+          relationship_to_lead?: string | null
+          seller_profile_id?: string | null
+          sentiment?: string | null
+          should_follow_up?: boolean
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string | null
+          created_at?: string
+          follow_up_after?: string | null
+          id?: string
+          importance?: number
+          is_active?: boolean
+          is_sensitive?: boolean
+          last_used_at?: string | null
+          lead_id?: string | null
+          memory_type?: string
+          message_id?: string | null
+          person_name?: string | null
+          relationship_to_lead?: string | null
+          seller_profile_id?: string | null
+          sentiment?: string | null
+          should_follow_up?: boolean
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emotional_memories_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "emotional_memories_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "emotional_memories_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "emotional_memories_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      emotional_profiles: {
+        Row: {
+          communication_preferences: Json | null
+          created_at: string
+          emotional_tone: string | null
+          id: string
+          important_events: Json | null
+          important_people: Json | null
+          last_care_opportunity: string | null
+          last_emotional_summary: string | null
+          lead_id: string | null
+          personal_context_summary: string | null
+          positive_topics: Json | null
+          preferred_empathy_style: string | null
+          relationship_stage: string
+          seller_profile_id: string | null
+          sensitive_topics: Json | null
+          updated_at: string
+        }
+        Insert: {
+          communication_preferences?: Json | null
+          created_at?: string
+          emotional_tone?: string | null
+          id?: string
+          important_events?: Json | null
+          important_people?: Json | null
+          last_care_opportunity?: string | null
+          last_emotional_summary?: string | null
+          lead_id?: string | null
+          personal_context_summary?: string | null
+          positive_topics?: Json | null
+          preferred_empathy_style?: string | null
+          relationship_stage?: string
+          seller_profile_id?: string | null
+          sensitive_topics?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          communication_preferences?: Json | null
+          created_at?: string
+          emotional_tone?: string | null
+          id?: string
+          important_events?: Json | null
+          important_people?: Json | null
+          last_care_opportunity?: string | null
+          last_emotional_summary?: string | null
+          lead_id?: string | null
+          personal_context_summary?: string | null
+          positive_topics?: Json | null
+          preferred_empathy_style?: string | null
+          relationship_stage?: string
+          seller_profile_id?: string | null
+          sensitive_topics?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emotional_profiles_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: true
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "emotional_profiles_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -508,17 +1028,170 @@ export type Database = {
           },
         ]
       }
+      funnel_memberships: {
+        Row: {
+          completed_at: string | null
+          current_step_id: string | null
+          entered_at: string
+          exited_at: string | null
+          funnel_id: string | null
+          id: string
+          last_step_sent_at: string | null
+          lead_id: string | null
+          seller_profile_id: string | null
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          current_step_id?: string | null
+          entered_at?: string
+          exited_at?: string | null
+          funnel_id?: string | null
+          id?: string
+          last_step_sent_at?: string | null
+          lead_id?: string | null
+          seller_profile_id?: string | null
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          current_step_id?: string | null
+          entered_at?: string
+          exited_at?: string | null
+          funnel_id?: string | null
+          id?: string
+          last_step_sent_at?: string | null
+          lead_id?: string | null
+          seller_profile_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funnel_memberships_current_step_id_fkey"
+            columns: ["current_step_id"]
+            isOneToOne: false
+            referencedRelation: "funnel_steps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funnel_memberships_funnel_id_fkey"
+            columns: ["funnel_id"]
+            isOneToOne: false
+            referencedRelation: "funnels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funnel_memberships_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funnel_memberships_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      funnel_steps: {
+        Row: {
+          action_type: string | null
+          content_id: string | null
+          created_at: string
+          delay_minutes: number
+          funnel_id: string | null
+          id: string
+          is_active: boolean
+          message_template: string | null
+          name: string | null
+          offer_type: string | null
+          plan_id: string | null
+          requires_human_approval: boolean
+          seller_profile_id: string | null
+          step_order: number
+          updated_at: string
+        }
+        Insert: {
+          action_type?: string | null
+          content_id?: string | null
+          created_at?: string
+          delay_minutes?: number
+          funnel_id?: string | null
+          id?: string
+          is_active?: boolean
+          message_template?: string | null
+          name?: string | null
+          offer_type?: string | null
+          plan_id?: string | null
+          requires_human_approval?: boolean
+          seller_profile_id?: string | null
+          step_order: number
+          updated_at?: string
+        }
+        Update: {
+          action_type?: string | null
+          content_id?: string | null
+          created_at?: string
+          delay_minutes?: number
+          funnel_id?: string | null
+          id?: string
+          is_active?: boolean
+          message_template?: string | null
+          name?: string | null
+          offer_type?: string | null
+          plan_id?: string | null
+          requires_human_approval?: boolean
+          seller_profile_id?: string | null
+          step_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funnel_steps_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "contents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funnel_steps_funnel_id_fkey"
+            columns: ["funnel_id"]
+            isOneToOne: false
+            referencedRelation: "funnels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funnel_steps_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funnel_steps_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       funnels: {
         Row: {
           created_at: string
           description: string | null
           goal: string | null
+          grok_mode: string | null
           ia_can_create_checkout: boolean
           ia_mode: Database["public"]["Enums"]["ia_mode"]
           ia_requires_approval: boolean
           id: string
           metrics: Json
           name: string
+          seller_profile_id: string | null
           status: string
           steps: Json
           type: string | null
@@ -528,12 +1201,14 @@ export type Database = {
           created_at?: string
           description?: string | null
           goal?: string | null
+          grok_mode?: string | null
           ia_can_create_checkout?: boolean
           ia_mode?: Database["public"]["Enums"]["ia_mode"]
           ia_requires_approval?: boolean
           id?: string
           metrics?: Json
           name: string
+          seller_profile_id?: string | null
           status?: string
           steps?: Json
           type?: string | null
@@ -543,18 +1218,28 @@ export type Database = {
           created_at?: string
           description?: string | null
           goal?: string | null
+          grok_mode?: string | null
           ia_can_create_checkout?: boolean
           ia_mode?: Database["public"]["Enums"]["ia_mode"]
           ia_requires_approval?: boolean
           id?: string
           metrics?: Json
           name?: string
+          seller_profile_id?: string | null
           status?: string
           steps?: Json
           type?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "funnels_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       knowledge_base: {
         Row: {
@@ -562,6 +1247,7 @@ export type Database = {
           created_at: string
           id: string
           is_active: boolean
+          seller_profile_id: string | null
           title: string
           updated_at: string
         }
@@ -570,6 +1256,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          seller_profile_id?: string | null
           title: string
           updated_at?: string
         }
@@ -578,10 +1265,190 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          seller_profile_id?: string | null
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_base_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_memories: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          importance: number
+          is_active: boolean
+          lead_id: string | null
+          memory_type: string
+          seller_profile_id: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          importance?: number
+          is_active?: boolean
+          lead_id?: string | null
+          memory_type?: string
+          seller_profile_id?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          importance?: number
+          is_active?: boolean
+          lead_id?: string | null
+          memory_type?: string
+          seller_profile_id?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_memories_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_memories_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          checkout_abandon_count: number
+          commercial_opportunity_score: number
+          created_at: string
+          current_funnel_id: string | null
+          current_interest: string | null
+          current_offer_id: string | null
+          current_story_funnel_id: string | null
+          display_name: string | null
+          emotional_connection_score: number
+          id: string
+          is_blocked: boolean
+          last_interaction_at: string | null
+          last_purchase_at: string | null
+          lead_stage: string
+          next_best_action: string | null
+          notes: string | null
+          purchase_intent_score: number
+          relationship_score: number
+          seller_profile_id: string | null
+          source: string
+          source_detail: string | null
+          status: string
+          tags: Json
+          telegram_user_id: string | null
+          temperature: string
+          total_orders: number
+          total_paid_orders: number
+          total_spent_cents: number
+          trust_score: number
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          checkout_abandon_count?: number
+          commercial_opportunity_score?: number
+          created_at?: string
+          current_funnel_id?: string | null
+          current_interest?: string | null
+          current_offer_id?: string | null
+          current_story_funnel_id?: string | null
+          display_name?: string | null
+          emotional_connection_score?: number
+          id?: string
+          is_blocked?: boolean
+          last_interaction_at?: string | null
+          last_purchase_at?: string | null
+          lead_stage?: string
+          next_best_action?: string | null
+          notes?: string | null
+          purchase_intent_score?: number
+          relationship_score?: number
+          seller_profile_id?: string | null
+          source?: string
+          source_detail?: string | null
+          status?: string
+          tags?: Json
+          telegram_user_id?: string | null
+          temperature?: string
+          total_orders?: number
+          total_paid_orders?: number
+          total_spent_cents?: number
+          trust_score?: number
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          checkout_abandon_count?: number
+          commercial_opportunity_score?: number
+          created_at?: string
+          current_funnel_id?: string | null
+          current_interest?: string | null
+          current_offer_id?: string | null
+          current_story_funnel_id?: string | null
+          display_name?: string | null
+          emotional_connection_score?: number
+          id?: string
+          is_blocked?: boolean
+          last_interaction_at?: string | null
+          last_purchase_at?: string | null
+          lead_stage?: string
+          next_best_action?: string | null
+          notes?: string | null
+          purchase_intent_score?: number
+          relationship_score?: number
+          seller_profile_id?: string | null
+          source?: string
+          source_detail?: string | null
+          status?: string
+          tags?: Json
+          telegram_user_id?: string | null
+          temperature?: string
+          total_orders?: number
+          total_paid_orders?: number
+          total_spent_cents?: number
+          trust_score?: number
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_telegram_user_id_fkey"
+            columns: ["telegram_user_id"]
+            isOneToOne: true
+            referencedRelation: "telegram_users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       memories: {
         Row: {
@@ -591,6 +1458,7 @@ export type Database = {
           id: string
           kind: Database["public"]["Enums"]["memory_kind"]
           lead_id: string
+          seller_profile_id: string | null
           tags: string[]
           updated_at: string
         }
@@ -601,6 +1469,7 @@ export type Database = {
           id?: string
           kind?: Database["public"]["Enums"]["memory_kind"]
           lead_id: string
+          seller_profile_id?: string | null
           tags?: string[]
           updated_at?: string
         }
@@ -611,6 +1480,7 @@ export type Database = {
           id?: string
           kind?: Database["public"]["Enums"]["memory_kind"]
           lead_id?: string
+          seller_profile_id?: string | null
           tags?: string[]
           updated_at?: string
         }
@@ -622,6 +1492,13 @@ export type Database = {
             referencedRelation: "telegram_users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "memories_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       messages: {
@@ -631,8 +1508,10 @@ export type Database = {
           direction: string
           id: string
           kind: Database["public"]["Enums"]["message_kind"]
+          lead_id: string | null
           payload: Json
           raw_payload: Json | null
+          seller_profile_id: string | null
           sender: Database["public"]["Enums"]["message_sender"]
           sender_type: string
           telegram_user_id: string | null
@@ -644,8 +1523,10 @@ export type Database = {
           direction: string
           id?: string
           kind?: Database["public"]["Enums"]["message_kind"]
+          lead_id?: string | null
           payload?: Json
           raw_payload?: Json | null
+          seller_profile_id?: string | null
           sender?: Database["public"]["Enums"]["message_sender"]
           sender_type: string
           telegram_user_id?: string | null
@@ -657,8 +1538,10 @@ export type Database = {
           direction?: string
           id?: string
           kind?: Database["public"]["Enums"]["message_kind"]
+          lead_id?: string | null
           payload?: Json
           raw_payload?: Json | null
+          seller_profile_id?: string | null
           sender?: Database["public"]["Enums"]["message_sender"]
           sender_type?: string
           telegram_user_id?: string | null
@@ -673,10 +1556,152 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "messages_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "messages_telegram_user_id_fkey"
             columns: ["telegram_user_id"]
             isOneToOne: false
             referencedRelation: "telegram_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      objection_detections: {
+        Row: {
+          confidence: number | null
+          conversation_id: string | null
+          created_at: string
+          detected_text: string | null
+          id: string
+          lead_id: string | null
+          message_id: string | null
+          objection_type_id: string | null
+          recommended_action: string | null
+          resolved_at: string | null
+          seller_profile_id: string | null
+          status: string
+          suggested_response: string | null
+        }
+        Insert: {
+          confidence?: number | null
+          conversation_id?: string | null
+          created_at?: string
+          detected_text?: string | null
+          id?: string
+          lead_id?: string | null
+          message_id?: string | null
+          objection_type_id?: string | null
+          recommended_action?: string | null
+          resolved_at?: string | null
+          seller_profile_id?: string | null
+          status?: string
+          suggested_response?: string | null
+        }
+        Update: {
+          confidence?: number | null
+          conversation_id?: string | null
+          created_at?: string
+          detected_text?: string | null
+          id?: string
+          lead_id?: string | null
+          message_id?: string | null
+          objection_type_id?: string | null
+          recommended_action?: string | null
+          resolved_at?: string | null
+          seller_profile_id?: string | null
+          status?: string
+          suggested_response?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "objection_detections_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "objection_detections_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "objection_detections_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "objection_detections_objection_type_id_fkey"
+            columns: ["objection_type_id"]
+            isOneToOne: false
+            referencedRelation: "objection_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "objection_detections_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      objection_types: {
+        Row: {
+          created_at: string
+          default_strategy: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          key: string
+          name: string
+          seller_profile_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          default_strategy?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          key: string
+          name: string
+          seller_profile_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          default_strategy?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          key?: string
+          name?: string
+          seller_profile_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "objection_types_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -689,6 +1714,7 @@ export type Database = {
           created_at: string
           id: string
           lead_id: string
+          seller_profile_id: string | null
           status: Database["public"]["Enums"]["objection_status"]
           suggested_reply: string | null
           type: Database["public"]["Enums"]["objection_type"]
@@ -701,6 +1727,7 @@ export type Database = {
           created_at?: string
           id?: string
           lead_id: string
+          seller_profile_id?: string | null
           status?: Database["public"]["Enums"]["objection_status"]
           suggested_reply?: string | null
           type?: Database["public"]["Enums"]["objection_type"]
@@ -713,6 +1740,7 @@ export type Database = {
           created_at?: string
           id?: string
           lead_id?: string
+          seller_profile_id?: string | null
           status?: Database["public"]["Enums"]["objection_status"]
           suggested_reply?: string | null
           type?: Database["public"]["Enums"]["objection_type"]
@@ -733,45 +1761,70 @@ export type Database = {
             referencedRelation: "telegram_users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "objections_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       orders: {
         Row: {
           amount_cents: number
           cakto_order_id: string | null
+          checkout_url: string | null
           content_id: string | null
           created_at: string
           external_reference: string | null
           id: string
           item_type: string
+          lead_id: string | null
+          metadata: Json | null
           paid_at: string | null
           plan_id: string | null
+          provider: string | null
+          provider_order_id: string | null
+          seller_profile_id: string | null
           status: string
           telegram_user_id: string | null
         }
         Insert: {
           amount_cents: number
           cakto_order_id?: string | null
+          checkout_url?: string | null
           content_id?: string | null
           created_at?: string
           external_reference?: string | null
           id?: string
           item_type: string
+          lead_id?: string | null
+          metadata?: Json | null
           paid_at?: string | null
           plan_id?: string | null
+          provider?: string | null
+          provider_order_id?: string | null
+          seller_profile_id?: string | null
           status?: string
           telegram_user_id?: string | null
         }
         Update: {
           amount_cents?: number
           cakto_order_id?: string | null
+          checkout_url?: string | null
           content_id?: string | null
           created_at?: string
           external_reference?: string | null
           id?: string
           item_type?: string
+          lead_id?: string | null
+          metadata?: Json | null
           paid_at?: string | null
           plan_id?: string | null
+          provider?: string | null
+          provider_order_id?: string | null
+          seller_profile_id?: string | null
           status?: string
           telegram_user_id?: string | null
         }
@@ -784,10 +1837,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "orders_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "orders_plan_id_fkey"
             columns: ["plan_id"]
             isOneToOne: false
             referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -803,66 +1870,92 @@ export type Database = {
         Row: {
           amount_cents: number
           approved_at: string | null
+          approved_at_legacy: string | null
           cakto_order_id: string | null
           cakto_payment_id: string | null
           checkout_url: string | null
           created_at: string
           event_payload: Json | null
           id: string
+          lead_id: string | null
           method: string
           order_id: string | null
           pix_expires_at: string | null
           pix_qr_code: string | null
           pix_qr_code_base64: string | null
           provider: string
+          provider_order_id: string | null
           provider_payment_id: string | null
           raw_payload: Json | null
+          seller_profile_id: string | null
           status: string
         }
         Insert: {
           amount_cents: number
           approved_at?: string | null
+          approved_at_legacy?: string | null
           cakto_order_id?: string | null
           cakto_payment_id?: string | null
           checkout_url?: string | null
           created_at?: string
           event_payload?: Json | null
           id?: string
+          lead_id?: string | null
           method?: string
           order_id?: string | null
           pix_expires_at?: string | null
           pix_qr_code?: string | null
           pix_qr_code_base64?: string | null
           provider?: string
+          provider_order_id?: string | null
           provider_payment_id?: string | null
           raw_payload?: Json | null
+          seller_profile_id?: string | null
           status?: string
         }
         Update: {
           amount_cents?: number
           approved_at?: string | null
+          approved_at_legacy?: string | null
           cakto_order_id?: string | null
           cakto_payment_id?: string | null
           checkout_url?: string | null
           created_at?: string
           event_payload?: Json | null
           id?: string
+          lead_id?: string | null
           method?: string
           order_id?: string | null
           pix_expires_at?: string | null
           pix_qr_code?: string | null
           pix_qr_code_base64?: string | null
           provider?: string
+          provider_order_id?: string | null
           provider_payment_id?: string | null
           raw_payload?: Json | null
+          seller_profile_id?: string | null
           status?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "payments_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "payments_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -883,6 +1976,7 @@ export type Database = {
           post_purchase_message: string | null
           price_cents: number
           renewal_message: string | null
+          seller_profile_id: string | null
           telegram_group_id: string | null
           updated_at: string
         }
@@ -901,6 +1995,7 @@ export type Database = {
           post_purchase_message?: string | null
           price_cents: number
           renewal_message?: string | null
+          seller_profile_id?: string | null
           telegram_group_id?: string | null
           updated_at?: string
         }
@@ -919,10 +2014,18 @@ export type Database = {
           post_purchase_message?: string | null
           price_cents?: number
           renewal_message?: string | null
+          seller_profile_id?: string | null
           telegram_group_id?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "plans_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "plans_telegram_group_id_fkey"
             columns: ["telegram_group_id"]
@@ -937,9 +2040,12 @@ export type Database = {
           active: boolean
           body: string
           category: Database["public"]["Enums"]["quick_reply_category"]
+          conversion_count: number | null
           conversions: number
           created_at: string
           id: string
+          reply_type: string | null
+          seller_profile_id: string | null
           title: string
           type: string
           updated_at: string
@@ -949,9 +2055,12 @@ export type Database = {
           active?: boolean
           body: string
           category?: Database["public"]["Enums"]["quick_reply_category"]
+          conversion_count?: number | null
           conversions?: number
           created_at?: string
           id?: string
+          reply_type?: string | null
+          seller_profile_id?: string | null
           title: string
           type?: string
           updated_at?: string
@@ -961,15 +2070,109 @@ export type Database = {
           active?: boolean
           body?: string
           category?: Database["public"]["Enums"]["quick_reply_category"]
+          conversion_count?: number | null
           conversions?: number
           created_at?: string
           id?: string
+          reply_type?: string | null
+          seller_profile_id?: string | null
           title?: string
           type?: string
           updated_at?: string
           usage_count?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "quick_replies_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      response_performance: {
+        Row: {
+          conversation_id: string | null
+          created_at: string
+          generated_checkout: boolean
+          id: string
+          lead_id: string | null
+          led_to_purchase: boolean
+          led_to_reply: boolean
+          message_id: string | null
+          related_funnel_id: string | null
+          related_objection_id: string | null
+          related_story_funnel_id: string | null
+          response_text: string | null
+          response_type: string | null
+          revenue_cents: number
+          seller_profile_id: string | null
+        }
+        Insert: {
+          conversation_id?: string | null
+          created_at?: string
+          generated_checkout?: boolean
+          id?: string
+          lead_id?: string | null
+          led_to_purchase?: boolean
+          led_to_reply?: boolean
+          message_id?: string | null
+          related_funnel_id?: string | null
+          related_objection_id?: string | null
+          related_story_funnel_id?: string | null
+          response_text?: string | null
+          response_type?: string | null
+          revenue_cents?: number
+          seller_profile_id?: string | null
+        }
+        Update: {
+          conversation_id?: string | null
+          created_at?: string
+          generated_checkout?: boolean
+          id?: string
+          lead_id?: string | null
+          led_to_purchase?: boolean
+          led_to_reply?: boolean
+          message_id?: string | null
+          related_funnel_id?: string | null
+          related_objection_id?: string | null
+          related_story_funnel_id?: string | null
+          response_text?: string | null
+          response_type?: string | null
+          revenue_cents?: number
+          seller_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "response_performance_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "response_performance_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "response_performance_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "response_performance_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       seller_profile: {
         Row: {
@@ -1049,6 +2252,90 @@ export type Database = {
         }
         Relationships: []
       }
+      seller_profiles: {
+        Row: {
+          allow_small_typos: boolean
+          avatar_url: string | null
+          away_message: string | null
+          commercial_rules: string | null
+          communication_style: string | null
+          created_at: string
+          default_language: string
+          display_name: string
+          emotional_rules: string | null
+          forbidden_promises: string | null
+          id: string
+          informality_level: number
+          is_active: boolean
+          public_description: string | null
+          return_message: string | null
+          short_bio: string | null
+          tone_of_voice: string | null
+          typo_frequency: number
+          updated_at: string
+          use_message_splitting: boolean
+          use_short_messages: boolean
+          use_slang: boolean
+          use_typing_delays: boolean
+          working_hours: Json | null
+          working_hours_enabled: boolean
+        }
+        Insert: {
+          allow_small_typos?: boolean
+          avatar_url?: string | null
+          away_message?: string | null
+          commercial_rules?: string | null
+          communication_style?: string | null
+          created_at?: string
+          default_language?: string
+          display_name: string
+          emotional_rules?: string | null
+          forbidden_promises?: string | null
+          id?: string
+          informality_level?: number
+          is_active?: boolean
+          public_description?: string | null
+          return_message?: string | null
+          short_bio?: string | null
+          tone_of_voice?: string | null
+          typo_frequency?: number
+          updated_at?: string
+          use_message_splitting?: boolean
+          use_short_messages?: boolean
+          use_slang?: boolean
+          use_typing_delays?: boolean
+          working_hours?: Json | null
+          working_hours_enabled?: boolean
+        }
+        Update: {
+          allow_small_typos?: boolean
+          avatar_url?: string | null
+          away_message?: string | null
+          commercial_rules?: string | null
+          communication_style?: string | null
+          created_at?: string
+          default_language?: string
+          display_name?: string
+          emotional_rules?: string | null
+          forbidden_promises?: string | null
+          id?: string
+          informality_level?: number
+          is_active?: boolean
+          public_description?: string | null
+          return_message?: string | null
+          short_bio?: string | null
+          tone_of_voice?: string | null
+          typo_frequency?: number
+          updated_at?: string
+          use_message_splitting?: boolean
+          use_short_messages?: boolean
+          use_slang?: boolean
+          use_typing_delays?: boolean
+          working_hours?: Json | null
+          working_hours_enabled?: boolean
+        }
+        Relationships: []
+      }
       stories: {
         Row: {
           category: Database["public"]["Enums"]["story_category"]
@@ -1063,6 +2350,7 @@ export type Database = {
           main_plan_id: string | null
           metrics: Json
           name: string
+          seller_profile_id: string | null
           status: string
           steps: Json
           updated_at: string
@@ -1081,6 +2369,7 @@ export type Database = {
           main_plan_id?: string | null
           metrics?: Json
           name: string
+          seller_profile_id?: string | null
           status?: string
           steps?: Json
           updated_at?: string
@@ -1099,6 +2388,7 @@ export type Database = {
           main_plan_id?: string | null
           metrics?: Json
           name?: string
+          seller_profile_id?: string | null
           status?: string
           steps?: Json
           updated_at?: string
@@ -1120,10 +2410,250 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "stories_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "stories_upsell_content_id_fkey"
             columns: ["upsell_content_id"]
             isOneToOne: false
             referencedRelation: "contents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_funnel_memberships: {
+        Row: {
+          completed_at: string | null
+          current_story_step_id: string | null
+          entered_at: string
+          exited_at: string | null
+          id: string
+          last_step_sent_at: string | null
+          lead_id: string | null
+          seller_profile_id: string | null
+          status: string
+          story_funnel_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          current_story_step_id?: string | null
+          entered_at?: string
+          exited_at?: string | null
+          id?: string
+          last_step_sent_at?: string | null
+          lead_id?: string | null
+          seller_profile_id?: string | null
+          status?: string
+          story_funnel_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          current_story_step_id?: string | null
+          entered_at?: string
+          exited_at?: string | null
+          id?: string
+          last_step_sent_at?: string | null
+          lead_id?: string | null
+          seller_profile_id?: string | null
+          status?: string
+          story_funnel_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_funnel_memberships_current_story_step_id_fkey"
+            columns: ["current_story_step_id"]
+            isOneToOne: false
+            referencedRelation: "story_steps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_funnel_memberships_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_funnel_memberships_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_funnel_memberships_story_funnel_id_fkey"
+            columns: ["story_funnel_id"]
+            isOneToOne: false
+            referencedRelation: "story_funnels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_funnel_metrics: {
+        Row: {
+          ai_suggestion: string | null
+          best_step_id: string | null
+          checkout_generated: number
+          conversion_rate: number
+          id: string
+          leads_entered: number
+          leads_replied: number
+          main_objection: string | null
+          purchases: number
+          reached_offer: number
+          revenue_cents: number
+          seller_profile_id: string | null
+          story_funnel_id: string | null
+          updated_at: string
+          worst_step_id: string | null
+        }
+        Insert: {
+          ai_suggestion?: string | null
+          best_step_id?: string | null
+          checkout_generated?: number
+          conversion_rate?: number
+          id?: string
+          leads_entered?: number
+          leads_replied?: number
+          main_objection?: string | null
+          purchases?: number
+          reached_offer?: number
+          revenue_cents?: number
+          seller_profile_id?: string | null
+          story_funnel_id?: string | null
+          updated_at?: string
+          worst_step_id?: string | null
+        }
+        Update: {
+          ai_suggestion?: string | null
+          best_step_id?: string | null
+          checkout_generated?: number
+          conversion_rate?: number
+          id?: string
+          leads_entered?: number
+          leads_replied?: number
+          main_objection?: string | null
+          purchases?: number
+          reached_offer?: number
+          revenue_cents?: number
+          seller_profile_id?: string | null
+          story_funnel_id?: string | null
+          updated_at?: string
+          worst_step_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_funnel_metrics_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_funnel_metrics_story_funnel_id_fkey"
+            columns: ["story_funnel_id"]
+            isOneToOne: false
+            referencedRelation: "story_funnels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_funnels: {
+        Row: {
+          commercial_goal: string | null
+          content_id: string | null
+          created_at: string
+          description: string | null
+          emotional_angle: string | null
+          grok_mode: string
+          id: string
+          is_active: boolean
+          main_story_angle: string | null
+          name: string
+          plan_id: string | null
+          primary_offer_type: string | null
+          seller_profile_id: string | null
+          story_category: string
+          updated_at: string
+          upsell_content_id: string | null
+          upsell_plan_id: string | null
+        }
+        Insert: {
+          commercial_goal?: string | null
+          content_id?: string | null
+          created_at?: string
+          description?: string | null
+          emotional_angle?: string | null
+          grok_mode?: string
+          id?: string
+          is_active?: boolean
+          main_story_angle?: string | null
+          name: string
+          plan_id?: string | null
+          primary_offer_type?: string | null
+          seller_profile_id?: string | null
+          story_category: string
+          updated_at?: string
+          upsell_content_id?: string | null
+          upsell_plan_id?: string | null
+        }
+        Update: {
+          commercial_goal?: string | null
+          content_id?: string | null
+          created_at?: string
+          description?: string | null
+          emotional_angle?: string | null
+          grok_mode?: string
+          id?: string
+          is_active?: boolean
+          main_story_angle?: string | null
+          name?: string
+          plan_id?: string | null
+          primary_offer_type?: string | null
+          seller_profile_id?: string | null
+          story_category?: string
+          updated_at?: string
+          upsell_content_id?: string | null
+          upsell_plan_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_funnels_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "contents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_funnels_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_funnels_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_funnels_upsell_content_id_fkey"
+            columns: ["upsell_content_id"]
+            isOneToOne: false
+            referencedRelation: "contents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_funnels_upsell_plan_id_fkey"
+            columns: ["upsell_plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
             referencedColumns: ["id"]
           },
         ]
@@ -1182,6 +2712,101 @@ export type Database = {
           },
         ]
       }
+      story_steps: {
+        Row: {
+          content_id: string | null
+          created_at: string
+          delay_minutes: number
+          expected_lead_reaction: string | null
+          id: string
+          is_active: boolean
+          message_template: string | null
+          offer_moment: boolean
+          offer_type: string | null
+          plan_id: string | null
+          requires_human_approval: boolean
+          requires_response: boolean
+          seller_profile_id: string | null
+          step_name: string | null
+          step_order: number
+          step_purpose: string | null
+          story_funnel_id: string | null
+          success_metric: string | null
+          updated_at: string
+        }
+        Insert: {
+          content_id?: string | null
+          created_at?: string
+          delay_minutes?: number
+          expected_lead_reaction?: string | null
+          id?: string
+          is_active?: boolean
+          message_template?: string | null
+          offer_moment?: boolean
+          offer_type?: string | null
+          plan_id?: string | null
+          requires_human_approval?: boolean
+          requires_response?: boolean
+          seller_profile_id?: string | null
+          step_name?: string | null
+          step_order: number
+          step_purpose?: string | null
+          story_funnel_id?: string | null
+          success_metric?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content_id?: string | null
+          created_at?: string
+          delay_minutes?: number
+          expected_lead_reaction?: string | null
+          id?: string
+          is_active?: boolean
+          message_template?: string | null
+          offer_moment?: boolean
+          offer_type?: string | null
+          plan_id?: string | null
+          requires_human_approval?: boolean
+          requires_response?: boolean
+          seller_profile_id?: string | null
+          step_name?: string | null
+          step_order?: number
+          step_purpose?: string | null
+          story_funnel_id?: string | null
+          success_metric?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_steps_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "contents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_steps_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_steps_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_steps_story_funnel_id_fkey"
+            columns: ["story_funnel_id"]
+            isOneToOne: false
+            referencedRelation: "story_funnels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       telegram_groups: {
         Row: {
           bot_is_admin: boolean
@@ -1190,6 +2815,7 @@ export type Database = {
           default_invite_link: string | null
           id: string
           name: string
+          seller_profile_id: string | null
           status: string
           type: string
           updated_at: string
@@ -1201,6 +2827,7 @@ export type Database = {
           default_invite_link?: string | null
           id?: string
           name: string
+          seller_profile_id?: string | null
           status?: string
           type: string
           updated_at?: string
@@ -1212,11 +2839,20 @@ export type Database = {
           default_invite_link?: string | null
           id?: string
           name?: string
+          seller_profile_id?: string | null
           status?: string
           type?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "telegram_groups_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       telegram_users: {
         Row: {
@@ -1230,6 +2866,7 @@ export type Database = {
           origin: string | null
           score_buy: number
           score_relationship: number
+          seller_profile_id: string | null
           status: Database["public"]["Enums"]["lead_status"]
           tags: string[]
           telegram_id: string
@@ -1249,6 +2886,7 @@ export type Database = {
           origin?: string | null
           score_buy?: number
           score_relationship?: number
+          seller_profile_id?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
           tags?: string[]
           telegram_id: string
@@ -1268,6 +2906,7 @@ export type Database = {
           origin?: string | null
           score_buy?: number
           score_relationship?: number
+          seller_profile_id?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
           tags?: string[]
           telegram_id?: string
@@ -1276,7 +2915,15 @@ export type Database = {
           updated_at?: string
           username?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "telegram_users_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -1298,6 +2945,59 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      voice_settings: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          max_audio_characters: number
+          max_audio_messages_per_user_per_day: number
+          model: string | null
+          provider: string
+          seller_profile_id: string | null
+          send_audio_mode: string
+          send_text_with_audio: boolean
+          updated_at: string
+          voice_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          max_audio_characters?: number
+          max_audio_messages_per_user_per_day?: number
+          model?: string | null
+          provider?: string
+          seller_profile_id?: string | null
+          send_audio_mode?: string
+          send_text_with_audio?: boolean
+          updated_at?: string
+          voice_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          max_audio_characters?: number
+          max_audio_messages_per_user_per_day?: number
+          model?: string | null
+          provider?: string
+          seller_profile_id?: string | null
+          send_audio_mode?: string
+          send_text_with_audio?: boolean
+          updated_at?: string
+          voice_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "voice_settings_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
