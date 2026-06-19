@@ -12,7 +12,8 @@ import { AUTH_ENABLED, SECRETS_STATUS, GROK_OPTIONAL_NOTE } from "@/lib/config";
 import { supabase } from "@/integrations/supabase/client";
 import { testTelegramBot } from "@/lib/telegram.functions";
 import { sendCaktoTestEvent } from "@/lib/cakto.functions";
-import { grokStatus } from "@/lib/grok.functions";
+import { grokStatus, pingGrok } from "@/lib/grok.functions";
+import { useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/configuracoes")({ component: Configuracoes });
 
