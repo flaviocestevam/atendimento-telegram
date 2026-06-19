@@ -21,6 +21,33 @@ export const grokStatus = createServerFn({ method: "GET" }).handler(async () => 
   };
 });
 
+// Teste rápido: faz uma chamada mínima ao endpoint da xAI e retorna o texto.
+export const pingGrok = createServerFn({ method: "POST" }).handler(async () => {
+  const xaiKey = process.env.XAI_API_KEY;
+  if (!xaiKey) return { ok: false, error: "missing_XAI_API_KEY" };
+  const model = process.env.XAI_MODEL ?? "grok-2-latest";
+  try {
+    const r = await fetch("https://api.x.ai/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${xaiKey}` },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: "system", content: "Responda em uma frase curta em português." },
+          { role: "user", content: "Diga 'ok' e a data de hoje." },
+        ],
+        temperature: 0.2,
+      }),
+    });
+    const json: any = await r.json();
+    if (!r.ok) return { ok: false, error: json?.error?.message ?? `http_${r.status}`, model };
+    const text = json.choices?.[0]?.message?.content ?? "";
+    return { ok: true, text, model };
+  } catch (err: any) {
+    return { ok: false, error: err?.message ?? "grok_ping_exception" };
+  }
+});
+
 // Chamada principal ao Grok (modo automático ou sugestão).
 // Retorna texto + flags de segurança. NÃO envia nada por conta própria.
 export const callGrok = createServerFn({ method: "POST" })
