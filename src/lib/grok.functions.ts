@@ -57,6 +57,41 @@ export const callGrok = createServerFn({ method: "POST" })
       .eq("is_active", true)
       .limit(20);
 
+    // === Banco de Histórias: escolhe uma ainda não usada com este lead ===
+    const telegramUserId = (conv as any).telegram_user_id ?? (conv as any).telegram_users?.id ?? null;
+    const sellerId = (conv as any).seller_profile_id;
+    let chosenStory: { id: string; name: string; text: string; variation: number } | null = null;
+
+    if (telegramUserId && sellerId) {
+      const { data: usedRows } = await supabaseAdmin
+        .from("story_leads")
+        .select("story_id")
+        .eq("lead_id", telegramUserId);
+      const usedIds = (usedRows ?? []).map((r: any) => r.story_id);
+
+      let q = supabaseAdmin
+        .from("stories")
+        .select("id, name, steps")
+        .eq("seller_profile_id", sellerId)
+        .eq("status", "active");
+      if (usedIds.length) q = q.not("id", "in", `(${usedIds.join(",")})`);
+      const { data: candidates } = await q.limit(20);
+
+      if (candidates?.length) {
+        const story: any = candidates[Math.floor(Math.random() * candidates.length)];
+        const variations = Array.isArray(story.steps) ? story.steps : [];
+        if (variations.length) {
+          const v: any = variations[Math.floor(Math.random() * variations.length)];
+          chosenStory = {
+            id: story.id,
+            name: story.name,
+            text: v?.text ?? "",
+            variation: v?.variation ?? 1,
+          };
+        }
+      }
+    }
+
     const systemPrompt = [
       `Você é ${(profile as any)?.display_name ?? "o vendedor"}.`,
       `Tom: ${(profile as any)?.tone_of_voice ?? "casual"}.`,
@@ -65,6 +100,9 @@ export const callGrok = createServerFn({ method: "POST" })
       `REGRAS EMOCIONAIS: ${(profile as any)?.emotional_rules ?? "Seja empático e respeitoso."}`,
       `PROIBIDO: ${(profile as any)?.forbidden_promises ?? "Não prometa o que não está cadastrado."}`,
       memories?.length ? `Memórias do lead:\n${memories.map((m: any) => `- ${m.title}: ${m.content}`).join("\n")}` : "",
+      chosenStory
+        ? `HISTÓRIA DISPONÍVEL (ainda não usada com este lead — "${chosenStory.name}", variação ${chosenStory.variation}):\n"${chosenStory.text}"\n\nSe fizer sentido no contexto da conversa, incorpore essa história de forma natural (pode adaptar palavras, mas mantenha a essência). Se não couber agora, ignore.`
+        : "",
     ].filter(Boolean).join("\n\n");
 
     const history = (messages ?? []).reverse().map((m: any) => ({
