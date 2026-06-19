@@ -13,12 +13,18 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { StatusBadge } from "@/components/admin/StatusBadge";
-import { Bot, Sparkles, Plus, Pencil, Trash2 } from "lucide-react";
+import { Bot, Sparkles, Plus, Pencil, Trash2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { SECRETS_STATUS } from "@/lib/config";
 
-export const Route = createFileRoute("/_authenticated/ia")({
-  component: IAPage,
-});
+export const Route = createFileRoute("/_authenticated/ia")({ component: IAPage });
+
+const GROK_MODES = [
+  { v: "off", label: "Desligado", help: "Sistema 100% manual. Grok não é chamado." },
+  { v: "suggest", label: "Apenas sugerir", help: "Grok gera sugestões dentro da conversa; admin decide enviar." },
+  { v: "auto_per_funnel", label: "Automático por funil", help: "Grok só responde sozinho nos funis com IA habilitada." },
+  { v: "auto_all", label: "Automático total", help: "Grok responde sozinho em todas as conversas permitidas." },
+];
 
 function IAPage() {
   const qc = useQueryClient();
@@ -30,12 +36,27 @@ function IAPage() {
     queryKey: ["knowledge_base"],
     queryFn: async () => (await supabase.from("knowledge_base").select("*").order("created_at", { ascending: false })).data ?? [],
   });
+  const objections = useQuery({
+    queryKey: ["objections"],
+    queryFn: async () => (await supabase.from("objections").select("*,telegram_users(first_name,username)").order("created_at", { ascending: false }).limit(50)).data ?? [],
+  });
+  const learnings = useQuery({
+    queryKey: ["ai_learnings"],
+    queryFn: async () => (await supabase.from("ai_learnings").select("*").eq("status", "pending").order("created_at", { ascending: false })).data ?? [],
+  });
 
   const [form, setForm] = useState<any>(null);
   useEffect(() => { if (settings.data && !form) setForm(settings.data); }, [settings.data, form]);
 
-  const [testInput, setTestInput] = useState("Quais são os planos disponíveis?");
-  const [testOutput, setTestOutput] = useState("");
+  const xaiConfigured = SECRETS_STATUS.xai;
+
+  async function saveGrokMode(mode: string) {
+    if (!form) return;
+    setForm({ ...form, grok_global_mode: mode });
+    const { error } = await supabase.from("ai_settings").update({ grok_global_mode: mode as any }).eq("id", form.id);
+    if (error) return toast.error(error.message);
+    toast.success("Modo do Grok atualizado");
+  }
 
   async function saveSettings() {
     if (!form) return;
@@ -46,12 +67,6 @@ function IAPage() {
     }).eq("id", form.id);
     if (error) return toast.error(error.message);
     toast.success("Configurações da IA atualizadas");
-  }
-
-  function runTest() {
-    setTestOutput(form?.enable_ai
-      ? "Para responder com a IA real, configure a XAI_API_KEY em Configurações. Esta é uma resposta de preview baseada no prompt configurado."
-      : form?.fallback_message ?? "IA desativada.");
   }
 
   // Knowledge base CRUD
@@ -73,112 +88,180 @@ function IAPage() {
     qc.invalidateQueries({ queryKey: ["knowledge_base"] });
   }
 
+  if (!form) return <div>Carregando...</div>;
+
   return (
     <div>
-      <PageHeader title="IA do Bot" subtitle="Comportamento do assistente automático no Telegram" />
+      <PageHeader title="IA / Grok" subtitle="A IA é opcional. O sistema funciona completo mesmo com o Grok desligado." />
+
+      {/* Status do Grok — sempre visível */}
+      <Card className="p-5 bg-card border-border mb-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 rounded-xl flex items-center justify-center" style={{ background: "var(--gradient-brand)", boxShadow: "var(--shadow-glow)" }}>
+              <Bot className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <div>
+              <p className="font-semibold">Atendimento automático com Grok</p>
+              <p className="text-xs text-muted-foreground">{GROK_MODES.find((m) => m.v === form.grok_global_mode)?.help}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Select value={form.grok_global_mode} onValueChange={saveGrokMode}>
+              <SelectTrigger className="w-64"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {GROK_MODES.map((m) => <SelectItem key={m.v} value={m.v}>{m.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-5">
+          <div className="p-3 rounded-lg bg-muted">
+            <p className="text-[11px] uppercase text-muted-foreground mb-1">Chave xAI</p>
+            <div className="flex items-center gap-2 text-sm font-semibold">
+              {xaiConfigured ? <><CheckCircle2 className="h-4 w-4 text-success" />Configurada</> : <><AlertCircle className="h-4 w-4 text-warning" />Não configurada</>}
+            </div>
+          </div>
+          <div className="p-3 rounded-lg bg-muted">
+            <p className="text-[11px] uppercase text-muted-foreground mb-1">Mensagens hoje</p>
+            <p className="text-lg font-semibold">{form.messages_today ?? 0}</p>
+          </div>
+          <div className="p-3 rounded-lg bg-muted">
+            <p className="text-[11px] uppercase text-muted-foreground mb-1">Custo estimado</p>
+            <p className="text-lg font-semibold">R$ {((form.cost_estimate_cents ?? 0) / 100).toFixed(2)}</p>
+          </div>
+          <div className="p-3 rounded-lg bg-muted">
+            <p className="text-[11px] uppercase text-muted-foreground mb-1">Modelo</p>
+            <p className="text-sm font-semibold">{form.model ?? "grok-2"}</p>
+          </div>
+        </div>
+
+        {!xaiConfigured && form.grok_global_mode !== "off" && (
+          <div className="mt-4 p-3 rounded-lg bg-warning/10 border border-warning/30 text-sm text-warning flex items-start gap-2">
+            <AlertCircle className="h-4 w-4 mt-0.5" />
+            <div>O Grok está ligado mas a chave xAI não foi configurada. As respostas automáticas ficarão pausadas até a chave ser adicionada nos segredos do projeto.</div>
+          </div>
+        )}
+      </Card>
 
       <Tabs defaultValue="settings">
         <TabsList>
           <TabsTrigger value="settings">Configurações</TabsTrigger>
+          <TabsTrigger value="objections">Objeções</TabsTrigger>
+          <TabsTrigger value="learnings">Aprendizado</TabsTrigger>
           <TabsTrigger value="kb">Base de conhecimento</TabsTrigger>
-          <TabsTrigger value="test">Teste rápido</TabsTrigger>
         </TabsList>
 
         <TabsContent value="settings" className="mt-4">
-          {form && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              <Card className="lg:col-span-2 p-5 bg-card border-border space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label>Provedor</Label>
-                    <Select value={form.provider} onValueChange={(v) => setForm({ ...form, provider: v })}>
-                      <SelectTrigger><SelectValue/></SelectTrigger>
-                      <SelectContent><SelectItem value="xai">xAI / Grok</SelectItem></SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label>Modelo</Label>
-                    <Select value={form.model} onValueChange={(v) => setForm({ ...form, model: v })}>
-                      <SelectTrigger><SelectValue/></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="grok-2">grok-2</SelectItem>
-                        <SelectItem value="grok-3">grok-3</SelectItem>
-                        <SelectItem value="grok-4">grok-4</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div><Label>Tom de voz</Label><Input value={form.tone ?? ""} onChange={(e) => setForm({ ...form, tone: e.target.value })}/></div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <Card className="lg:col-span-2 p-5 bg-card border-border space-y-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label>Prompt do sistema</Label>
-                  <Textarea rows={10} value={form.system_prompt ?? ""} onChange={(e) => setForm({ ...form, system_prompt: e.target.value })} className="font-mono text-xs"/>
+                  <Label>Provedor</Label>
+                  <Select value={form.provider} onValueChange={(v) => setForm({ ...form, provider: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent><SelectItem value="xai">xAI / Grok</SelectItem></SelectContent>
+                  </Select>
                 </div>
-                <div><Label>Mensagem de fallback</Label><Textarea rows={2} value={form.fallback_message ?? ""} onChange={(e) => setForm({ ...form, fallback_message: e.target.value })}/></div>
-                <div><Label>Máx. mensagens por usuário/dia</Label><Input type="number" value={form.max_messages_per_user_per_day} onChange={(e) => setForm({ ...form, max_messages_per_user_per_day: parseInt(e.target.value || "0", 10) })}/></div>
-                <div className="flex justify-end"><Button onClick={saveSettings}>Salvar configurações</Button></div>
-              </Card>
-
-              <div className="space-y-4">
-                <Card className="p-5 bg-card border-border">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-lg flex items-center justify-center" style={{ background: "var(--gradient-brand)" }}>
-                        <Bot className="h-5 w-5 text-primary-foreground"/>
-                      </div>
-                      <div>
-                        <p className="font-semibold">IA ativa</p>
-                        <p className="text-xs text-muted-foreground">Responde automaticamente no bot</p>
-                      </div>
-                    </div>
-                    <Switch checked={!!form.enable_ai} onCheckedChange={(v) => setForm({ ...form, enable_ai: v })}/>
-                  </div>
-                </Card>
-                <Card className="p-5 bg-card border-border">
-                  <p className="font-semibold mb-2">Regras obrigatórias</p>
-                  <ul className="text-xs text-muted-foreground space-y-1.5 list-disc pl-4">
-                    <li>Nunca liberar acesso sem pagamento aprovado.</li>
-                    <li>Nunca inventar links.</li>
-                    <li>Nunca afirmar pagamento aprovado sem consultar o sistema.</li>
-                    <li>Transferir para humano quando solicitado.</li>
-                    <li>Responder com fallback se não souber.</li>
-                  </ul>
-                </Card>
+                <div>
+                  <Label>Modelo</Label>
+                  <Select value={form.model} onValueChange={(v) => setForm({ ...form, model: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="grok-2">grok-2</SelectItem>
+                      <SelectItem value="grok-3">grok-3</SelectItem>
+                      <SelectItem value="grok-4">grok-4</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
+              <div><Label>Tom de voz</Label><Input value={form.tone ?? ""} onChange={(e) => setForm({ ...form, tone: e.target.value })} /></div>
+              <div>
+                <Label>Prompt do sistema</Label>
+                <Textarea rows={10} value={form.system_prompt ?? ""} onChange={(e) => setForm({ ...form, system_prompt: e.target.value })} className="font-mono text-xs" />
+              </div>
+              <div><Label>Mensagem de fallback</Label><Textarea rows={2} value={form.fallback_message ?? ""} onChange={(e) => setForm({ ...form, fallback_message: e.target.value })} /></div>
+              <div><Label>Máx. mensagens por usuário/dia</Label><Input type="number" value={form.max_messages_per_user_per_day} onChange={(e) => setForm({ ...form, max_messages_per_user_per_day: parseInt(e.target.value || "0", 10) })} /></div>
+              <div className="flex justify-end"><Button onClick={saveSettings}>Salvar configurações</Button></div>
+            </Card>
+
+            <Card className="p-5 bg-card border-border">
+              <p className="font-semibold mb-3">Regras obrigatórias da IA</p>
+              <ul className="text-xs text-muted-foreground space-y-2 list-disc pl-4">
+                <li>Nunca liberar acesso sem pagamento aprovado.</li>
+                <li>Nunca entregar conteúdo pago sem confirmação de pagamento.</li>
+                <li>Nunca dizer que o Pix foi pago sem consultar o sistema.</li>
+                <li>Nunca inventar desconto, garantia, prova social, benefício, produto ou preço.</li>
+                <li>Nunca prometer resultado.</li>
+                <li>Se perguntarem se é IA, responder com transparência.</li>
+                <li>Se detectar necessidade humana, marcar conversa como "precisa de humano".</li>
+                <li>Respeitar tom, idioma e regras do perfil do vendedor.</li>
+              </ul>
+              <p className="text-[11px] text-muted-foreground mt-3">Essas regras são aplicadas antes de cada resposta automática.</p>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="objections" className="mt-4">
+          <Card className="bg-card border-border overflow-hidden">
+            <div className="p-4 border-b border-border"><p className="text-sm text-muted-foreground">Objeções detectadas em conversas reais. A IA usa esses padrões para preparar respostas melhores.</p></div>
+            <div className="divide-y divide-border">
+              {(objections.data ?? []).map((o: any) => (
+                <div key={o.id} className="p-4 grid grid-cols-12 gap-3 items-center">
+                  <div className="col-span-3">
+                    <div className="font-medium">{o.telegram_users?.first_name ?? "Lead"}</div>
+                    <div className="text-xs text-muted-foreground">@{o.telegram_users?.username ?? "—"}</div>
+                  </div>
+                  <div className="col-span-2"><StatusBadge status={o.status} /></div>
+                  <div className="col-span-2 text-xs"><span className="text-muted-foreground">Tipo:</span> <span className="font-medium">{o.type}</span></div>
+                  <div className="col-span-2 text-xs"><span className="text-muted-foreground">Confiança:</span> {o.confidence}%</div>
+                  <div className="col-span-3 text-xs text-muted-foreground line-clamp-2">{o.suggested_reply ?? "—"}</div>
+                </div>
+              ))}
+              {(objections.data?.length ?? 0) === 0 && <div className="p-8 text-center text-sm text-muted-foreground">Nenhuma objeção registrada ainda.</div>}
             </div>
-          )}
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="learnings" className="mt-4">
+          <Card className="bg-card border-border overflow-hidden">
+            <div className="p-4 border-b border-border"><p className="text-sm text-muted-foreground">Sugestões da IA esperando aprovação. Você decide quais virar regra.</p></div>
+            <div className="divide-y divide-border">
+              {(learnings.data ?? []).map((l: any) => (
+                <div key={l.id} className="p-4 flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{l.kind}</p>
+                    <p className="text-sm mt-1">{l.content}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={async () => { await supabase.from("ai_learnings").update({ status: "approved" }).eq("id", l.id); qc.invalidateQueries({ queryKey: ["ai_learnings"] }); }}>Aprovar</Button>
+                    <Button size="sm" variant="outline" onClick={async () => { await supabase.from("ai_learnings").update({ status: "rejected" }).eq("id", l.id); qc.invalidateQueries({ queryKey: ["ai_learnings"] }); }}>Descartar</Button>
+                  </div>
+                </div>
+              ))}
+              {(learnings.data?.length ?? 0) === 0 && <div className="p-8 text-center text-sm text-muted-foreground">Nenhum aprendizado pendente.</div>}
+            </div>
+          </Card>
         </TabsContent>
 
         <TabsContent value="kb" className="mt-4">
-          <div className="flex justify-end mb-3"><Button onClick={newKb}><Plus className="h-4 w-4 mr-1"/>Nova entrada</Button></div>
+          <div className="flex justify-end mb-3"><Button onClick={newKb}><Plus className="h-4 w-4 mr-1" />Nova entrada</Button></div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {(kb.data ?? []).map((k: any) => (
               <Card key={k.id} className="p-5 bg-card border-border">
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="font-semibold">{k.title}</h3>
-                  <StatusBadge status={k.is_active ? "active" : "inactive"}/>
+                  <StatusBadge status={k.is_active ? "active" : "inactive"} />
                 </div>
                 <p className="text-sm text-muted-foreground line-clamp-3">{k.content}</p>
                 <div className="flex gap-2 mt-4">
-                  <Button size="sm" variant="outline" onClick={() => editKb(k)}><Pencil className="h-3 w-3 mr-1"/>Editar</Button>
-                  <Button size="sm" variant="outline" onClick={() => removeKb(k.id)}><Trash2 className="h-3 w-3 text-destructive"/></Button>
+                  <Button size="sm" variant="outline" onClick={() => editKb(k)}><Pencil className="h-3 w-3 mr-1" />Editar</Button>
+                  <Button size="sm" variant="outline" onClick={() => removeKb(k.id)}><Trash2 className="h-3 w-3 text-destructive" /></Button>
                 </div>
               </Card>
             ))}
           </div>
-        </TabsContent>
-
-        <TabsContent value="test" className="mt-4">
-          <Card className="p-5 bg-card border-border max-w-2xl">
-            <Label>Pergunta do usuário</Label>
-            <Textarea rows={3} value={testInput} onChange={(e) => setTestInput(e.target.value)} className="mt-1"/>
-            <Button className="mt-3" onClick={runTest}><Sparkles className="h-4 w-4 mr-1"/>Simular resposta</Button>
-            {testOutput && (
-              <div className="mt-4 p-4 rounded-lg bg-primary/10 border border-primary/20">
-                <p className="text-xs uppercase tracking-wide text-primary mb-1">Resposta do bot</p>
-                <p className="text-sm">{testOutput}</p>
-              </div>
-            )}
-          </Card>
         </TabsContent>
       </Tabs>
 
@@ -186,11 +269,11 @@ function IAPage() {
         <DialogContent>
           <DialogHeader><DialogTitle>{kbForm.id ? "Editar entrada" : "Nova entrada"}</DialogTitle></DialogHeader>
           <div className="space-y-3">
-            <div><Label>Título</Label><Input value={kbForm.title} onChange={(e) => setKbForm({ ...kbForm, title: e.target.value })}/></div>
-            <div><Label>Conteúdo</Label><Textarea rows={6} value={kbForm.content} onChange={(e) => setKbForm({ ...kbForm, content: e.target.value })}/></div>
+            <div><Label>Título</Label><Input value={kbForm.title} onChange={(e) => setKbForm({ ...kbForm, title: e.target.value })} /></div>
+            <div><Label>Conteúdo</Label><Textarea rows={6} value={kbForm.content} onChange={(e) => setKbForm({ ...kbForm, content: e.target.value })} /></div>
             <div className="flex items-center justify-between p-3 rounded bg-muted">
               <Label>Ativa</Label>
-              <Switch checked={kbForm.is_active} onCheckedChange={(v) => setKbForm({ ...kbForm, is_active: v })}/>
+              <Switch checked={kbForm.is_active} onCheckedChange={(v) => setKbForm({ ...kbForm, is_active: v })} />
             </div>
           </div>
           <DialogFooter>
