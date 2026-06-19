@@ -1,14 +1,16 @@
-import { createFileRoute, Outlet, Link, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Outlet, Link, useRouterState, redirect } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/admin/AppSidebar";
-import { ChevronRight, AlertCircle } from "lucide-react";
+import { ChevronRight, ShieldCheck } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
-// MODO DEMO: login desativado. Painel abre direto em modo admin.
-// Quando ativar autenticação, reintroduzir o gate beforeLoad usando supabase.auth.getUser().
+// Login ativo: primeiro usuário cadastrado vira admin automaticamente (trigger handle_new_user).
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
-  beforeLoad: () => ({
-    user: { id: "demo-admin", email: "admin@demo.local", role: "admin" as const },
-  }),
+  beforeLoad: async () => {
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) throw redirect({ to: "/auth" });
+    return { user: { id: data.user.id, email: data.user.email ?? "", role: "admin" as const } };
+  },
   component: AuthenticatedLayout,
 });
 
@@ -47,14 +49,17 @@ function AuthenticatedLayout() {
             <span className="text-foreground font-medium">{current}</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="hidden md:inline-flex items-center gap-1.5 text-[11px] px-2 py-1 rounded-md bg-warning/10 text-warning border border-warning/30">
-              <AlertCircle className="h-3 w-3" />
-              Modo desenvolvimento: login desativado
+            <span className="hidden md:inline-flex items-center gap-1.5 text-[11px] px-2 py-1 rounded-md bg-success/10 text-success border border-success/30">
+              <ShieldCheck className="h-3 w-3" />
+              Admin autenticado
             </span>
             <span className="text-xs text-muted-foreground hidden sm:inline">{user.email}</span>
-            <div className="h-8 w-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-xs font-semibold text-primary">
-              A
-            </div>
+            <button
+              onClick={async () => { await supabase.auth.signOut(); window.location.href = "/auth"; }}
+              className="h-8 px-3 rounded-md bg-card border border-border text-xs hover:bg-muted"
+            >
+              Sair
+            </button>
           </div>
         </header>
         <main className="flex-1 p-6 overflow-x-auto">
