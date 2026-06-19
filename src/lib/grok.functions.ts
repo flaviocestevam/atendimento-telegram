@@ -128,14 +128,38 @@ export const callGrok = createServerFn({ method: "POST" })
 
       const text = json.choices?.[0]?.message?.content ?? "";
 
-      // Em modo "suggest", devolve sem enviar. Em modo "auto", o caller decide
-      // se envia ou pede aprovação humana (regras adicionais ficam no caller).
+      // Se a IA realmente incorporou a história sugerida, registra como usada.
+      // Heurística: pega ~6 palavras significativas da história e procura overlap no texto.
+      let storyUsed: { id: string; name: string; variation: number } | null = null;
+      if (chosenStory && text && telegramUserId) {
+        const norm = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, "");
+        const sample = norm(chosenStory.text).split(/\s+/).filter((w) => w.length > 4).slice(0, 8);
+        const hay = norm(text);
+        const hits = sample.filter((w) => hay.includes(w)).length;
+        if (hits >= 2) {
+          await supabaseAdmin
+            .from("story_leads")
+            .upsert(
+              {
+                story_id: chosenStory.id,
+                lead_id: telegramUserId,
+                current_step: chosenStory.variation,
+                last_step_at: new Date().toISOString(),
+                status: "active",
+              },
+              { onConflict: "story_id,lead_id" },
+            );
+          storyUsed = { id: chosenStory.id, name: chosenStory.name, variation: chosenStory.variation };
+        }
+      }
+
       return {
         ok: true,
         text,
         mode: data.mode,
         shouldRequestHuman: false,
         suggestedAction: null,
+        storyUsed,
       };
     } catch (err: any) {
       return { ok: false, error: err?.message ?? "grok_call_exception" };
