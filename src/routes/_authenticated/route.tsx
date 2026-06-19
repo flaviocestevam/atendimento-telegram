@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, Link, useRouterState, redirect } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { AppSidebar } from "@/components/admin/AppSidebar";
-import { ChevronRight, ShieldCheck } from "lucide-react";
+import { ChevronRight, ShieldCheck, Menu } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 // Login ativo: primeiro usuário cadastrado vira admin automaticamente (trigger handle_new_user).
@@ -37,23 +38,34 @@ function AuthenticatedLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const segs = pathname.split("/").filter(Boolean);
   const current = labels[segs[1] ?? segs[0]] ?? "Painel";
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Fecha o menu ao navegar
+  useEffect(() => { setMobileOpen(false); }, [pathname]);
 
   return (
     <div className="min-h-screen flex bg-background text-foreground">
-      <AppSidebar />
+      <AppSidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-14 border-b border-border bg-card/40 backdrop-blur flex items-center justify-between px-6 sticky top-0 z-10">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Link to="/dashboard" className="hover:text-foreground">Painel</Link>
-            <ChevronRight className="h-4 w-4" />
-            <span className="text-foreground font-medium">{current}</span>
+        <header className="h-14 border-b border-border bg-card/40 backdrop-blur sticky top-0 z-20 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 px-3 sm:px-6">
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="lg:hidden h-9 w-9 rounded-md hover:bg-muted flex items-center justify-center shrink-0"
+            aria-label="Abrir menu"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-0">
+            <Link to="/dashboard" className="hover:text-foreground hidden sm:inline">Painel</Link>
+            <ChevronRight className="h-4 w-4 shrink-0 hidden sm:inline" />
+            <span className="text-foreground font-medium truncate">{current}</span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <span className="hidden md:inline-flex items-center gap-1.5 text-[11px] px-2 py-1 rounded-md bg-success/10 text-success border border-success/30">
               <ShieldCheck className="h-3 w-3" />
-              Admin autenticado
+              Admin
             </span>
-            <span className="text-xs text-muted-foreground hidden sm:inline">{user.email}</span>
+            <span className="text-xs text-muted-foreground hidden md:inline max-w-[160px] truncate">{user.email}</span>
             <button
               onClick={async () => { await supabase.auth.signOut(); window.location.href = "/auth"; }}
               className="h-8 px-3 rounded-md bg-card border border-border text-xs hover:bg-muted"
@@ -62,7 +74,7 @@ function AuthenticatedLayout() {
             </button>
           </div>
         </header>
-        <main className="flex-1 p-6 overflow-x-auto">
+        <main className="flex-1 p-3 sm:p-6 overflow-x-auto">
           <Outlet />
         </main>
       </div>
