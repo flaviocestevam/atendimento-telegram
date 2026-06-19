@@ -84,6 +84,7 @@ function Configuracoes() {
   const setGlobalMode = async (mode: string) => {
     await supabase.from("ai_settings").update({ grok_global_mode: mode } as any).neq("id", "00000000-0000-0000-0000-000000000000");
     aiQ.refetch();
+    grok.refetch();
     toast.success(`Modo: ${mode}`);
   };
 

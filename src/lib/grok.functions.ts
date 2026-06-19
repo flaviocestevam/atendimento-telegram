@@ -4,11 +4,19 @@ import { createServerFn } from "@tanstack/react-start";
 // Retorna { available, reason } — todo fluxo de IA passa por aqui antes de chamar.
 export const grokStatus = createServerFn({ method: "GET" }).handler(async () => {
   const hasKey = !!process.env.XAI_API_KEY;
-  const enabled = process.env.GROK_ENABLED === "true";
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: ai } = await supabaseAdmin
+    .from("ai_settings")
+    .select("grok_global_mode")
+    .limit(1)
+    .maybeSingle();
+  const mode = (ai?.grok_global_mode as string | undefined) ?? "off";
+  const enabled = mode !== "off";
   return {
     available: hasKey && enabled,
     hasKey,
     enabled,
+    mode,
     model: process.env.XAI_MODEL ?? "grok-2-latest",
   };
 });
@@ -22,7 +30,13 @@ export const callGrok = createServerFn({ method: "POST" })
   }) => input)
   .handler(async ({ data }) => {
     const xaiKey = process.env.XAI_API_KEY;
-    const enabled = process.env.GROK_ENABLED === "true";
+    const { supabaseAdmin: _adminCheck } = await import("@/integrations/supabase/client.server");
+    const { data: aiCheck } = await _adminCheck
+      .from("ai_settings")
+      .select("grok_global_mode")
+      .limit(1)
+      .maybeSingle();
+    const enabled = ((aiCheck?.grok_global_mode as string | undefined) ?? "off") !== "off";
     if (!xaiKey || !enabled) {
       return { ok: false, error: "grok_disabled", available: false };
     }
