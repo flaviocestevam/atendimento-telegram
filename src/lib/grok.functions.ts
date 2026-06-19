@@ -25,7 +25,7 @@ export const grokStatus = createServerFn({ method: "GET" }).handler(async () => 
 export const pingGrok = createServerFn({ method: "POST" }).handler(async () => {
   const xaiKey = process.env.XAI_API_KEY;
   if (!xaiKey) return { ok: false, error: "missing_XAI_API_KEY" };
-  const model = process.env.XAI_MODEL ?? "grok-2-latest";
+  const model = process.env.XAI_MODEL ?? "grok-4-latest";
   try {
     const r = await fetch("https://api.x.ai/v1/chat/completions", {
       method: "POST",
@@ -39,9 +39,14 @@ export const pingGrok = createServerFn({ method: "POST" }).handler(async () => {
         temperature: 0.2,
       }),
     });
-    const json: any = await r.json();
-    if (!r.ok) return { ok: false, error: json?.error?.message ?? `http_${r.status}`, model };
-    const text = json.choices?.[0]?.message?.content ?? "";
+    const raw = await r.text();
+    let json: any = null;
+    try { json = JSON.parse(raw); } catch { /* keep raw */ }
+    if (!r.ok) {
+      const msg = json?.error?.message ?? json?.error ?? raw ?? `http_${r.status}`;
+      return { ok: false, error: `HTTP ${r.status}: ${typeof msg === "string" ? msg : JSON.stringify(msg)}`, model };
+    }
+    const text = json?.choices?.[0]?.message?.content ?? "";
     return { ok: true, text, model };
   } catch (err: any) {
     return { ok: false, error: err?.message ?? "grok_ping_exception" };
