@@ -27,6 +27,8 @@ import { Route as AuthenticatedConteudosRouteImport } from './routes/_authentica
 import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
 import { Route as AuthenticatedAutomacaoRouteImport } from './routes/_authenticated/automacao'
 import { Route as AuthenticatedAssinantesRouteImport } from './routes/_authenticated/assinantes'
+import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
+import { Route as ApiPublicCaktoWebhookRouteImport } from './routes/api/public/cakto/webhook'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -120,6 +122,17 @@ const AuthenticatedAssinantesRoute = AuthenticatedAssinantesRouteImport.update({
   path: '/assinantes',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicTelegramWebhookRoute =
+  ApiPublicTelegramWebhookRouteImport.update({
+    id: '/api/public/telegram/webhook',
+    path: '/api/public/telegram/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicCaktoWebhookRoute = ApiPublicCaktoWebhookRouteImport.update({
+  id: '/api/public/cakto/webhook',
+  path: '/api/public/cakto/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -139,6 +152,8 @@ export interface FileRoutesByFullPath {
   '/perfil-vendedor': typeof AuthenticatedPerfilVendedorRoute
   '/planos': typeof AuthenticatedPlanosRoute
   '/respostas-rapidas': typeof AuthenticatedRespostasRapidasRoute
+  '/api/public/cakto/webhook': typeof ApiPublicCaktoWebhookRoute
+  '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -158,6 +173,8 @@ export interface FileRoutesByTo {
   '/perfil-vendedor': typeof AuthenticatedPerfilVendedorRoute
   '/planos': typeof AuthenticatedPlanosRoute
   '/respostas-rapidas': typeof AuthenticatedRespostasRapidasRoute
+  '/api/public/cakto/webhook': typeof ApiPublicCaktoWebhookRoute
+  '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -179,6 +196,8 @@ export interface FileRoutesById {
   '/_authenticated/perfil-vendedor': typeof AuthenticatedPerfilVendedorRoute
   '/_authenticated/planos': typeof AuthenticatedPlanosRoute
   '/_authenticated/respostas-rapidas': typeof AuthenticatedRespostasRapidasRoute
+  '/api/public/cakto/webhook': typeof ApiPublicCaktoWebhookRoute
+  '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -200,6 +219,8 @@ export interface FileRouteTypes {
     | '/perfil-vendedor'
     | '/planos'
     | '/respostas-rapidas'
+    | '/api/public/cakto/webhook'
+    | '/api/public/telegram/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -219,6 +240,8 @@ export interface FileRouteTypes {
     | '/perfil-vendedor'
     | '/planos'
     | '/respostas-rapidas'
+    | '/api/public/cakto/webhook'
+    | '/api/public/telegram/webhook'
   id:
     | '__root__'
     | '/'
@@ -239,12 +262,16 @@ export interface FileRouteTypes {
     | '/_authenticated/perfil-vendedor'
     | '/_authenticated/planos'
     | '/_authenticated/respostas-rapidas'
+    | '/api/public/cakto/webhook'
+    | '/api/public/telegram/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicCaktoWebhookRoute: typeof ApiPublicCaktoWebhookRoute
+  ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -375,6 +402,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAssinantesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/telegram/webhook': {
+      id: '/api/public/telegram/webhook'
+      path: '/api/public/telegram/webhook'
+      fullPath: '/api/public/telegram/webhook'
+      preLoaderRoute: typeof ApiPublicTelegramWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/cakto/webhook': {
+      id: '/api/public/cakto/webhook'
+      path: '/api/public/cakto/webhook'
+      fullPath: '/api/public/cakto/webhook'
+      preLoaderRoute: typeof ApiPublicCaktoWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -421,6 +462,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicCaktoWebhookRoute: ApiPublicCaktoWebhookRoute,
+  ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

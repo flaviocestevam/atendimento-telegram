@@ -96,6 +96,8 @@ function ConversasPage() {
       telegram_user_id: selected.telegram_user_id,
       direction: "outbound",
       sender_type: "admin",
+      sender: "admin",
+      kind: "text",
       text: reply,
     });
     if (error) return toast.error(error.message);
