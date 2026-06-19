@@ -12,10 +12,15 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRespostasRapidasRouteImport } from './routes/_authenticated/respostas-rapidas'
 import { Route as AuthenticatedPlanosRouteImport } from './routes/_authenticated/planos'
+import { Route as AuthenticatedPerfilVendedorRouteImport } from './routes/_authenticated/perfil-vendedor'
 import { Route as AuthenticatedPagamentosRouteImport } from './routes/_authenticated/pagamentos'
+import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
 import { Route as AuthenticatedIaRouteImport } from './routes/_authenticated/ia'
+import { Route as AuthenticatedHistoriasRouteImport } from './routes/_authenticated/historias'
 import { Route as AuthenticatedGruposRouteImport } from './routes/_authenticated/grupos'
+import { Route as AuthenticatedFunisRouteImport } from './routes/_authenticated/funis'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedConversasRouteImport } from './routes/_authenticated/conversas'
 import { Route as AuthenticatedConteudosRouteImport } from './routes/_authenticated/conteudos'
@@ -37,14 +42,31 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRespostasRapidasRoute =
+  AuthenticatedRespostasRapidasRouteImport.update({
+    id: '/respostas-rapidas',
+    path: '/respostas-rapidas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPlanosRoute = AuthenticatedPlanosRouteImport.update({
   id: '/planos',
   path: '/planos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPerfilVendedorRoute =
+  AuthenticatedPerfilVendedorRouteImport.update({
+    id: '/perfil-vendedor',
+    path: '/perfil-vendedor',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPagamentosRoute = AuthenticatedPagamentosRouteImport.update({
   id: '/pagamentos',
   path: '/pagamentos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedLeadsRoute = AuthenticatedLeadsRouteImport.update({
+  id: '/leads',
+  path: '/leads',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedIaRoute = AuthenticatedIaRouteImport.update({
@@ -52,9 +74,19 @@ const AuthenticatedIaRoute = AuthenticatedIaRouteImport.update({
   path: '/ia',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedHistoriasRoute = AuthenticatedHistoriasRouteImport.update({
+  id: '/historias',
+  path: '/historias',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedGruposRoute = AuthenticatedGruposRouteImport.update({
   id: '/grupos',
   path: '/grupos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedFunisRoute = AuthenticatedFunisRouteImport.update({
+  id: '/funis',
+  path: '/funis',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -98,10 +130,15 @@ export interface FileRoutesByFullPath {
   '/conteudos': typeof AuthenticatedConteudosRoute
   '/conversas': typeof AuthenticatedConversasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/funis': typeof AuthenticatedFunisRoute
   '/grupos': typeof AuthenticatedGruposRoute
+  '/historias': typeof AuthenticatedHistoriasRoute
   '/ia': typeof AuthenticatedIaRoute
+  '/leads': typeof AuthenticatedLeadsRoute
   '/pagamentos': typeof AuthenticatedPagamentosRoute
+  '/perfil-vendedor': typeof AuthenticatedPerfilVendedorRoute
   '/planos': typeof AuthenticatedPlanosRoute
+  '/respostas-rapidas': typeof AuthenticatedRespostasRapidasRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -112,10 +149,15 @@ export interface FileRoutesByTo {
   '/conteudos': typeof AuthenticatedConteudosRoute
   '/conversas': typeof AuthenticatedConversasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/funis': typeof AuthenticatedFunisRoute
   '/grupos': typeof AuthenticatedGruposRoute
+  '/historias': typeof AuthenticatedHistoriasRoute
   '/ia': typeof AuthenticatedIaRoute
+  '/leads': typeof AuthenticatedLeadsRoute
   '/pagamentos': typeof AuthenticatedPagamentosRoute
+  '/perfil-vendedor': typeof AuthenticatedPerfilVendedorRoute
   '/planos': typeof AuthenticatedPlanosRoute
+  '/respostas-rapidas': typeof AuthenticatedRespostasRapidasRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -128,10 +170,15 @@ export interface FileRoutesById {
   '/_authenticated/conteudos': typeof AuthenticatedConteudosRoute
   '/_authenticated/conversas': typeof AuthenticatedConversasRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/funis': typeof AuthenticatedFunisRoute
   '/_authenticated/grupos': typeof AuthenticatedGruposRoute
+  '/_authenticated/historias': typeof AuthenticatedHistoriasRoute
   '/_authenticated/ia': typeof AuthenticatedIaRoute
+  '/_authenticated/leads': typeof AuthenticatedLeadsRoute
   '/_authenticated/pagamentos': typeof AuthenticatedPagamentosRoute
+  '/_authenticated/perfil-vendedor': typeof AuthenticatedPerfilVendedorRoute
   '/_authenticated/planos': typeof AuthenticatedPlanosRoute
+  '/_authenticated/respostas-rapidas': typeof AuthenticatedRespostasRapidasRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -144,10 +191,15 @@ export interface FileRouteTypes {
     | '/conteudos'
     | '/conversas'
     | '/dashboard'
+    | '/funis'
     | '/grupos'
+    | '/historias'
     | '/ia'
+    | '/leads'
     | '/pagamentos'
+    | '/perfil-vendedor'
     | '/planos'
+    | '/respostas-rapidas'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -158,10 +210,15 @@ export interface FileRouteTypes {
     | '/conteudos'
     | '/conversas'
     | '/dashboard'
+    | '/funis'
     | '/grupos'
+    | '/historias'
     | '/ia'
+    | '/leads'
     | '/pagamentos'
+    | '/perfil-vendedor'
     | '/planos'
+    | '/respostas-rapidas'
   id:
     | '__root__'
     | '/'
@@ -173,10 +230,15 @@ export interface FileRouteTypes {
     | '/_authenticated/conteudos'
     | '/_authenticated/conversas'
     | '/_authenticated/dashboard'
+    | '/_authenticated/funis'
     | '/_authenticated/grupos'
+    | '/_authenticated/historias'
     | '/_authenticated/ia'
+    | '/_authenticated/leads'
     | '/_authenticated/pagamentos'
+    | '/_authenticated/perfil-vendedor'
     | '/_authenticated/planos'
+    | '/_authenticated/respostas-rapidas'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -208,11 +270,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/respostas-rapidas': {
+      id: '/_authenticated/respostas-rapidas'
+      path: '/respostas-rapidas'
+      fullPath: '/respostas-rapidas'
+      preLoaderRoute: typeof AuthenticatedRespostasRapidasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/planos': {
       id: '/_authenticated/planos'
       path: '/planos'
       fullPath: '/planos'
       preLoaderRoute: typeof AuthenticatedPlanosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/perfil-vendedor': {
+      id: '/_authenticated/perfil-vendedor'
+      path: '/perfil-vendedor'
+      fullPath: '/perfil-vendedor'
+      preLoaderRoute: typeof AuthenticatedPerfilVendedorRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/pagamentos': {
@@ -222,6 +298,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPagamentosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/leads': {
+      id: '/_authenticated/leads'
+      path: '/leads'
+      fullPath: '/leads'
+      preLoaderRoute: typeof AuthenticatedLeadsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/ia': {
       id: '/_authenticated/ia'
       path: '/ia'
@@ -229,11 +312,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/historias': {
+      id: '/_authenticated/historias'
+      path: '/historias'
+      fullPath: '/historias'
+      preLoaderRoute: typeof AuthenticatedHistoriasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/grupos': {
       id: '/_authenticated/grupos'
       path: '/grupos'
       fullPath: '/grupos'
       preLoaderRoute: typeof AuthenticatedGruposRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/funis': {
+      id: '/_authenticated/funis'
+      path: '/funis'
+      fullPath: '/funis'
+      preLoaderRoute: typeof AuthenticatedFunisRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
@@ -288,10 +385,15 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedConteudosRoute: typeof AuthenticatedConteudosRoute
   AuthenticatedConversasRoute: typeof AuthenticatedConversasRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedFunisRoute: typeof AuthenticatedFunisRoute
   AuthenticatedGruposRoute: typeof AuthenticatedGruposRoute
+  AuthenticatedHistoriasRoute: typeof AuthenticatedHistoriasRoute
   AuthenticatedIaRoute: typeof AuthenticatedIaRoute
+  AuthenticatedLeadsRoute: typeof AuthenticatedLeadsRoute
   AuthenticatedPagamentosRoute: typeof AuthenticatedPagamentosRoute
+  AuthenticatedPerfilVendedorRoute: typeof AuthenticatedPerfilVendedorRoute
   AuthenticatedPlanosRoute: typeof AuthenticatedPlanosRoute
+  AuthenticatedRespostasRapidasRoute: typeof AuthenticatedRespostasRapidasRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -301,10 +403,15 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConteudosRoute: AuthenticatedConteudosRoute,
   AuthenticatedConversasRoute: AuthenticatedConversasRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedFunisRoute: AuthenticatedFunisRoute,
   AuthenticatedGruposRoute: AuthenticatedGruposRoute,
+  AuthenticatedHistoriasRoute: AuthenticatedHistoriasRoute,
   AuthenticatedIaRoute: AuthenticatedIaRoute,
+  AuthenticatedLeadsRoute: AuthenticatedLeadsRoute,
   AuthenticatedPagamentosRoute: AuthenticatedPagamentosRoute,
+  AuthenticatedPerfilVendedorRoute: AuthenticatedPerfilVendedorRoute,
   AuthenticatedPlanosRoute: AuthenticatedPlanosRoute,
+  AuthenticatedRespostasRapidasRoute: AuthenticatedRespostasRapidasRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
