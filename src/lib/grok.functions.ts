@@ -17,7 +17,7 @@ export const grokStatus = createServerFn({ method: "GET" }).handler(async () => 
     hasKey,
     enabled,
     mode,
-    model: process.env.XAI_MODEL ?? "grok-2-latest",
+    model: process.env.XAI_MODEL ?? "grok-4-latest",
   };
 });
 
