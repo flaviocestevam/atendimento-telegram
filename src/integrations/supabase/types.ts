@@ -1489,7 +1489,7 @@ export type Database = {
             foreignKeyName: "memories_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
-            referencedRelation: "telegram_users"
+            referencedRelation: "leads"
             referencedColumns: ["id"]
           },
           {
@@ -1758,7 +1758,7 @@ export type Database = {
             foreignKeyName: "objections_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
-            referencedRelation: "telegram_users"
+            referencedRelation: "leads"
             referencedColumns: ["id"]
           },
           {
