@@ -1,28 +1,32 @@
-import { createFileRoute, redirect, Outlet, Link, useRouterState } from "@tanstack/react-router";
-import { supabase } from "@/integrations/supabase/client";
+import { createFileRoute, Outlet, Link, useRouterState } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/admin/AppSidebar";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, AlertCircle } from "lucide-react";
 
+// MODO DEMO: login desativado. Painel abre direto em modo admin.
+// Quando ativar autenticação, reintroduzir o gate beforeLoad usando supabase.auth.getUser().
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
-  beforeLoad: async () => {
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) throw redirect({ to: "/auth" });
-    return { user: data.user };
-  },
+  beforeLoad: () => ({
+    user: { id: "demo-admin", email: "admin@demo.local", role: "admin" as const },
+  }),
   component: AuthenticatedLayout,
 });
 
 const labels: Record<string, string> = {
   dashboard: "Dashboard",
   conversas: "Conversas",
+  leads: "Leads",
   assinantes: "Assinantes",
   planos: "Planos",
   conteudos: "Conteúdos",
   pagamentos: "Pagamentos",
   grupos: "Grupos Telegram",
-  ia: "IA do Bot",
-  automacao: "Automação",
+  ia: "IA / Grok",
+  automacao: "Automações",
+  funis: "Funis",
+  historias: "Histórias",
+  "respostas-rapidas": "Respostas rápidas",
+  "perfil-vendedor": "Perfil do vendedor",
   configuracoes: "Configurações",
 };
 
@@ -30,7 +34,7 @@ function AuthenticatedLayout() {
   const { user } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const segs = pathname.split("/").filter(Boolean);
-  const current = labels[segs[0]] ?? "Painel";
+  const current = labels[segs[1] ?? segs[0]] ?? "Painel";
 
   return (
     <div className="min-h-screen flex bg-background text-foreground">
@@ -43,9 +47,13 @@ function AuthenticatedLayout() {
             <span className="text-foreground font-medium">{current}</span>
           </div>
           <div className="flex items-center gap-3">
+            <span className="hidden md:inline-flex items-center gap-1.5 text-[11px] px-2 py-1 rounded-md bg-warning/10 text-warning border border-warning/30">
+              <AlertCircle className="h-3 w-3" />
+              Modo desenvolvimento: login desativado
+            </span>
             <span className="text-xs text-muted-foreground hidden sm:inline">{user.email}</span>
             <div className="h-8 w-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-xs font-semibold text-primary">
-              {user.email?.[0]?.toUpperCase() ?? "A"}
+              A
             </div>
           </div>
         </header>
