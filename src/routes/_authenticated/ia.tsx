@@ -53,7 +53,7 @@ function IAPage() {
   async function saveGrokMode(mode: string) {
     if (!form) return;
     setForm({ ...form, grok_global_mode: mode });
-    const { error } = await supabase.from("ai_settings").update({ grok_global_mode: mode }).eq("id", form.id);
+    const { error } = await supabase.from("ai_settings").update({ grok_global_mode: mode as any }).eq("id", form.id);
     if (error) return toast.error(error.message);
     toast.success("Modo do Grok atualizado");
   }
