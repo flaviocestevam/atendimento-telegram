@@ -82,6 +82,21 @@ function Configuracoes() {
     queryFn: () => grokFn(),
   });
 
+  const [grokTestResult, setGrokTestResult] = useState<{ ok: boolean; text?: string; error?: string; model?: string } | null>(null);
+  const pingGrokFn = useServerFn(pingGrok);
+  const testGrok = useMutation({
+    mutationFn: () => pingGrokFn({} as any),
+    onSuccess: (r: any) => {
+      setGrokTestResult(r);
+      if (r?.ok) toast.success("Grok respondeu");
+      else toast.error(r?.error ?? "Falha ao testar Grok");
+    },
+    onError: (e: any) => {
+      setGrokTestResult({ ok: false, error: e?.message ?? "erro" });
+      toast.error(e?.message ?? "Erro");
+    },
+  });
+
   const setGlobalMode = async (mode: string) => {
     await supabase.from("ai_settings").update({ grok_global_mode: mode } as any).neq("id", "00000000-0000-0000-0000-000000000000");
     aiQ.refetch();
