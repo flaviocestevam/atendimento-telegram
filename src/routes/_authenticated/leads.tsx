@@ -78,6 +78,7 @@ function LeadsPage() {
             <TableRow>
               <TableHead>Lead</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Tier</TableHead>
               <TableHead>Temperatura</TableHead>
               <TableHead className="text-right">Score</TableHead>
               <TableHead className="text-right">Total gasto</TableHead>
