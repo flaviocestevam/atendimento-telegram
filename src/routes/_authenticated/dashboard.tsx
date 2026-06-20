@@ -37,23 +37,23 @@ function StatCard({
   const showDelta = typeof delta === "number" && isFinite(delta);
   const up = (delta ?? 0) >= 0;
   return (
-    <Card className="p-5 bg-card border-border relative overflow-hidden">
+    <Card className="p-4 bg-card border-border relative overflow-hidden">
       <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full opacity-10" style={{ background: accent }} />
-      <div className="flex items-start justify-between relative">
-        <div className="min-w-0">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
-          <p className="text-2xl font-bold mt-1 truncate">{value}</p>
-          {showDelta && (
-            <p className={`text-xs mt-2 flex items-center gap-1 ${up ? "text-emerald-400" : "text-red-400"}`}>
-              {up ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
-              {Math.abs(delta!).toFixed(1)}% <span className="text-muted-foreground">{deltaLabel ?? "vs período anterior"}</span>
-            </p>
-          )}
-        </div>
-        <div className="h-10 w-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: accent }}>
-          <Icon className="h-5 w-5 text-primary-foreground" />
+      <div className="relative flex items-start justify-between gap-2">
+        <p className="text-[11px] uppercase tracking-wide text-muted-foreground leading-tight">{label}</p>
+        <div className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: accent }}>
+          <Icon className="h-4 w-4 text-primary-foreground" />
         </div>
       </div>
+      <p className="relative mt-2 font-bold tabular-nums leading-tight text-[clamp(1.1rem,2.2vw,1.6rem)] break-words">
+        {value}
+      </p>
+      {showDelta && (
+        <p className={`relative text-[11px] mt-2 flex flex-wrap items-center gap-1 ${up ? "text-emerald-400" : "text-red-400"}`}>
+          {up ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
+          {Math.abs(delta!).toFixed(1)}% <span className="text-muted-foreground">{deltaLabel ?? "vs período anterior"}</span>
+        </p>
+      )}
     </Card>
   );
 }
