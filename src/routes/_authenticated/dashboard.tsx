@@ -305,12 +305,14 @@ function Dashboard() {
             <h3 className="font-semibold">Funil de conversão</h3>
             <span className="text-xs text-muted-foreground">Últimos 30 dias</span>
           </div>
-          <div className="space-y-4">
-            <FunnelRow label="Visitantes / Iniciaram conversa" value={f.visitantes} total={f.visitantes || 1} color="oklch(0.62 0.22 295)" />
-            <FunnelRow label="Interessados" value={f.interessados} total={f.visitantes || 1} color="oklch(0.65 0.20 250)" />
-            <FunnelRow label="Assinaram" value={f.assinaram} total={f.visitantes || 1} color="oklch(0.65 0.18 200)" />
-            <FunnelRow label="Pagaram" value={f.pagaram} total={f.visitantes || 1} color="oklch(0.75 0.16 60)" />
-          </div>
+          <FunnelChart
+            rows={[
+              { label: "Visitantes / Iniciaram conversa", value: f.visitantes, color: "oklch(0.62 0.22 295)" },
+              { label: "Interessados", value: f.interessados, color: "oklch(0.65 0.20 250)" },
+              { label: "Assinaram", value: f.assinaram, color: "oklch(0.65 0.18 200)" },
+              { label: "Pagaram", value: f.pagaram, color: "oklch(0.75 0.16 60)" },
+            ]}
+          />
         </Card>
       </div>
 
