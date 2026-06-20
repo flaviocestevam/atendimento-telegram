@@ -58,23 +58,54 @@ function StatCard({
   );
 }
 
-function FunnelRow({ label, value, total, color }: { label: string; value: number; total: number; color: string }) {
-  const p = total ? (value / total) * 100 : 0;
+function FunnelChart({ rows }: { rows: { label: string; value: number; color: string }[] }) {
+  const top = rows[0]?.value || 1;
+  const W = 220;
+  const H = 220;
+  const minW = 60; // bottom width floor so tiny values still render
+  const sliceH = H / rows.length;
+  // Compute trapezoid widths per row based on value relative to top
+  const widths = rows.map(r => {
+    const ratio = Math.max(0, Math.min(1, r.value / top));
+    return Math.max(minW, W * (0.35 + 0.65 * ratio));
+  });
+  // Each slice's top width = previous bottom width (so trapezoids connect)
   return (
-    <div className="space-y-1">
-      <div className="flex items-center justify-between text-sm">
-        <span className="text-muted-foreground">{label}</span>
-        <span className="tabular-nums">
-          <span className="font-semibold">{value.toLocaleString("pt-BR")}</span>{" "}
-          <span className="text-xs text-muted-foreground">{p.toFixed(1)}%</span>
-        </span>
-      </div>
-      <div className="h-2 rounded-full bg-muted overflow-hidden">
-        <div className="h-full rounded-full" style={{ width: `${p}%`, background: color }} />
+    <div className="flex items-center gap-6">
+      <svg viewBox={`0 0 ${W} ${H}`} className="shrink-0" style={{ width: 200, height: 200 }}>
+        {rows.map((r, i) => {
+          const topW = i === 0 ? W : widths[i - 1];
+          const botW = widths[i];
+          const y1 = i * sliceH;
+          const y2 = y1 + sliceH - 2;
+          const cx = W / 2;
+          const points = [
+            `${cx - topW / 2},${y1}`,
+            `${cx + topW / 2},${y1}`,
+            `${cx + botW / 2},${y2}`,
+            `${cx - botW / 2},${y2}`,
+          ].join(" ");
+          return <polygon key={i} points={points} fill={r.color} />;
+        })}
+      </svg>
+      <div className="flex-1 space-y-3">
+        {rows.map((r, i) => {
+          const p = top ? (r.value / top) * 100 : 0;
+          return (
+            <div key={i} className="flex items-center justify-between text-sm gap-3">
+              <span className="text-muted-foreground truncate">{r.label}</span>
+              <span className="tabular-nums whitespace-nowrap">
+                <span className="font-semibold">{r.value.toLocaleString("pt-BR")}</span>{" "}
+                <span className="text-xs text-muted-foreground">{p.toFixed(1)}%</span>
+              </span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 }
+
 
 function Dashboard() {
   const { profileId, profiles } = useActiveProfile();
