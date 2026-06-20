@@ -183,7 +183,7 @@ function IAPage() {
                   </Select>
                 </div>
               </div>
-              <div><Label>Tom de voz</Label><Input value={form.tone ?? ""} onChange={(e) => setForm({ ...form, tone: e.target.value })} /></div>
+              
               <div>
                 <Label>Prompt do sistema</Label>
                 <Textarea rows={10} value={form.system_prompt ?? ""} onChange={(e) => setForm({ ...form, system_prompt: e.target.value })} className="font-mono text-xs" />

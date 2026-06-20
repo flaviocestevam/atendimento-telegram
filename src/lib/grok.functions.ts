@@ -102,12 +102,26 @@ export const callGrok = createServerFn({ method: "POST" })
       .eq("id", sellerId)
       .maybeSingle();
 
+    const { data: platform } = await supabaseAdmin
+      .from("seller_platform_settings")
+      .select("default_language")
+      .eq("seller_profile_id", sellerId)
+      .maybeSingle();
+
     const { data: memories } = await supabaseAdmin
       .from("lead_memories")
       .select("title, content")
       .eq("lead_id", (conv as any).lead_id)
       .eq("is_active", true)
       .limit(20);
+
+    const lead: any = (conv as any).leads ?? null;
+    const defaultLang = (platform as any)?.default_language ?? "pt-BR";
+    const preferredLang = lead?.preferred_language && lead.preferred_language !== "default"
+      ? lead.preferred_language
+      : null;
+    const activeLang = preferredLang ?? defaultLang;
+    const langConfirmed = !!lead?.language_confirmed_at;
 
     const telegramUserId = (conv as any).telegram_user_id ?? (conv as any).telegram_users?.id ?? null;
     let chosenStory: { id: string; name: string; text: string; variation: number } | null = null;
@@ -142,11 +156,26 @@ export const callGrok = createServerFn({ method: "POST" })
       }
     }
 
+    const languageBlock = [
+      `IDIOMA ATIVO DESTA CONVERSA: ${activeLang}${langConfirmed ? " (confirmado pelo lead)" : " (padrão do perfil)"}.`,
+      `IDIOMA PADRÃO DO PERFIL: ${defaultLang}.`,
+      `REGRAS DE IDIOMA:`,
+      `- Sempre responda em "${activeLang}" enquanto não houver confirmação para outro idioma.`,
+      `- NUNCA mude o idioma da conversa por causa de palavras isoladas, gírias, nomes de produto, emojis, ou frases curtas em outro idioma (ex.: "ok", "hello", "thanks", "hola", "gracias", "price?", "link?", "pix?", "vip", "checkout").`,
+      `- Só considere mudança de idioma se o lead escrever UMA MENSAGEM COMPLETA ou várias mensagens seguidas em inglês ou espanhol.`,
+      `- Nesses casos, pergunte antes de mudar:`,
+      `  • Para inglês: "vi que você escreveu em inglês. prefere que eu continue conversando com você em inglês?"`,
+      `  • Para espanhol: "vi que escribiste en español. ¿prefieres que siga conversando contigo en español?"`,
+      `- Só troque o idioma após confirmação clara ("sim", "yes", "sí", "pode", "please", "em inglês", "in English", "en español", "prefiro espanhol", "prefiro inglês").`,
+      `- A mudança de idioma NUNCA pode alterar preço, produto, plano, desconto, garantia, entrega, regra de acesso, regra de pagamento, regra de reembolso ou validade da assinatura. Traduza mantendo exatamente o mesmo sentido comercial.`,
+    ].join("\n");
+
     const systemPrompt = [
       cfg.perProfile?.system_prompt || "",
       `Você é ${(profile as any)?.display_name ?? "o vendedor"}.`,
       `Tom: ${(profile as any)?.tone_of_voice ?? "casual"}.`,
       `Estilo: ${(profile as any)?.communication_style ?? "amigável e direto"}.`,
+      languageBlock,
       `REGRAS COMERCIAIS: ${(profile as any)?.commercial_rules ?? "Não invente preço, garantia ou benefício."}`,
       `REGRAS EMOCIONAIS: ${(profile as any)?.emotional_rules ?? "Seja empático e respeitoso."}`,
       `PROIBIDO: ${(profile as any)?.forbidden_promises ?? "Não prometa o que não está cadastrado."}`,

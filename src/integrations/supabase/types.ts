@@ -1346,11 +1346,15 @@ export type Database = {
           emotional_connection_score: number
           id: string
           is_blocked: boolean
+          language_confidence: number | null
+          language_confirmed_at: string | null
+          language_detection_source: string | null
           last_interaction_at: string | null
           last_purchase_at: string | null
           lead_stage: string
           next_best_action: string | null
           notes: string | null
+          preferred_language: string
           purchase_intent_score: number
           relationship_score: number
           seller_profile_id: string | null
@@ -1379,11 +1383,15 @@ export type Database = {
           emotional_connection_score?: number
           id?: string
           is_blocked?: boolean
+          language_confidence?: number | null
+          language_confirmed_at?: string | null
+          language_detection_source?: string | null
           last_interaction_at?: string | null
           last_purchase_at?: string | null
           lead_stage?: string
           next_best_action?: string | null
           notes?: string | null
+          preferred_language?: string
           purchase_intent_score?: number
           relationship_score?: number
           seller_profile_id?: string | null
@@ -1412,11 +1420,15 @@ export type Database = {
           emotional_connection_score?: number
           id?: string
           is_blocked?: boolean
+          language_confidence?: number | null
+          language_confirmed_at?: string | null
+          language_detection_source?: string | null
           last_interaction_at?: string | null
           last_purchase_at?: string | null
           lead_stage?: string
           next_best_action?: string | null
           notes?: string | null
+          preferred_language?: string
           purchase_intent_score?: number
           relationship_score?: number
           seller_profile_id?: string | null
@@ -2402,9 +2414,13 @@ export type Database = {
           away_message: string | null
           bio: string | null
           commercial_rules: string | null
+          commercial_rules_updated_at: string | null
+          commercial_rules_updated_by: string | null
           created_at: string
           display_name: string
           emotional_rules: string | null
+          emotional_rules_updated_at: string | null
+          emotional_rules_updated_by: string | null
           forbidden_promises: string[]
           hours: Json
           id: string
@@ -2427,9 +2443,13 @@ export type Database = {
           away_message?: string | null
           bio?: string | null
           commercial_rules?: string | null
+          commercial_rules_updated_at?: string | null
+          commercial_rules_updated_by?: string | null
           created_at?: string
           display_name?: string
           emotional_rules?: string | null
+          emotional_rules_updated_at?: string | null
+          emotional_rules_updated_by?: string | null
           forbidden_promises?: string[]
           hours?: Json
           id?: string
@@ -2452,9 +2472,13 @@ export type Database = {
           away_message?: string | null
           bio?: string | null
           commercial_rules?: string | null
+          commercial_rules_updated_at?: string | null
+          commercial_rules_updated_by?: string | null
           created_at?: string
           display_name?: string
           emotional_rules?: string | null
+          emotional_rules_updated_at?: string | null
+          emotional_rules_updated_by?: string | null
           forbidden_promises?: string[]
           hours?: Json
           id?: string
