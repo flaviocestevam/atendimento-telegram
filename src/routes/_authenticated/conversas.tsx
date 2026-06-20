@@ -372,6 +372,34 @@ function ConversasPage() {
                   <p className="font-semibold text-success">{BRL(userStats.data?.totalPago ?? 0)}</p>
                 </div>
               </div>
+              <div>
+                <p className="text-xs uppercase text-muted-foreground mb-1">Memórias do lead ({leadContext.data?.memories.length ?? 0})</p>
+                <div className="space-y-1 max-h-40 overflow-y-auto">
+                  {(leadContext.data?.memories ?? []).map((m: any) => (
+                    <div key={m.id} className="text-xs p-2 rounded bg-muted">
+                      <p className="font-medium truncate">{m.title ?? m.memory_type}</p>
+                      <p className="text-muted-foreground line-clamp-2">{m.content}</p>
+                    </div>
+                  ))}
+                  {(leadContext.data?.memories.length ?? 0) === 0 && (
+                    <p className="text-xs text-muted-foreground">Nenhuma memória registrada ainda.</p>
+                  )}
+                </div>
+              </div>
+              <div>
+                <p className="text-xs uppercase text-muted-foreground mb-1">Histórias já usadas ({leadContext.data?.stories.length ?? 0})</p>
+                <div className="space-y-1 max-h-32 overflow-y-auto">
+                  {(leadContext.data?.stories ?? []).map((s: any) => (
+                    <div key={s.id} className="text-xs p-2 rounded bg-muted flex items-center justify-between gap-2">
+                      <span className="truncate">{s.stories?.name ?? s.story_id}</span>
+                      <span className="text-muted-foreground shrink-0">var {s.current_step}</span>
+                    </div>
+                  ))}
+                  {(leadContext.data?.stories.length ?? 0) === 0 && (
+                    <p className="text-xs text-muted-foreground">Nenhuma história usada com este lead.</p>
+                  )}
+                </div>
+              </div>
               <div className="space-y-2">
                 <Button size="sm" variant="outline" className="w-full">Reenviar link</Button>
                 <Button size="sm" variant="outline" className="w-full">Ver pagamentos</Button>
