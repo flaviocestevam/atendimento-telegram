@@ -34,8 +34,8 @@ export function ProfileSelector() {
             key={p.id}
             onClick={() => {
               setProfileId(p.id);
-              // Hard refresh so all queries refetch under the new scope
-              setTimeout(() => window.location.reload(), 50);
+              qc.invalidateQueries();
+              router.invalidate();
             }}
             className="flex items-center gap-2 cursor-pointer"
           >
