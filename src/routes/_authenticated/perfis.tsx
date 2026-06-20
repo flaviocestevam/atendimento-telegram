@@ -202,14 +202,20 @@ function PerfisPage() {
                   <span>{p.timezone}</span>
                 </div>
                 <div className="flex flex-wrap gap-2 pt-2">
-                  {!active && !archived && (
-                    <Button size="sm" variant="outline" onClick={() => { setProfileId(p.id); qc.invalidateQueries(); }}>
-                      Tornar ativo
-                    </Button>
-                  )}
-                  {active && (
-                    <Button size="sm" variant="outline" onClick={() => router.navigate({ to: "/configuracoes" })}>
-                      Configurar
+                  {!archived && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        if (p.id !== profileId) {
+                          setProfileId(p.id);
+                          qc.invalidateQueries();
+                        }
+                        router.navigate({ to: "/perfil-vendedor" });
+                      }}
+                    >
+                      <Pencil className="h-3.5 w-3.5 mr-1" />
+                      Editar
                     </Button>
                   )}
                   <Button size="sm" variant="ghost" onClick={() => toggleArchive.mutate(p)}>
