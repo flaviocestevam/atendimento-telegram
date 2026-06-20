@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
+import { callGrok } from "@/lib/grok.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useActiveProfile } from "@/lib/active-profile";
 import { Card } from "@/components/ui/card";
@@ -38,6 +40,9 @@ function ConversasPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [reply, setReply] = useState("");
   const qc = useQueryClient();
+  const callGrokFn = useServerFn(callGrok);
+  const [grokLoading, setGrokLoading] = useState(false);
+
 
   const convs = useQuery({
     enabled: !!profileId,
@@ -107,6 +112,36 @@ function ConversasPage() {
       return data;
     },
   });
+
+  const leadContext = useQuery({
+    enabled: !!leadQ.data?.id && !!selected?.telegram_user_id,
+    queryKey: ["lead-context", leadQ.data?.id, selected?.telegram_user_id],
+    queryFn: async () => {
+      const leadId = leadQ.data!.id as string;
+      const tgUserId = selected!.telegram_user_id as string;
+      const [mems, stories] = await Promise.all([
+        supabase.from("lead_memories").select("id,title,content,memory_type,importance").eq("lead_id", leadId).eq("is_active", true).order("importance", { ascending: false }).limit(8),
+        supabase.from("story_leads").select("id,story_id,current_step,last_step_at,stories(name)").eq("lead_id", tgUserId).order("last_step_at", { ascending: false }).limit(8),
+      ]);
+      return { memories: mems.data ?? [], stories: stories.data ?? [] };
+    },
+  });
+
+  async function suggestWithGrok() {
+    if (!selected) return;
+    setGrokLoading(true);
+    try {
+      const res = await callGrokFn({ data: { conversationId: selected.id, mode: "suggest" } });
+      if (!res?.ok) return toast.error(res?.error ?? "Falha no Grok");
+      setReply(res.text ?? "");
+      if (res.storyUsed) toast.success(`Sugestão pronta · usou história "${res.storyUsed.name}"`);
+      else toast.success("Sugestão pronta");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao chamar Grok");
+    } finally {
+      setGrokLoading(false);
+    }
+  }
 
   async function setLeadLanguage(lang: "pt" | "en" | "es", source: "manual" | "confirmed" = "manual") {
     if (!leadQ.data?.id) return toast.error("Lead não encontrado para este usuário");
@@ -281,9 +316,12 @@ function ConversasPage() {
                 <div className="flex items-start gap-2 p-3 rounded-lg bg-primary/10 border border-primary/20">
                   <Sparkles className="h-4 w-4 text-primary mt-0.5"/>
                   <div className="flex-1 text-xs">
-                    <p className="font-medium text-primary">Sugestão da IA</p>
-                    <p className="text-muted-foreground">Conecte a xAI/Grok em Configurações para gerar sugestões em tempo real.</p>
+                    <p className="font-medium text-primary">Sugestão da IA (Grok)</p>
+                    <p className="text-muted-foreground">Gera resposta usando ficha da influenciadora, memórias do lead e histórias ainda não usadas.</p>
                   </div>
+                  <Button size="sm" variant="outline" onClick={suggestWithGrok} disabled={grokLoading}>
+                    {grokLoading ? "Gerando..." : "Sugerir"}
+                  </Button>
                 </div>
                 <div className="flex gap-2">
                   <Textarea
@@ -332,6 +370,34 @@ function ConversasPage() {
                 <div className="col-span-2 p-2 rounded bg-muted">
                   <p className="text-muted-foreground">Total pago</p>
                   <p className="font-semibold text-success">{BRL(userStats.data?.totalPago ?? 0)}</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs uppercase text-muted-foreground mb-1">Memórias do lead ({leadContext.data?.memories.length ?? 0})</p>
+                <div className="space-y-1 max-h-40 overflow-y-auto">
+                  {(leadContext.data?.memories ?? []).map((m: any) => (
+                    <div key={m.id} className="text-xs p-2 rounded bg-muted">
+                      <p className="font-medium truncate">{m.title ?? m.memory_type}</p>
+                      <p className="text-muted-foreground line-clamp-2">{m.content}</p>
+                    </div>
+                  ))}
+                  {(leadContext.data?.memories.length ?? 0) === 0 && (
+                    <p className="text-xs text-muted-foreground">Nenhuma memória registrada ainda.</p>
+                  )}
+                </div>
+              </div>
+              <div>
+                <p className="text-xs uppercase text-muted-foreground mb-1">Histórias já usadas ({leadContext.data?.stories.length ?? 0})</p>
+                <div className="space-y-1 max-h-32 overflow-y-auto">
+                  {(leadContext.data?.stories ?? []).map((s: any) => (
+                    <div key={s.id} className="text-xs p-2 rounded bg-muted flex items-center justify-between gap-2">
+                      <span className="truncate">{s.stories?.name ?? s.story_id}</span>
+                      <span className="text-muted-foreground shrink-0">var {s.current_step}</span>
+                    </div>
+                  ))}
+                  {(leadContext.data?.stories.length ?? 0) === 0 && (
+                    <p className="text-xs text-muted-foreground">Nenhuma história usada com este lead.</p>
+                  )}
                 </div>
               </div>
               <div className="space-y-2">
