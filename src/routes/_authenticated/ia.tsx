@@ -217,12 +217,12 @@ function IAPage() {
               {(objections.data ?? []).map((o: any) => (
                 <div key={o.id} className="p-4 grid grid-cols-12 gap-3 items-center">
                   <div className="col-span-3">
-                    <div className="font-medium">{o.telegram_users?.first_name ?? "Lead"}</div>
-                    <div className="text-xs text-muted-foreground">@{o.telegram_users?.username ?? "—"}</div>
+                    <div className="font-medium">{o.leads?.display_name ?? "Lead"}</div>
+                    <div className="text-xs text-muted-foreground">@{o.leads?.username ?? "—"}</div>
                   </div>
                   <div className="col-span-2"><StatusBadge status={o.status} /></div>
                   <div className="col-span-2 text-xs"><span className="text-muted-foreground">Tipo:</span> <span className="font-medium">{o.type}</span></div>
-                  <div className="col-span-2 text-xs"><span className="text-muted-foreground">Confiança:</span> {o.confidence}%</div>
+                  <div className="col-span-2 text-xs"><span className="text-muted-foreground">Confiança:</span> {Math.round((o.confidence ?? 0) * 100)}%</div>
                   <div className="col-span-3 text-xs text-muted-foreground line-clamp-2">{o.suggested_reply ?? "—"}</div>
                 </div>
               ))}
