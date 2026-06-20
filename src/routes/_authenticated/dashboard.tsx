@@ -237,15 +237,17 @@ function Dashboard() {
         subtitle="Visão geral do desempenho do seu bot no Telegram."
         actions={
           <div className="flex items-center gap-2">
-            <Select value={scope} onValueChange={(v) => setScope(v as any)}>
-              <SelectTrigger className="w-[200px]">
+            <Select value={scope} onValueChange={setScope}>
+              <SelectTrigger className="w-[220px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os perfis ({profiles?.length ?? 0})</SelectItem>
-                <SelectItem value="single" disabled={!profileId}>
-                  Perfil ativo apenas
-                </SelectItem>
+                {(profiles ?? []).map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.display_name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <Button asChild><Link to="/ia"><Bot className="h-4 w-4 mr-1"/>Configurar IA</Link></Button>
