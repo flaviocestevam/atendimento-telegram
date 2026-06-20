@@ -235,7 +235,31 @@ function ConversasPage() {
                   <Button size="sm" variant="outline"><UserCheck className="h-3 w-3 mr-1"/>Assumir</Button>
                 </div>
               </div>
-              <ScrollArea className="flex-1 p-4">
+              <div className="px-4 py-2 border-b border-border flex items-center gap-2 flex-wrap text-xs">
+                <Languages className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-muted-foreground">Idioma:</span>
+                <span className="font-medium uppercase">{leadQ.data?.preferred_language ?? "pt"}</span>
+                {leadQ.data?.language_confirmed_at ? (
+                  <span className="text-muted-foreground">· confirmado {relTime(leadQ.data.language_confirmed_at)}</span>
+                ) : (
+                  <span className="text-muted-foreground">· padrão do perfil</span>
+                )}
+                <div className="ml-auto flex items-center gap-1">
+                  <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => askLanguage("en")}>Perguntar EN</Button>
+                  <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => askLanguage("es")}>Perguntar ES</Button>
+                  <Select
+                    value={leadQ.data?.preferred_language ?? "pt"}
+                    onValueChange={(v) => setLeadLanguage(v as "pt" | "en" | "es", "manual")}
+                  >
+                    <SelectTrigger className="h-7 w-[120px] text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pt">Português</SelectItem>
+                      <SelectItem value="en">English</SelectItem>
+                      <SelectItem value="es">Español</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
                 <div className="space-y-3">
                   {(messages.data ?? []).map((m: any) => (
                     <div key={m.id} className={cn("flex", m.direction === "inbound" ? "justify-start" : "justify-end")}>
