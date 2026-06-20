@@ -12,7 +12,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { relTime, dateTimeBR, BRL } from "@/lib/format";
-import { Send, Sparkles, UserCheck, Pause, Play, Search } from "lucide-react";
+import { Send, Sparkles, UserCheck, Pause, Play, Search, Languages } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
