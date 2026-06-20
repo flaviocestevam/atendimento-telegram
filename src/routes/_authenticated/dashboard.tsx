@@ -60,22 +60,18 @@ function StatCard({
 
 function FunnelChart({ rows }: { rows: { label: string; value: number; color: string }[] }) {
   const top = rows[0]?.value || 1;
-  const W = 220;
+  const W = 240;
   const H = 220;
-  const minW = 60; // bottom width floor so tiny values still render
-  const sliceH = H / rows.length;
-  // Compute trapezoid widths per row based on value relative to top
-  const widths = rows.map(r => {
-    const ratio = Math.max(0, Math.min(1, r.value / top));
-    return Math.max(minW, W * (0.35 + 0.65 * ratio));
-  });
-  // Each slice's top width = previous bottom width (so trapezoids connect)
+  const n = rows.length;
+  const sliceH = H / n;
+  // Funil decorativo: larguras fixas, sempre afunilando — independente dos valores
+  const widthAt = (i: number) => W - (W * 0.55) * (i / n);
   return (
     <div className="flex items-center gap-6">
-      <svg viewBox={`0 0 ${W} ${H}`} className="shrink-0" style={{ width: 200, height: 200 }}>
+      <svg viewBox={`0 0 ${W} ${H}`} className="shrink-0" style={{ width: 220, height: 200 }}>
         {rows.map((r, i) => {
-          const topW = i === 0 ? W : widths[i - 1];
-          const botW = widths[i];
+          const topW = widthAt(i);
+          const botW = widthAt(i + 1);
           const y1 = i * sliceH;
           const y2 = y1 + sliceH - 2;
           const cx = W / 2;
@@ -85,7 +81,23 @@ function FunnelChart({ rows }: { rows: { label: string; value: number; color: st
             `${cx + botW / 2},${y2}`,
             `${cx - botW / 2},${y2}`,
           ].join(" ");
-          return <polygon key={i} points={points} fill={r.color} />;
+          const p = top ? (r.value / top) * 100 : 0;
+          return (
+            <g key={i}>
+              <polygon points={points} fill={r.color} />
+              <text
+                x={cx}
+                y={y1 + sliceH / 2 + 4}
+                textAnchor="middle"
+                fontSize="13"
+                fontWeight="700"
+                fill="white"
+                style={{ paintOrder: "stroke", stroke: "rgba(0,0,0,0.25)", strokeWidth: 0.5 }}
+              >
+                {p.toFixed(1)}%
+              </text>
+            </g>
+          );
         })}
       </svg>
       <div className="flex-1 space-y-3">
