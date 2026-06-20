@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { StatusBadge } from "@/components/admin/StatusBadge";
+import { BuyerTierBadge } from "@/components/admin/BuyerTierBadge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BRL, dateTimeBR } from "@/lib/format";
 import { Search } from "lucide-react";
@@ -38,7 +39,7 @@ function LeadsPage() {
     queryFn: async () => {
       let q = supabase
         .from("telegram_users")
-        .select("id,first_name,last_name,username,telegram_id,status,temperature,score_buy,total_spent,tags,last_interaction:updated_at,last_purchase_at")
+        .select("id,first_name,last_name,username,telegram_id,status,temperature,score_buy,total_spent,tags,buyer_tier,last_interaction:updated_at,last_purchase_at")
         .eq("seller_profile_id", profileId!)
         .order("updated_at", { ascending: false })
         .limit(100);
@@ -77,6 +78,7 @@ function LeadsPage() {
             <TableRow>
               <TableHead>Lead</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Tier</TableHead>
               <TableHead>Temperatura</TableHead>
               <TableHead className="text-right">Score</TableHead>
               <TableHead className="text-right">Total gasto</TableHead>
@@ -94,6 +96,7 @@ function LeadsPage() {
                   </Link>
                 </TableCell>
                 <TableCell><StatusBadge status={l.status} /></TableCell>
+                <TableCell><BuyerTierBadge tier={l.buyer_tier} /></TableCell>
                 <TableCell><StatusBadge status={l.temperature} /></TableCell>
                 <TableCell className="text-right font-mono">{l.score_buy ?? 0}</TableCell>
                 <TableCell className="text-right">{BRL((l.total_spent ?? 0) * 100)}</TableCell>
@@ -102,7 +105,7 @@ function LeadsPage() {
               </TableRow>
             ))}
             {!leads.isLoading && (leads.data?.length ?? 0) === 0 && (
-              <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">Nenhum lead ainda.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">Nenhum lead ainda.</TableCell></TableRow>
             )}
           </TableBody>
         </Table>
