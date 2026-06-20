@@ -260,6 +260,7 @@ function ConversasPage() {
                   </Select>
                 </div>
               </div>
+              <ScrollArea className="flex-1 p-4">
                 <div className="space-y-3">
                   {(messages.data ?? []).map((m: any) => (
                     <div key={m.id} className={cn("flex", m.direction === "inbound" ? "justify-start" : "justify-end")}>
