@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useActiveProfile } from "@/lib/active-profile";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -18,25 +19,31 @@ export const Route = createFileRoute("/_authenticated/assinantes")({
 });
 
 function Assinantes() {
+  const { profileId } = useActiveProfile();
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
 
   const q = useQuery({
-    queryKey: ["assinantes", filter, search],
+    enabled: !!profileId,
+    queryKey: ["assinantes", profileId, filter, search],
     queryFn: async () => {
+      const sp = profileId!;
       const { data: users } = await supabase
         .from("telegram_users")
         .select("*")
+        .eq("seller_profile_id", sp)
         .order("created_at", { ascending: false });
 
       const { data: grants } = await supabase
         .from("access_grants")
         .select("telegram_user_id,expires_at,status,plans(name)")
+        .eq("seller_profile_id", sp)
         .eq("status", "active");
 
       const { data: orders } = await supabase
         .from("orders")
-        .select("telegram_user_id,amount_cents,status,paid_at");
+        .select("telegram_user_id,amount_cents,status,paid_at")
+        .eq("seller_profile_id", sp);
 
       const list = (users ?? []).map((u: any) => {
         const g = (grants ?? []).find((g: any) => g.telegram_user_id === u.id);

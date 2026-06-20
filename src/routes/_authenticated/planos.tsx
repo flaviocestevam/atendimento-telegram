@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useActiveProfile } from "@/lib/active-profile";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,16 +34,19 @@ const empty: Form = { name: "", description: "", price_reais: "", duration_days:
 
 function Planos() {
   const qc = useQueryClient();
+  const { profileId } = useActiveProfile();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<Form>(empty);
 
   const plans = useQuery({
-    queryKey: ["plans"],
-    queryFn: async () => (await supabase.from("plans").select("*,telegram_groups(name)").order("price_cents")).data ?? [],
+    enabled: !!profileId,
+    queryKey: ["plans", profileId],
+    queryFn: async () => (await supabase.from("plans").select("*,telegram_groups(name)").eq("seller_profile_id", profileId!).order("price_cents")).data ?? [],
   });
   const groups = useQuery({
-    queryKey: ["telegram_groups-min"],
-    queryFn: async () => (await supabase.from("telegram_groups").select("id,name,type")).data ?? [],
+    enabled: !!profileId,
+    queryKey: ["telegram_groups-min", profileId],
+    queryFn: async () => (await supabase.from("telegram_groups").select("id,name,type").eq("seller_profile_id", profileId!)).data ?? [],
   });
 
   function openNew() { setForm(empty); setOpen(true); }
@@ -57,6 +61,7 @@ function Planos() {
   }
 
   async function save() {
+    if (!profileId) return toast.error("Selecione um perfil");
     const payload = {
       name: form.name,
       description: form.description || null,
@@ -68,8 +73,8 @@ function Planos() {
       is_active: form.is_active,
     };
     const res = form.id
-      ? await supabase.from("plans").update(payload).eq("id", form.id)
-      : await supabase.from("plans").insert(payload);
+      ? await supabase.from("plans").update(payload).eq("id", form.id).eq("seller_profile_id", profileId)
+      : await supabase.from("plans").insert({ ...payload, seller_profile_id: profileId });
     if (res.error) return toast.error(res.error.message);
     toast.success(form.id ? "Plano atualizado" : "Plano criado");
     setOpen(false);
@@ -78,7 +83,7 @@ function Planos() {
 
   async function remove(id: string) {
     if (!confirm("Excluir este plano?")) return;
-    const { error } = await supabase.from("plans").delete().eq("id", id);
+    const { error } = await supabase.from("plans").delete().eq("id", id).eq("seller_profile_id", profileId!);
     if (error) return toast.error(error.message);
     toast.success("Plano excluído");
     qc.invalidateQueries({ queryKey: ["plans"] });

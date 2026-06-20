@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useActiveProfile } from "@/lib/active-profile";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +31,7 @@ const filters = [
 ];
 
 function ConversasPage() {
+  const { profileId } = useActiveProfile();
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -37,11 +39,13 @@ function ConversasPage() {
   const qc = useQueryClient();
 
   const convs = useQuery({
-    queryKey: ["conversations", filter, search],
+    enabled: !!profileId,
+    queryKey: ["conversations", profileId, filter, search],
     queryFn: async () => {
       let q = supabase
         .from("conversations")
         .select("id,status,ai_enabled,last_message_at,telegram_user_id,telegram_users(id,first_name,last_name,username,telegram_id,is_blocked)")
+        .eq("seller_profile_id", profileId!)
         .order("last_message_at", { ascending: false, nullsFirst: false })
         .limit(50);
       if (filter === "pending") q = q.eq("status", "pending");
@@ -75,13 +79,13 @@ function ConversasPage() {
   });
 
   const userStats = useQuery({
-    enabled: !!selected?.telegram_user_id,
-    queryKey: ["user-stats", selected?.telegram_user_id],
+    enabled: !!selected?.telegram_user_id && !!profileId,
+    queryKey: ["user-stats", profileId, selected?.telegram_user_id],
     queryFn: async () => {
       const uid = selected!.telegram_user_id as string;
       const [orders, grant] = await Promise.all([
-        supabase.from("orders").select("amount_cents,status,paid_at").eq("telegram_user_id", uid),
-        supabase.from("access_grants").select("*,plans(name)").eq("telegram_user_id", uid).eq("status", "active").order("expires_at", { ascending: false }).limit(1).maybeSingle(),
+        supabase.from("orders").select("amount_cents,status,paid_at").eq("seller_profile_id", profileId!).eq("telegram_user_id", uid),
+        supabase.from("access_grants").select("*,plans(name)").eq("seller_profile_id", profileId!).eq("telegram_user_id", uid).eq("status", "active").order("expires_at", { ascending: false }).limit(1).maybeSingle(),
       ]);
       const totalPago = (orders.data ?? []).filter(o => o.status === "paid").reduce((s, o) => s + o.amount_cents, 0);
       const ultimo = (orders.data ?? []).filter(o => !!o.paid_at).sort((a, b) => +new Date(b.paid_at as string) - +new Date(a.paid_at as string))[0];
@@ -90,8 +94,9 @@ function ConversasPage() {
   });
 
   async function sendReply() {
-    if (!reply.trim() || !selected) return;
+    if (!reply.trim() || !selected || !profileId) return;
     const { error } = await supabase.from("messages").insert({
+      seller_profile_id: profileId,
       conversation_id: selected.id,
       telegram_user_id: selected.telegram_user_id,
       direction: "outbound",
