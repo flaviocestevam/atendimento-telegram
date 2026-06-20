@@ -1,87 +1,93 @@
 import { createServerFn } from "@tanstack/react-start";
 
-// Verifica se o Grok está habilitado e configurado.
-// Retorna { available, reason } — todo fluxo de IA passa por aqui antes de chamar.
-export const grokStatus = createServerFn({ method: "GET" }).handler(async () => {
-  const hasKey = !!process.env.XAI_API_KEY;
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: ai } = await supabaseAdmin
-    .from("ai_settings")
-    .select("grok_global_mode")
-    .limit(1)
-    .maybeSingle();
-  const mode = (ai?.grok_global_mode as string | undefined) ?? "off";
-  const enabled = mode !== "off";
-  return {
-    available: hasKey && enabled,
-    hasKey,
-    enabled,
-    mode,
-    model: process.env.XAI_MODEL ?? "grok-4-latest",
-  };
-});
-
-// Teste rápido: faz uma chamada mínima ao endpoint da xAI e retorna o texto.
-export const pingGrok = createServerFn({ method: "POST" }).handler(async () => {
-  const xaiKey = process.env.XAI_API_KEY;
-  if (!xaiKey) return { ok: false, error: "missing_XAI_API_KEY" };
-  const model = process.env.XAI_MODEL ?? "grok-4-latest";
-  try {
-    const r = await fetch("https://api.x.ai/v1/chat/completions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${xaiKey}` },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: "system", content: "Responda em uma frase curta em português." },
-          { role: "user", content: "Diga 'ok' e a data de hoje." },
-        ],
-        temperature: 0.2,
-      }),
-    });
-    const raw = await r.text();
-    let json: any = null;
-    try { json = JSON.parse(raw); } catch { /* keep raw */ }
-    if (!r.ok) {
-      const msg = json?.error?.message ?? json?.error ?? raw ?? `http_${r.status}`;
-      return { ok: false, error: `HTTP ${r.status}: ${typeof msg === "string" ? msg : JSON.stringify(msg)}`, model };
-    }
-    const text = json?.choices?.[0]?.message?.content ?? "";
-    return { ok: true, text, model };
-  } catch (err: any) {
-    return { ok: false, error: err?.message ?? "grok_ping_exception" };
+// Lê configuração Grok do perfil (se houver) e mescla com fallback de env.
+async function resolveGrokConfig(sellerProfileId?: string | null) {
+  let perProfile: any = null;
+  if (sellerProfileId) {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("seller_grok_settings")
+      .select("xai_api_key, model, global_mode, enable_ai")
+      .eq("seller_profile_id", sellerProfileId)
+      .maybeSingle();
+    perProfile = data;
   }
-});
+  const xaiKey = perProfile?.xai_api_key || process.env.XAI_API_KEY || null;
+  const model = perProfile?.model || process.env.XAI_MODEL || "grok-4-latest";
+  const mode = (perProfile?.global_mode as string | undefined) ?? "off";
+  const enableAi = !!perProfile?.enable_ai;
+  const enabled = enableAi && mode !== "off";
+  return { xaiKey, model, mode, enableAi, enabled, perProfile };
+}
 
-// Chamada principal ao Grok (modo automático ou sugestão).
-// Retorna texto + flags de segurança. NÃO envia nada por conta própria.
+export const grokStatus = createServerFn({ method: "POST" })
+  .inputValidator((input: { sellerProfileId?: string | null } | undefined) => input ?? {})
+  .handler(async ({ data }) => {
+    const cfg = await resolveGrokConfig(data?.sellerProfileId);
+    return {
+      available: !!cfg.xaiKey && cfg.enabled,
+      hasKey: !!cfg.xaiKey,
+      enabled: cfg.enabled,
+      mode: cfg.mode,
+      model: cfg.model,
+      enableAi: cfg.enableAi,
+      perProfileConfigured: !!cfg.perProfile?.xai_api_key,
+    };
+  });
+
+export const pingGrok = createServerFn({ method: "POST" })
+  .inputValidator((input: { sellerProfileId?: string | null } | undefined) => input ?? {})
+  .handler(async ({ data }) => {
+    const cfg = await resolveGrokConfig(data?.sellerProfileId);
+    if (!cfg.xaiKey) return { ok: false, error: "missing_xai_api_key" };
+    try {
+      const r = await fetch("https://api.x.ai/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${cfg.xaiKey}` },
+        body: JSON.stringify({
+          model: cfg.model,
+          messages: [
+            { role: "system", content: "Responda em uma frase curta em português." },
+            { role: "user", content: "Diga 'ok' e a data de hoje." },
+          ],
+          temperature: 0.2,
+        }),
+      });
+      const raw = await r.text();
+      let json: any = null;
+      try { json = JSON.parse(raw); } catch { /* keep raw */ }
+      if (!r.ok) {
+        const msg = json?.error?.message ?? json?.error ?? raw ?? `http_${r.status}`;
+        return { ok: false, error: `HTTP ${r.status}: ${typeof msg === "string" ? msg : JSON.stringify(msg)}`, model: cfg.model };
+      }
+      const text = json?.choices?.[0]?.message?.content ?? "";
+      return { ok: true, text, model: cfg.model };
+    } catch (err: any) {
+      return { ok: false, error: err?.message ?? "grok_ping_exception" };
+    }
+  });
+
+// Chamada principal (auto/sugestão) — agora resolve config a partir do seller da conversa.
 export const callGrok = createServerFn({ method: "POST" })
   .inputValidator((input: {
     conversationId: string;
     mode: "suggest" | "auto";
   }) => input)
   .handler(async ({ data }) => {
-    const xaiKey = process.env.XAI_API_KEY;
-    const { supabaseAdmin: _adminCheck } = await import("@/integrations/supabase/client.server");
-    const { data: aiCheck } = await _adminCheck
-      .from("ai_settings")
-      .select("grok_global_mode")
-      .limit(1)
-      .maybeSingle();
-    const enabled = ((aiCheck?.grok_global_mode as string | undefined) ?? "off") !== "off";
-    if (!xaiKey || !enabled) {
-      return { ok: false, error: "grok_disabled", available: false };
-    }
-
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    // Contexto mínimo: últimas 15 mensagens + perfil do vendedor + memórias do lead
     const { data: conv } = await supabaseAdmin
       .from("conversations")
       .select("*, leads(*), telegram_users(*)")
       .eq("id", data.conversationId)
       .maybeSingle();
     if (!conv) return { ok: false, error: "conversation_not_found" };
+
+    const sellerId = (conv as any).seller_profile_id;
+    const cfg = await resolveGrokConfig(sellerId);
+    if (!cfg.xaiKey || !cfg.enabled) {
+      return { ok: false, error: "grok_disabled", available: false };
+    }
 
     const { data: messages } = await supabaseAdmin
       .from("messages")
@@ -93,7 +99,7 @@ export const callGrok = createServerFn({ method: "POST" })
     const { data: profile } = await supabaseAdmin
       .from("seller_profiles")
       .select("*")
-      .eq("id", (conv as any).seller_profile_id)
+      .eq("id", sellerId)
       .maybeSingle();
 
     const { data: memories } = await supabaseAdmin
@@ -103,9 +109,7 @@ export const callGrok = createServerFn({ method: "POST" })
       .eq("is_active", true)
       .limit(20);
 
-    // === Banco de Histórias: escolhe uma ainda não usada com este lead ===
     const telegramUserId = (conv as any).telegram_user_id ?? (conv as any).telegram_users?.id ?? null;
-    const sellerId = (conv as any).seller_profile_id;
     let chosenStory: { id: string; name: string; text: string; variation: number } | null = null;
 
     if (telegramUserId && sellerId) {
@@ -139,6 +143,7 @@ export const callGrok = createServerFn({ method: "POST" })
     }
 
     const systemPrompt = [
+      cfg.perProfile?.system_prompt || "",
       `Você é ${(profile as any)?.display_name ?? "o vendedor"}.`,
       `Tom: ${(profile as any)?.tone_of_voice ?? "casual"}.`,
       `Estilo: ${(profile as any)?.communication_style ?? "amigável e direto"}.`,
@@ -161,10 +166,10 @@ export const callGrok = createServerFn({ method: "POST" })
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${xaiKey}`,
+          Authorization: `Bearer ${cfg.xaiKey}`,
         },
         body: JSON.stringify({
-          model: process.env.XAI_MODEL ?? "grok-2-latest",
+          model: cfg.model,
           messages: [{ role: "system", content: systemPrompt }, ...history],
           temperature: 0.7,
         }),
@@ -174,8 +179,6 @@ export const callGrok = createServerFn({ method: "POST" })
 
       const text = json.choices?.[0]?.message?.content ?? "";
 
-      // Se a IA realmente incorporou a história sugerida, registra como usada.
-      // Heurística: pega ~6 palavras significativas da história e procura overlap no texto.
       let storyUsed: { id: string; name: string; variation: number } | null = null;
       if (chosenStory && text && telegramUserId) {
         const norm = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, "");

@@ -78,12 +78,14 @@ export const createCaktoCheckout = createServerFn({ method: "POST" })
     return { ok: true, orderId: order.id, paymentId: payment?.id, checkoutUrl, item };
   });
 
-// Botão "Evento de teste" na tela de Configurações.
+// Botão "Evento de teste" — agora cria evento vinculado ao perfil ativo.
 export const sendCaktoTestEvent = createServerFn({ method: "POST" })
-  .handler(async () => {
+  .inputValidator((input: { sellerProfileId?: string | null } | undefined) => input ?? {})
+  .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const fakeId = `test_${Date.now()}`;
     await supabaseAdmin.from("cakto_events").insert({
+      seller_profile_id: data?.sellerProfileId ?? null,
       payload: { test: true, status: "approved", payment_id: fakeId, amount: 29.9 },
       buyer_email: "teste@exemplo.com",
       amount: 29.9,
