@@ -112,7 +112,7 @@ export const testTelegramBot = createServerFn({ method: "POST" })
     // Atualiza status do bot por perfil quando aplicável
     if (data?.sellerProfileId) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const patch: Record<string, any> = result.ok
+      const patch = result.ok
         ? {
             status: "active",
             last_error: null,
@@ -120,7 +120,7 @@ export const testTelegramBot = createServerFn({ method: "POST" })
             bot_username: (result as any).data?.result?.username ?? null,
           }
         : { status: "error", last_error: (result as any).error ?? "test_failed" };
-      await supabaseAdmin.from("seller_bots").update(patch).eq("seller_profile_id", data.sellerProfileId);
+      await supabaseAdmin.from("seller_bots").update(patch as any).eq("seller_profile_id", data.sellerProfileId);
     }
     return result;
   });
