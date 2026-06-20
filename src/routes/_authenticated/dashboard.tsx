@@ -162,7 +162,7 @@ function Dashboard() {
         applyScope(supabase.from("orders").select("id", { count: "exact", head: true }).eq("item_type", "content").eq("status", "paid").gte("paid_at", last30ISO)),
         applyScope(supabase.from("orders").select("id", { count: "exact", head: true }).eq("item_type", "content").eq("status", "paid").gte("paid_at", prev30ISO).lt("paid_at", last30ISO)),
         applyScope(supabase.from("leads").select("id", { count: "exact", head: true })),
-        applyScope(supabase.from("leads").select("id", { count: "exact", head: true }).not("last_message_at", "is", null)),
+        applyScope(supabase.from("leads").select("id", { count: "exact", head: true }).not("last_interaction_at", "is", null)),
         applyScope(supabase.from("access_grants").select("id", { count: "exact", head: true }).eq("status", "active")),
         applyScope(supabase.from("orders").select("id", { count: "exact", head: true }).eq("status", "paid")),
       ]);
