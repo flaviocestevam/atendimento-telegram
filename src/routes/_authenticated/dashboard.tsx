@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { StatusBadge } from "@/components/admin/StatusBadge";
+import { IntegrationStatusCard } from "@/components/admin/IntegrationStatusCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BRL, BRLCompact, relTime } from "@/lib/format";
 import {
@@ -275,6 +276,8 @@ function Dashboard() {
           </div>
         }
       />
+
+      {sp && <IntegrationStatusCard profileId={sp} />}
 
       {/* Top stat row — 6 cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
