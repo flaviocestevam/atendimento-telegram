@@ -316,9 +316,12 @@ function ConversasPage() {
                 <div className="flex items-start gap-2 p-3 rounded-lg bg-primary/10 border border-primary/20">
                   <Sparkles className="h-4 w-4 text-primary mt-0.5"/>
                   <div className="flex-1 text-xs">
-                    <p className="font-medium text-primary">Sugestão da IA</p>
-                    <p className="text-muted-foreground">Conecte a xAI/Grok em Configurações para gerar sugestões em tempo real.</p>
+                    <p className="font-medium text-primary">Sugestão da IA (Grok)</p>
+                    <p className="text-muted-foreground">Gera resposta usando ficha da influenciadora, memórias do lead e histórias ainda não usadas.</p>
                   </div>
+                  <Button size="sm" variant="outline" onClick={suggestWithGrok} disabled={grokLoading}>
+                    {grokLoading ? "Gerando..." : "Sugerir"}
+                  </Button>
                 </div>
                 <div className="flex gap-2">
                   <Textarea
