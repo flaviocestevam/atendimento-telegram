@@ -32,6 +32,7 @@ const labels: Record<string, string> = {
   historias: "Histórias",
   "respostas-rapidas": "Respostas rápidas",
   "perfil-vendedor": "Perfil do vendedor",
+  perfis: "Perfis / Vendedores",
   configuracoes: "Configurações",
 };
 
