@@ -39,7 +39,9 @@ function ConversasPage() {
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [reply, setReply] = useState("");
-  const qc = useQueryClient();
+  const callGrokFn = useServerFn(callGrok);
+  const [grokLoading, setGrokLoading] = useState(false);
+
 
   const convs = useQuery({
     enabled: !!profileId,
