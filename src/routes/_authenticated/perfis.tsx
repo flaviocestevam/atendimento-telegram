@@ -117,53 +117,58 @@ function PerfisPage() {
         title="Perfis / Vendedores"
         subtitle="Cada perfil tem seu próprio bot, Cakto, IA, planos, leads e configurações."
         actions={
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button><Plus className="h-4 w-4 mr-2" />Novo perfil</Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg">
-              <DialogHeader>
-                <DialogTitle>Criar novo perfil</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-3">
-                <div>
-                  <Label>Nome de exibição *</Label>
-                  <Input value={form.display_name} onChange={(e) => setForm({ ...form, display_name: e.target.value })} placeholder="Ex: Lara" />
-                </div>
-                <div>
-                  <Label>Username</Label>
-                  <Input value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} placeholder="lara_oficial" />
-                </div>
-                <div>
-                  <Label>Avatar URL</Label>
-                  <Input value={form.avatar_url} onChange={(e) => setForm({ ...form, avatar_url: e.target.value })} placeholder="https://..." />
-                </div>
-                <div>
-                  <Label>Bio curta</Label>
-                  <Textarea rows={2} value={form.short_bio} onChange={(e) => setForm({ ...form, short_bio: e.target.value })} />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
+          <div className="flex gap-2">
+            <Button asChild>
+              <a href="/perfis/novo"><Plus className="h-4 w-4 mr-2" />Nova vendedora (wizard)</a>
+            </Button>
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline">Criar rápido</Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>Criar novo perfil</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-3">
                   <div>
-                    <Label>Moeda</Label>
-                    <Input value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} />
+                    <Label>Nome de exibição *</Label>
+                    <Input value={form.display_name} onChange={(e) => setForm({ ...form, display_name: e.target.value })} placeholder="Ex: Lara" />
                   </div>
                   <div>
-                    <Label>Timezone</Label>
-                    <Input value={form.timezone} onChange={(e) => setForm({ ...form, timezone: e.target.value })} />
+                    <Label>Username</Label>
+                    <Input value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} placeholder="lara_oficial" />
                   </div>
+                  <div>
+                    <Label>Avatar URL</Label>
+                    <Input value={form.avatar_url} onChange={(e) => setForm({ ...form, avatar_url: e.target.value })} placeholder="https://..." />
+                  </div>
+                  <div>
+                    <Label>Bio curta</Label>
+                    <Textarea rows={2} value={form.short_bio} onChange={(e) => setForm({ ...form, short_bio: e.target.value })} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label>Moeda</Label>
+                      <Input value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Timezone</Label>
+                      <Input value={form.timezone} onChange={(e) => setForm({ ...form, timezone: e.target.value })} />
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    O bot do Telegram, Cakto, voz e IA são configurados depois em <strong>Configurações</strong> com este perfil ativo.
+                  </p>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  O bot do Telegram, Cakto, voz e IA são configurados depois em <strong>Configurações</strong> com este perfil ativo.
-                </p>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                <Button onClick={() => create.mutate()} disabled={create.isPending}>
-                  {create.isPending ? "Criando..." : "Criar perfil"}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+                  <Button onClick={() => create.mutate()} disabled={create.isPending}>
+                    {create.isPending ? "Criando..." : "Criar perfil"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
         }
       />
 
