@@ -45,7 +45,7 @@ function StatCard({
           <Icon className="h-4 w-4 text-primary-foreground" />
         </div>
       </div>
-      <p className="relative mt-2 font-bold tabular-nums leading-tight text-[clamp(1.1rem,2.2vw,1.6rem)] break-words">
+      <p className="relative mt-2 font-bold tabular-nums leading-tight text-[clamp(1rem,1.7vw,1.5rem)] whitespace-nowrap overflow-hidden text-ellipsis">
         {value}
       </p>
       {showDelta && (
