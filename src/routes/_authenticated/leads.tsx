@@ -39,7 +39,7 @@ function LeadsPage() {
     queryFn: async () => {
       let q = supabase
         .from("telegram_users")
-        .select("id,first_name,last_name,username,telegram_id,status,temperature,score_buy,total_spent,tags,last_interaction:updated_at,last_purchase_at")
+        .select("id,first_name,last_name,username,telegram_id,status,temperature,score_buy,total_spent,tags,buyer_tier,last_interaction:updated_at,last_purchase_at")
         .eq("seller_profile_id", profileId!)
         .order("updated_at", { ascending: false })
         .limit(100);
