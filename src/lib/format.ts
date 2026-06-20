@@ -1,6 +1,15 @@
 export const BRL = (cents: number | null | undefined) =>
   ((cents ?? 0) / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
+// Versão compacta para KPIs (sem centavos, abreviado em mil/mi)
+export const BRLCompact = (cents: number | null | undefined) => {
+  const v = (cents ?? 0) / 100;
+  const abs = Math.abs(v);
+  if (abs >= 1_000_000) return `R$ ${(v / 1_000_000).toLocaleString("pt-BR", { maximumFractionDigits: 2 })} mi`;
+  if (abs >= 10_000) return `R$ ${(v / 1_000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} mil`;
+  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+};
+
 export const dateBR = (d: string | Date | null | undefined) => {
   if (!d) return "—";
   const dt = typeof d === "string" ? new Date(d) : d;
