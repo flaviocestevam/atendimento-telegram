@@ -108,13 +108,14 @@ function FunnelChart({ rows }: { rows: { label: string; value: number; color: st
 
 
 function Dashboard() {
-  const { profileId, profiles } = useActiveProfile();
-  const [scope, setScope] = useState<"all" | "single">("all");
-  const sp = scope === "single" ? profileId : null;
-  const scopeKey = scope === "single" ? profileId ?? "none" : "all";
+  const { profiles } = useActiveProfile();
+  const [scope, setScope] = useState<string>("all"); // "all" | profileId
+  const sp = scope === "all" ? null : scope;
+  const scopeKey = scope;
 
   const applyScope = <T extends { eq: (k: string, v: any) => T }>(q: T) =>
     sp ? q.eq("seller_profile_id", sp) : q;
+
 
   const stats = useQuery({
     queryKey: ["dashboard-stats", scopeKey],
