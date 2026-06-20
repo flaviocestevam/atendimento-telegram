@@ -188,7 +188,7 @@ function Dashboard() {
     queryKey: ["ai-today", scopeKey],
     queryFn: async () => {
       let q = supabase.from("messages").select("id", { count: "exact", head: true })
-        .eq("from_bot", true).gte("created_at", startOfToday().toISOString());
+        .eq("direction", "outbound").gte("created_at", startOfToday().toISOString());
       if (sp) q = q.eq("seller_profile_id", sp);
       const { count } = await q;
       return { atendidas: count ?? 0 };
