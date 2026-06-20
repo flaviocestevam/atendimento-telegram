@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRespostasRapidasRouteImport } from './routes/_authenticated/respostas-rapidas'
 import { Route as AuthenticatedPlanosRouteImport } from './routes/_authenticated/planos'
+import { Route as AuthenticatedPerfisRouteImport } from './routes/_authenticated/perfis'
 import { Route as AuthenticatedPerfilVendedorRouteImport } from './routes/_authenticated/perfil-vendedor'
 import { Route as AuthenticatedPagamentosRouteImport } from './routes/_authenticated/pagamentos'
 import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
@@ -53,6 +54,11 @@ const AuthenticatedRespostasRapidasRoute =
 const AuthenticatedPlanosRoute = AuthenticatedPlanosRouteImport.update({
   id: '/planos',
   path: '/planos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPerfisRoute = AuthenticatedPerfisRouteImport.update({
+  id: '/perfis',
+  path: '/perfis',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPerfilVendedorRoute =
@@ -150,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/leads': typeof AuthenticatedLeadsRoute
   '/pagamentos': typeof AuthenticatedPagamentosRoute
   '/perfil-vendedor': typeof AuthenticatedPerfilVendedorRoute
+  '/perfis': typeof AuthenticatedPerfisRoute
   '/planos': typeof AuthenticatedPlanosRoute
   '/respostas-rapidas': typeof AuthenticatedRespostasRapidasRoute
   '/api/public/cakto/webhook': typeof ApiPublicCaktoWebhookRoute
@@ -171,6 +178,7 @@ export interface FileRoutesByTo {
   '/leads': typeof AuthenticatedLeadsRoute
   '/pagamentos': typeof AuthenticatedPagamentosRoute
   '/perfil-vendedor': typeof AuthenticatedPerfilVendedorRoute
+  '/perfis': typeof AuthenticatedPerfisRoute
   '/planos': typeof AuthenticatedPlanosRoute
   '/respostas-rapidas': typeof AuthenticatedRespostasRapidasRoute
   '/api/public/cakto/webhook': typeof ApiPublicCaktoWebhookRoute
@@ -194,6 +202,7 @@ export interface FileRoutesById {
   '/_authenticated/leads': typeof AuthenticatedLeadsRoute
   '/_authenticated/pagamentos': typeof AuthenticatedPagamentosRoute
   '/_authenticated/perfil-vendedor': typeof AuthenticatedPerfilVendedorRoute
+  '/_authenticated/perfis': typeof AuthenticatedPerfisRoute
   '/_authenticated/planos': typeof AuthenticatedPlanosRoute
   '/_authenticated/respostas-rapidas': typeof AuthenticatedRespostasRapidasRoute
   '/api/public/cakto/webhook': typeof ApiPublicCaktoWebhookRoute
@@ -217,6 +226,7 @@ export interface FileRouteTypes {
     | '/leads'
     | '/pagamentos'
     | '/perfil-vendedor'
+    | '/perfis'
     | '/planos'
     | '/respostas-rapidas'
     | '/api/public/cakto/webhook'
@@ -238,6 +248,7 @@ export interface FileRouteTypes {
     | '/leads'
     | '/pagamentos'
     | '/perfil-vendedor'
+    | '/perfis'
     | '/planos'
     | '/respostas-rapidas'
     | '/api/public/cakto/webhook'
@@ -260,6 +271,7 @@ export interface FileRouteTypes {
     | '/_authenticated/leads'
     | '/_authenticated/pagamentos'
     | '/_authenticated/perfil-vendedor'
+    | '/_authenticated/perfis'
     | '/_authenticated/planos'
     | '/_authenticated/respostas-rapidas'
     | '/api/public/cakto/webhook'
@@ -309,6 +321,13 @@ declare module '@tanstack/react-router' {
       path: '/planos'
       fullPath: '/planos'
       preLoaderRoute: typeof AuthenticatedPlanosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/perfis': {
+      id: '/_authenticated/perfis'
+      path: '/perfis'
+      fullPath: '/perfis'
+      preLoaderRoute: typeof AuthenticatedPerfisRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/perfil-vendedor': {
@@ -433,6 +452,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedLeadsRoute: typeof AuthenticatedLeadsRoute
   AuthenticatedPagamentosRoute: typeof AuthenticatedPagamentosRoute
   AuthenticatedPerfilVendedorRoute: typeof AuthenticatedPerfilVendedorRoute
+  AuthenticatedPerfisRoute: typeof AuthenticatedPerfisRoute
   AuthenticatedPlanosRoute: typeof AuthenticatedPlanosRoute
   AuthenticatedRespostasRapidasRoute: typeof AuthenticatedRespostasRapidasRoute
 }
@@ -451,6 +471,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedLeadsRoute: AuthenticatedLeadsRoute,
   AuthenticatedPagamentosRoute: AuthenticatedPagamentosRoute,
   AuthenticatedPerfilVendedorRoute: AuthenticatedPerfilVendedorRoute,
+  AuthenticatedPerfisRoute: AuthenticatedPerfisRoute,
   AuthenticatedPlanosRoute: AuthenticatedPlanosRoute,
   AuthenticatedRespostasRapidasRoute: AuthenticatedRespostasRapidasRoute,
 }

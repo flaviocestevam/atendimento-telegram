@@ -3,9 +3,11 @@ import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
   DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Check, UserCircle } from "lucide-react";
+import { ChevronDown, Check, UserCircle, Plus, Settings2 } from "lucide-react";
+import { useRouter } from "@tanstack/react-router";
 
 export function ProfileSelector() {
+  const router = useRouter();
   const { profile, profiles, setProfileId, loading } = useActiveProfile();
 
   return (
@@ -48,11 +50,11 @@ export function ProfileSelector() {
           </DropdownMenuItem>
         ))}
         <DropdownMenuSeparator />
-        <DropdownMenuItem disabled className="text-xs text-muted-foreground">
-          + Novo perfil (em breve)
+        <DropdownMenuItem onClick={() => router.navigate({ to: "/perfis" })} className="text-xs cursor-pointer">
+          <Plus className="h-3.5 w-3.5 mr-2" />Novo perfil
         </DropdownMenuItem>
-        <DropdownMenuItem disabled className="text-xs text-muted-foreground">
-          Gerenciar perfis (em breve)
+        <DropdownMenuItem onClick={() => router.navigate({ to: "/perfis" })} className="text-xs cursor-pointer">
+          <Settings2 className="h-3.5 w-3.5 mr-2" />Gerenciar perfis
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
