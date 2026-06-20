@@ -96,6 +96,7 @@ function LeadsPage() {
                   </Link>
                 </TableCell>
                 <TableCell><StatusBadge status={l.status} /></TableCell>
+                <TableCell><BuyerTierBadge tier={l.buyer_tier} /></TableCell>
                 <TableCell><StatusBadge status={l.temperature} /></TableCell>
                 <TableCell className="text-right font-mono">{l.score_buy ?? 0}</TableCell>
                 <TableCell className="text-right">{BRL((l.total_spent ?? 0) * 100)}</TableCell>
