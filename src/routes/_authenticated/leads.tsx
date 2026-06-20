@@ -105,7 +105,7 @@ function LeadsPage() {
               </TableRow>
             ))}
             {!leads.isLoading && (leads.data?.length ?? 0) === 0 && (
-              <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">Nenhum lead ainda.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">Nenhum lead ainda.</TableCell></TableRow>
             )}
           </TableBody>
         </Table>
