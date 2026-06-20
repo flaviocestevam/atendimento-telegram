@@ -108,13 +108,14 @@ function FunnelChart({ rows }: { rows: { label: string; value: number; color: st
 
 
 function Dashboard() {
-  const { profileId, profiles } = useActiveProfile();
-  const [scope, setScope] = useState<"all" | "single">("all");
-  const sp = scope === "single" ? profileId : null;
-  const scopeKey = scope === "single" ? profileId ?? "none" : "all";
+  const { profiles } = useActiveProfile();
+  const [scope, setScope] = useState<string>("all"); // "all" | profileId
+  const sp = scope === "all" ? null : scope;
+  const scopeKey = scope;
 
   const applyScope = <T extends { eq: (k: string, v: any) => T }>(q: T) =>
     sp ? q.eq("seller_profile_id", sp) : q;
+
 
   const stats = useQuery({
     queryKey: ["dashboard-stats", scopeKey],
@@ -236,15 +237,17 @@ function Dashboard() {
         subtitle="Visão geral do desempenho do seu bot no Telegram."
         actions={
           <div className="flex items-center gap-2">
-            <Select value={scope} onValueChange={(v) => setScope(v as any)}>
-              <SelectTrigger className="w-[200px]">
+            <Select value={scope} onValueChange={setScope}>
+              <SelectTrigger className="w-[220px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os perfis ({profiles?.length ?? 0})</SelectItem>
-                <SelectItem value="single" disabled={!profileId}>
-                  Perfil ativo apenas
-                </SelectItem>
+                {(profiles ?? []).map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.display_name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <Button asChild><Link to="/ia"><Bot className="h-4 w-4 mr-1"/>Configurar IA</Link></Button>
