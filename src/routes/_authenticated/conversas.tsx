@@ -94,6 +94,56 @@ function ConversasPage() {
     },
   });
 
+  const leadQ = useQuery({
+    enabled: !!selected?.telegram_user_id && !!profileId,
+    queryKey: ["lead-lang", profileId, selected?.telegram_user_id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("leads")
+        .select("id,preferred_language,language_confirmed_at,language_detection_source")
+        .eq("seller_profile_id", profileId!)
+        .eq("telegram_user_id", selected!.telegram_user_id as string)
+        .maybeSingle();
+      return data;
+    },
+  });
+
+  async function setLeadLanguage(lang: "pt" | "en" | "es", source: "manual" | "confirmed" = "manual") {
+    if (!leadQ.data?.id) return toast.error("Lead não encontrado para este usuário");
+    const { error } = await supabase
+      .from("leads")
+      .update({
+        preferred_language: lang,
+        language_confirmed_at: new Date().toISOString(),
+        language_detection_source: source,
+      })
+      .eq("id", leadQ.data.id);
+    if (error) return toast.error(error.message);
+    toast.success(`Idioma definido: ${lang.toUpperCase()}`);
+    qc.invalidateQueries({ queryKey: ["lead-lang", profileId, selected?.telegram_user_id] });
+  }
+
+  async function askLanguage(lang: "en" | "es") {
+    if (!selected || !profileId) return;
+    const text = lang === "en"
+      ? "I noticed you wrote in English. Would you like me to continue our conversation in English?"
+      : "Vi que escribiste en español. ¿Prefieres que siga conversando contigo en español?";
+    const { error } = await supabase.from("messages").insert({
+      seller_profile_id: profileId,
+      conversation_id: selected.id,
+      telegram_user_id: selected.telegram_user_id,
+      direction: "outbound",
+      sender_type: "admin",
+      sender: "admin",
+      kind: "text",
+      text,
+    });
+    if (error) return toast.error(error.message);
+    await supabase.from("conversations").update({ last_message_at: new Date().toISOString() }).eq("id", selected.id);
+    qc.invalidateQueries({ queryKey: ["messages", selected.id] });
+    toast.success("Pergunta enviada");
+  }
+
   async function sendReply() {
     if (!reply.trim() || !selected || !profileId) return;
     const { error } = await supabase.from("messages").insert({
