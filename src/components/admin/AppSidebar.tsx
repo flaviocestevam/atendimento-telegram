@@ -39,6 +39,7 @@ const groups: { label: string; items: { to: string; label: string; icon: any }[]
   {
     label: "Sistema",
     items: [
+      { to: "/perfis", label: "Perfis / Vendedores", icon: UserCircle },
       { to: "/configuracoes", label: "Configurações", icon: Settings },
     ],
   },
