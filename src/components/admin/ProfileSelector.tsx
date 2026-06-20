@@ -5,9 +5,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, Check, UserCircle, Plus, Settings2 } from "lucide-react";
 import { useRouter } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function ProfileSelector() {
   const router = useRouter();
+  const qc = useQueryClient();
   const { profile, profiles, setProfileId, loading } = useActiveProfile();
 
   return (
@@ -32,8 +34,8 @@ export function ProfileSelector() {
             key={p.id}
             onClick={() => {
               setProfileId(p.id);
-              // Hard refresh so all queries refetch under the new scope
-              setTimeout(() => window.location.reload(), 50);
+              qc.invalidateQueries();
+              router.invalidate();
             }}
             className="flex items-center gap-2 cursor-pointer"
           >

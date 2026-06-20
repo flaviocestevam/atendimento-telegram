@@ -203,7 +203,7 @@ function PerfisPage() {
                 </div>
                 <div className="flex flex-wrap gap-2 pt-2">
                   {!active && !archived && (
-                    <Button size="sm" variant="outline" onClick={() => { setProfileId(p.id); setTimeout(() => window.location.reload(), 50); }}>
+                    <Button size="sm" variant="outline" onClick={() => { setProfileId(p.id); qc.invalidateQueries(); }}>
                       Tornar ativo
                     </Button>
                   )}
