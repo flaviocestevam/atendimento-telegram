@@ -1335,6 +1335,7 @@ export type Database = {
       }
       leads: {
         Row: {
+          buyer_tier: string | null
           checkout_abandon_count: number
           commercial_opportunity_score: number
           created_at: string
@@ -1372,6 +1373,7 @@ export type Database = {
           username: string | null
         }
         Insert: {
+          buyer_tier?: string | null
           checkout_abandon_count?: number
           commercial_opportunity_score?: number
           created_at?: string
@@ -1409,6 +1411,7 @@ export type Database = {
           username?: string | null
         }
         Update: {
+          buyer_tier?: string | null
           checkout_abandon_count?: number
           commercial_opportunity_score?: number
           created_at?: string
@@ -3178,6 +3181,7 @@ export type Database = {
       }
       telegram_users: {
         Row: {
+          buyer_tier: string | null
           created_at: string
           first_name: string | null
           id: string
@@ -3198,6 +3202,7 @@ export type Database = {
           username: string | null
         }
         Insert: {
+          buyer_tier?: string | null
           created_at?: string
           first_name?: string | null
           id?: string
@@ -3218,6 +3223,7 @@ export type Database = {
           username?: string | null
         }
         Update: {
+          buyer_tier?: string | null
           created_at?: string
           first_name?: string | null
           id?: string
@@ -3326,7 +3332,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calc_buyer_tier: { Args: { total_brl: number }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "agent"
