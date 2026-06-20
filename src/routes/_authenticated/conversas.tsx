@@ -113,6 +113,36 @@ function ConversasPage() {
     },
   });
 
+  const leadContext = useQuery({
+    enabled: !!leadQ.data?.id && !!selected?.telegram_user_id,
+    queryKey: ["lead-context", leadQ.data?.id, selected?.telegram_user_id],
+    queryFn: async () => {
+      const leadId = leadQ.data!.id as string;
+      const tgUserId = selected!.telegram_user_id as string;
+      const [mems, stories] = await Promise.all([
+        supabase.from("lead_memories").select("id,title,content,memory_type,importance").eq("lead_id", leadId).eq("is_active", true).order("importance", { ascending: false }).limit(8),
+        supabase.from("story_leads").select("id,story_id,current_step,last_step_at,stories(name)").eq("lead_id", tgUserId).order("last_step_at", { ascending: false }).limit(8),
+      ]);
+      return { memories: mems.data ?? [], stories: stories.data ?? [] };
+    },
+  });
+
+  async function suggestWithGrok() {
+    if (!selected) return;
+    setGrokLoading(true);
+    try {
+      const res = await callGrokFn({ data: { conversationId: selected.id, mode: "suggest" } });
+      if (!res?.ok) return toast.error(res?.error ?? "Falha no Grok");
+      setReply(res.text ?? "");
+      if (res.storyUsed) toast.success(`Sugestão pronta · usou história "${res.storyUsed.name}"`);
+      else toast.success("Sugestão pronta");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao chamar Grok");
+    } finally {
+      setGrokLoading(false);
+    }
+  }
+
   async function setLeadLanguage(lang: "pt" | "en" | "es", source: "manual" | "confirmed" = "manual") {
     if (!leadQ.data?.id) return toast.error("Lead não encontrado para este usuário");
     const { error } = await supabase
