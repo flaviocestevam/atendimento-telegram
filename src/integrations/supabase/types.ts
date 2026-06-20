@@ -2174,6 +2174,227 @@ export type Database = {
           },
         ]
       }
+      seller_bots: {
+        Row: {
+          bot_name: string | null
+          bot_username: string | null
+          created_at: string
+          id: string
+          last_error: string | null
+          last_webhook_update_at: string | null
+          seller_profile_id: string
+          status: string
+          telegram_bot_id: string | null
+          telegram_bot_token: string | null
+          updated_at: string
+          webhook_secret: string | null
+          webhook_url: string | null
+        }
+        Insert: {
+          bot_name?: string | null
+          bot_username?: string | null
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          last_webhook_update_at?: string | null
+          seller_profile_id: string
+          status?: string
+          telegram_bot_id?: string | null
+          telegram_bot_token?: string | null
+          updated_at?: string
+          webhook_secret?: string | null
+          webhook_url?: string | null
+        }
+        Update: {
+          bot_name?: string | null
+          bot_username?: string | null
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          last_webhook_update_at?: string | null
+          seller_profile_id?: string
+          status?: string
+          telegram_bot_id?: string | null
+          telegram_bot_token?: string | null
+          updated_at?: string
+          webhook_secret?: string | null
+          webhook_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_bots_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seller_cakto_settings: {
+        Row: {
+          cakto_api_key: string | null
+          cakto_client_id: string | null
+          cakto_client_secret: string | null
+          cakto_webhook_secret: string | null
+          cakto_webhook_url: string | null
+          created_at: string
+          id: string
+          last_error: string | null
+          last_webhook_received_at: string | null
+          seller_profile_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          cakto_api_key?: string | null
+          cakto_client_id?: string | null
+          cakto_client_secret?: string | null
+          cakto_webhook_secret?: string | null
+          cakto_webhook_url?: string | null
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          last_webhook_received_at?: string | null
+          seller_profile_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          cakto_api_key?: string | null
+          cakto_client_id?: string | null
+          cakto_client_secret?: string | null
+          cakto_webhook_secret?: string | null
+          cakto_webhook_url?: string | null
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          last_webhook_received_at?: string | null
+          seller_profile_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_cakto_settings_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: true
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seller_grok_settings: {
+        Row: {
+          created_at: string
+          enable_ai: boolean
+          enable_auto_reply: boolean
+          fallback_message: string | null
+          global_mode: string
+          id: string
+          last_error: string | null
+          max_messages_per_user_per_day: number
+          model: string
+          provider: string
+          require_approval_for_funnel_changes: boolean
+          require_approval_for_offers: boolean
+          seller_profile_id: string
+          status: string
+          system_prompt: string | null
+          updated_at: string
+          xai_api_key: string | null
+        }
+        Insert: {
+          created_at?: string
+          enable_ai?: boolean
+          enable_auto_reply?: boolean
+          fallback_message?: string | null
+          global_mode?: string
+          id?: string
+          last_error?: string | null
+          max_messages_per_user_per_day?: number
+          model?: string
+          provider?: string
+          require_approval_for_funnel_changes?: boolean
+          require_approval_for_offers?: boolean
+          seller_profile_id: string
+          status?: string
+          system_prompt?: string | null
+          updated_at?: string
+          xai_api_key?: string | null
+        }
+        Update: {
+          created_at?: string
+          enable_ai?: boolean
+          enable_auto_reply?: boolean
+          fallback_message?: string | null
+          global_mode?: string
+          id?: string
+          last_error?: string | null
+          max_messages_per_user_per_day?: number
+          model?: string
+          provider?: string
+          require_approval_for_funnel_changes?: boolean
+          require_approval_for_offers?: boolean
+          seller_profile_id?: string
+          status?: string
+          system_prompt?: string | null
+          updated_at?: string
+          xai_api_key?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_grok_settings_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: true
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seller_platform_settings: {
+        Row: {
+          created_at: string
+          currency: string
+          default_language: string
+          development_mode: boolean
+          id: string
+          login_enabled: boolean
+          seller_profile_id: string
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          default_language?: string
+          development_mode?: boolean
+          id?: string
+          login_enabled?: boolean
+          seller_profile_id: string
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          default_language?: string
+          development_mode?: boolean
+          id?: string
+          login_enabled?: boolean
+          seller_profile_id?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_platform_settings_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: true
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       seller_profile: {
         Row: {
           allow_typos: boolean
@@ -2260,6 +2481,7 @@ export type Database = {
           commercial_rules: string | null
           communication_style: string | null
           created_at: string
+          currency: string
           default_language: string
           display_name: string
           emotional_rules: string | null
@@ -2267,9 +2489,12 @@ export type Database = {
           id: string
           informality_level: number
           is_active: boolean
+          owner_user_id: string | null
           public_description: string | null
           return_message: string | null
           short_bio: string | null
+          status: string
+          timezone: string
           tone_of_voice: string | null
           typo_frequency: number
           updated_at: string
@@ -2277,6 +2502,7 @@ export type Database = {
           use_short_messages: boolean
           use_slang: boolean
           use_typing_delays: boolean
+          username: string | null
           working_hours: Json | null
           working_hours_enabled: boolean
         }
@@ -2287,6 +2513,7 @@ export type Database = {
           commercial_rules?: string | null
           communication_style?: string | null
           created_at?: string
+          currency?: string
           default_language?: string
           display_name: string
           emotional_rules?: string | null
@@ -2294,9 +2521,12 @@ export type Database = {
           id?: string
           informality_level?: number
           is_active?: boolean
+          owner_user_id?: string | null
           public_description?: string | null
           return_message?: string | null
           short_bio?: string | null
+          status?: string
+          timezone?: string
           tone_of_voice?: string | null
           typo_frequency?: number
           updated_at?: string
@@ -2304,6 +2534,7 @@ export type Database = {
           use_short_messages?: boolean
           use_slang?: boolean
           use_typing_delays?: boolean
+          username?: string | null
           working_hours?: Json | null
           working_hours_enabled?: boolean
         }
@@ -2314,6 +2545,7 @@ export type Database = {
           commercial_rules?: string | null
           communication_style?: string | null
           created_at?: string
+          currency?: string
           default_language?: string
           display_name?: string
           emotional_rules?: string | null
@@ -2321,9 +2553,12 @@ export type Database = {
           id?: string
           informality_level?: number
           is_active?: boolean
+          owner_user_id?: string | null
           public_description?: string | null
           return_message?: string | null
           short_bio?: string | null
+          status?: string
+          timezone?: string
           tone_of_voice?: string | null
           typo_frequency?: number
           updated_at?: string
@@ -2331,10 +2566,73 @@ export type Database = {
           use_short_messages?: boolean
           use_slang?: boolean
           use_typing_delays?: boolean
+          username?: string | null
           working_hours?: Json | null
           working_hours_enabled?: boolean
         }
         Relationships: []
+      }
+      seller_voice_settings: {
+        Row: {
+          created_at: string
+          elevenlabs_api_key: string | null
+          enabled: boolean
+          id: string
+          last_error: string | null
+          max_audio_characters: number
+          max_audio_messages_per_user_per_day: number
+          model: string | null
+          provider: string
+          seller_profile_id: string
+          send_audio_mode: string
+          send_text_with_audio: boolean
+          status: string
+          updated_at: string
+          voice_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          elevenlabs_api_key?: string | null
+          enabled?: boolean
+          id?: string
+          last_error?: string | null
+          max_audio_characters?: number
+          max_audio_messages_per_user_per_day?: number
+          model?: string | null
+          provider?: string
+          seller_profile_id: string
+          send_audio_mode?: string
+          send_text_with_audio?: boolean
+          status?: string
+          updated_at?: string
+          voice_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          elevenlabs_api_key?: string | null
+          enabled?: boolean
+          id?: string
+          last_error?: string | null
+          max_audio_characters?: number
+          max_audio_messages_per_user_per_day?: number
+          model?: string | null
+          provider?: string
+          seller_profile_id?: string
+          send_audio_mode?: string
+          send_text_with_audio?: boolean
+          status?: string
+          updated_at?: string
+          voice_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_voice_settings_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: true
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stories: {
         Row: {
