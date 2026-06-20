@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, UserCircle, Check, Archive, ArchiveRestore } from "lucide-react";
+import { Plus, UserCircle, Check, Archive, ArchiveRestore, Pencil } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/perfis")({
   component: PerfisPage,
