@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useActiveProfile } from "@/lib/active-profile";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,9 +26,11 @@ const CATEGORIES = [
 
 function QuickRepliesPage() {
   const qc = useQueryClient();
+  const { profileId } = useActiveProfile();
   const list = useQuery({
-    queryKey: ["quick_replies"],
-    queryFn: async () => (await supabase.from("quick_replies").select("*").order("category")).data ?? [],
+    enabled: !!profileId,
+    queryKey: ["quick_replies", profileId],
+    queryFn: async () => (await supabase.from("quick_replies").select("*").eq("seller_profile_id", profileId!).order("category")).data ?? [],
   });
   const [open, setOpen] = useState(false);
   const [f, setF] = useState<any>({ title: "", body: "", category: "outro", type: "text", active: true });
@@ -35,17 +38,18 @@ function QuickRepliesPage() {
   function newOne() { setF({ title: "", body: "", category: "outro", type: "text", active: true }); setOpen(true); }
   function edit(r: any) { setF(r); setOpen(true); }
   async function save() {
+    if (!profileId) return toast.error("Selecione um perfil");
     const payload = { title: f.title, body: f.body, category: f.category, type: f.type, active: f.active };
     const res = f.id
-      ? await supabase.from("quick_replies").update(payload).eq("id", f.id)
-      : await supabase.from("quick_replies").insert(payload);
+      ? await supabase.from("quick_replies").update(payload).eq("id", f.id).eq("seller_profile_id", profileId)
+      : await supabase.from("quick_replies").insert({ ...payload, seller_profile_id: profileId });
     if (res.error) return toast.error(res.error.message);
     setOpen(false); toast.success("Salvo");
     qc.invalidateQueries({ queryKey: ["quick_replies"] });
   }
   async function remove(id: string) {
     if (!confirm("Excluir?")) return;
-    await supabase.from("quick_replies").delete().eq("id", id);
+    await supabase.from("quick_replies").delete().eq("id", id).eq("seller_profile_id", profileId!);
     qc.invalidateQueries({ queryKey: ["quick_replies"] });
   }
 

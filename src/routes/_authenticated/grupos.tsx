@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useActiveProfile } from "@/lib/active-profile";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,27 +25,30 @@ const empty: F = { name: "", chat_id: "", type: "group", bot_is_admin: false, st
 
 function Grupos() {
   const qc = useQueryClient();
+  const { profileId } = useActiveProfile();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<F>(empty);
   const q = useQuery({
-    queryKey: ["telegram_groups"],
-    queryFn: async () => (await supabase.from("telegram_groups").select("*").order("created_at", { ascending: false })).data ?? [],
+    enabled: !!profileId,
+    queryKey: ["telegram_groups", profileId],
+    queryFn: async () => (await supabase.from("telegram_groups").select("*").eq("seller_profile_id", profileId!).order("created_at", { ascending: false })).data ?? [],
   });
 
   function openNew() { setForm(empty); setOpen(true); }
   function openEdit(g: any) { setForm({ ...g, default_invite_link: g.default_invite_link ?? "" }); setOpen(true); }
   async function save() {
+    if (!profileId) return toast.error("Selecione um perfil");
     const payload = { ...form, default_invite_link: form.default_invite_link || null };
     const res = form.id
-      ? await supabase.from("telegram_groups").update(payload).eq("id", form.id)
-      : await supabase.from("telegram_groups").insert(payload);
+      ? await supabase.from("telegram_groups").update(payload).eq("id", form.id).eq("seller_profile_id", profileId)
+      : await supabase.from("telegram_groups").insert({ ...payload, seller_profile_id: profileId });
     if (res.error) return toast.error(res.error.message);
     toast.success("Salvo"); setOpen(false);
     qc.invalidateQueries({ queryKey: ["telegram_groups"] });
   }
   async function remove(id: string) {
     if (!confirm("Excluir grupo?")) return;
-    await supabase.from("telegram_groups").delete().eq("id", id);
+    await supabase.from("telegram_groups").delete().eq("id", id).eq("seller_profile_id", profileId!);
     qc.invalidateQueries({ queryKey: ["telegram_groups"] });
   }
 

@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useActiveProfile } from "@/lib/active-profile";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,25 +29,30 @@ const GROK_MODES = [
 
 function IAPage() {
   const qc = useQueryClient();
+  const { profileId } = useActiveProfile();
   const settings = useQuery({
-    queryKey: ["ai_settings"],
-    queryFn: async () => (await supabase.from("ai_settings").select("*").limit(1).maybeSingle()).data,
+    enabled: !!profileId,
+    queryKey: ["ai_settings", profileId],
+    queryFn: async () => (await supabase.from("ai_settings").select("*").eq("seller_profile_id", profileId!).limit(1).maybeSingle()).data,
   });
   const kb = useQuery({
-    queryKey: ["knowledge_base"],
-    queryFn: async () => (await supabase.from("knowledge_base").select("*").order("created_at", { ascending: false })).data ?? [],
+    enabled: !!profileId,
+    queryKey: ["knowledge_base", profileId],
+    queryFn: async () => (await supabase.from("knowledge_base").select("*").eq("seller_profile_id", profileId!).order("created_at", { ascending: false })).data ?? [],
   });
   const objections = useQuery({
-    queryKey: ["objections"],
-    queryFn: async () => (await supabase.from("objections").select("*,telegram_users(first_name,username)").order("created_at", { ascending: false }).limit(50)).data ?? [],
+    enabled: !!profileId,
+    queryKey: ["objections", profileId],
+    queryFn: async () => (await supabase.from("objections").select("*,telegram_users(first_name,username)").eq("seller_profile_id", profileId!).order("created_at", { ascending: false }).limit(50)).data ?? [],
   });
   const learnings = useQuery({
-    queryKey: ["ai_learnings"],
-    queryFn: async () => (await supabase.from("ai_learnings").select("*").eq("status", "pending").order("created_at", { ascending: false })).data ?? [],
+    enabled: !!profileId,
+    queryKey: ["ai_learnings", profileId],
+    queryFn: async () => (await supabase.from("ai_learnings").select("*").eq("seller_profile_id", profileId!).eq("status", "pending").order("created_at", { ascending: false })).data ?? [],
   });
 
   const [form, setForm] = useState<any>(null);
-  useEffect(() => { if (settings.data && !form) setForm(settings.data); }, [settings.data, form]);
+  useEffect(() => { setForm(settings.data ?? null); }, [settings.data, profileId]);
 
   const xaiConfigured = SECRETS_STATUS.xai;
 
@@ -75,16 +81,17 @@ function IAPage() {
   function newKb() { setKbForm({ title: "", content: "", is_active: true }); setKbOpen(true); }
   function editKb(k: any) { setKbForm(k); setKbOpen(true); }
   async function saveKb() {
+    if (!profileId) return toast.error("Selecione um perfil");
     const res = kbForm.id
-      ? await supabase.from("knowledge_base").update({ title: kbForm.title, content: kbForm.content, is_active: kbForm.is_active }).eq("id", kbForm.id)
-      : await supabase.from("knowledge_base").insert({ title: kbForm.title, content: kbForm.content, is_active: kbForm.is_active });
+      ? await supabase.from("knowledge_base").update({ title: kbForm.title, content: kbForm.content, is_active: kbForm.is_active }).eq("id", kbForm.id).eq("seller_profile_id", profileId)
+      : await supabase.from("knowledge_base").insert({ title: kbForm.title, content: kbForm.content, is_active: kbForm.is_active, seller_profile_id: profileId });
     if (res.error) return toast.error(res.error.message);
     setKbOpen(false); toast.success("Salvo");
     qc.invalidateQueries({ queryKey: ["knowledge_base"] });
   }
   async function removeKb(id: string) {
     if (!confirm("Excluir?")) return;
-    await supabase.from("knowledge_base").delete().eq("id", id);
+    await supabase.from("knowledge_base").delete().eq("id", id).eq("seller_profile_id", profileId!);
     qc.invalidateQueries({ queryKey: ["knowledge_base"] });
   }
 

@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { useActiveProfile } from "@/lib/active-profile";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/admin/PageHeader";
@@ -38,17 +39,20 @@ function StatCard({ icon: Icon, label, value, accent, sub }: any) {
 }
 
 function Dashboard() {
+  const { profileId } = useActiveProfile();
   const stats = useQuery({
-    queryKey: ["dashboard-stats"],
+    enabled: !!profileId,
+    queryKey: ["dashboard-stats", profileId],
     queryFn: async () => {
+      const sp = profileId!;
       const [grants, ordersToday, ordersMonth, pending, convsToday, expiring, contents] = await Promise.all([
-        supabase.from("access_grants").select("id", { count: "exact", head: true }).eq("status", "active"),
-        supabase.from("orders").select("amount_cents").eq("status", "paid").gte("paid_at", new Date(new Date().setHours(0,0,0,0)).toISOString()),
-        supabase.from("orders").select("amount_cents,paid_at").eq("status", "paid").gte("paid_at", new Date(Date.now()-30*864e5).toISOString()),
-        supabase.from("payments").select("id", { count: "exact", head: true }).eq("status", "pending"),
-        supabase.from("messages").select("id", { count: "exact", head: true }).gte("created_at", new Date(new Date().setHours(0,0,0,0)).toISOString()),
-        supabase.from("access_grants").select("id", { count: "exact", head: true }).eq("status","active").lte("expires_at", new Date(Date.now()+3*864e5).toISOString()).gte("expires_at", new Date().toISOString()),
-        supabase.from("orders").select("id", { count: "exact", head: true }).eq("item_type", "content").eq("status", "paid"),
+        supabase.from("access_grants").select("id", { count: "exact", head: true }).eq("seller_profile_id", sp).eq("status", "active"),
+        supabase.from("orders").select("amount_cents").eq("seller_profile_id", sp).eq("status", "paid").gte("paid_at", new Date(new Date().setHours(0,0,0,0)).toISOString()),
+        supabase.from("orders").select("amount_cents,paid_at").eq("seller_profile_id", sp).eq("status", "paid").gte("paid_at", new Date(Date.now()-30*864e5).toISOString()),
+        supabase.from("payments").select("id", { count: "exact", head: true }).eq("seller_profile_id", sp).eq("status", "pending"),
+        supabase.from("messages").select("id", { count: "exact", head: true }).eq("seller_profile_id", sp).gte("created_at", new Date(new Date().setHours(0,0,0,0)).toISOString()),
+        supabase.from("access_grants").select("id", { count: "exact", head: true }).eq("seller_profile_id", sp).eq("status","active").lte("expires_at", new Date(Date.now()+3*864e5).toISOString()).gte("expires_at", new Date().toISOString()),
+        supabase.from("orders").select("id", { count: "exact", head: true }).eq("seller_profile_id", sp).eq("item_type", "content").eq("status", "paid"),
       ]);
       const receitaHoje = (ordersToday.data ?? []).reduce((s, r) => s + (r.amount_cents ?? 0), 0);
       const receitaMes = (ordersMonth.data ?? []).reduce((s, r) => s + (r.amount_cents ?? 0), 0);
@@ -80,11 +84,13 @@ function Dashboard() {
   });
 
   const recent = useQuery({
-    queryKey: ["recent-activity"],
+    enabled: !!profileId,
+    queryKey: ["recent-activity", profileId],
     queryFn: async () => {
       const { data } = await supabase
         .from("activity_logs")
         .select("id,type,description,created_at,telegram_user_id,telegram_users(first_name,username)")
+        .eq("seller_profile_id", profileId!)
         .order("created_at", { ascending: false })
         .limit(8);
       return data ?? [];

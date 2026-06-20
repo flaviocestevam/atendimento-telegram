@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useActiveProfile } from "@/lib/active-profile";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -27,15 +28,18 @@ const statusFilters = [
 ];
 
 function LeadsPage() {
+  const { profileId } = useActiveProfile();
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
 
   const leads = useQuery({
-    queryKey: ["leads", filter, search],
+    enabled: !!profileId,
+    queryKey: ["leads", profileId, filter, search],
     queryFn: async () => {
       let q = supabase
         .from("telegram_users")
         .select("id,first_name,last_name,username,telegram_id,status,temperature,score_buy,total_spent,tags,last_interaction:updated_at,last_purchase_at")
+        .eq("seller_profile_id", profileId!)
         .order("updated_at", { ascending: false })
         .limit(100);
       if (filter !== "all") q = q.eq("status", filter as any);

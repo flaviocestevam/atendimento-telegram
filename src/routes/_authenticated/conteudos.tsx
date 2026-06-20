@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useActiveProfile } from "@/lib/active-profile";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,12 +34,14 @@ const labels = { text: "Texto", link: "Link", file: "Arquivo", private_area: "Á
 
 function Conteudos() {
   const qc = useQueryClient();
+  const { profileId } = useActiveProfile();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<F>(empty);
 
   const q = useQuery({
-    queryKey: ["contents"],
-    queryFn: async () => (await supabase.from("contents").select("*").order("created_at", { ascending: false })).data ?? [],
+    enabled: !!profileId,
+    queryKey: ["contents", profileId],
+    queryFn: async () => (await supabase.from("contents").select("*").eq("seller_profile_id", profileId!).order("created_at", { ascending: false })).data ?? [],
   });
 
   function openNew() { setForm(empty); setOpen(true); }
@@ -52,6 +55,7 @@ function Conteudos() {
     setOpen(true);
   }
   async function save() {
+    if (!profileId) return toast.error("Selecione um perfil");
     const payload = {
       name: form.name, description: form.description || null,
       price_cents: Math.round(parseFloat(form.price_reais || "0") * 100),
@@ -61,8 +65,8 @@ function Conteudos() {
       is_active: form.is_active,
     };
     const res = form.id
-      ? await supabase.from("contents").update(payload).eq("id", form.id)
-      : await supabase.from("contents").insert(payload);
+      ? await supabase.from("contents").update(payload).eq("id", form.id).eq("seller_profile_id", profileId)
+      : await supabase.from("contents").insert({ ...payload, seller_profile_id: profileId });
     if (res.error) return toast.error(res.error.message);
     toast.success("Salvo");
     setOpen(false);
@@ -70,7 +74,7 @@ function Conteudos() {
   }
   async function remove(id: string) {
     if (!confirm("Excluir?")) return;
-    await supabase.from("contents").delete().eq("id", id);
+    await supabase.from("contents").delete().eq("id", id).eq("seller_profile_id", profileId!);
     qc.invalidateQueries({ queryKey: ["contents"] });
   }
 

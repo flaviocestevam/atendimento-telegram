@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useActiveProfile } from "@/lib/active-profile";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,16 +19,19 @@ export const Route = createFileRoute("/_authenticated/pagamentos")({ component: 
 
 function Pagamentos() {
   const qc = useQueryClient();
+  const { profileId } = useActiveProfile();
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<any>(null);
 
   const payments = useQuery({
-    queryKey: ["payments", filter, search],
+    enabled: !!profileId,
+    queryKey: ["payments", profileId, filter, search],
     queryFn: async () => {
       let qb = supabase
         .from("payments")
         .select("*,orders(id,item_type,plans(name),contents(name),telegram_users(first_name,last_name,username))")
+        .eq("seller_profile_id", profileId!)
         .order("created_at", { ascending: false })
         .limit(200);
       if (filter !== "all") qb = qb.eq("status", filter);
@@ -46,16 +50,17 @@ function Pagamentos() {
   });
 
   const events = useQuery({
-    queryKey: ["cakto_events_unlinked"],
-    queryFn: async () => (await supabase.from("cakto_events").select("*").eq("action", "pending").order("received_at", { ascending: false }).limit(100)).data ?? [],
+    enabled: !!profileId,
+    queryKey: ["cakto_events_unlinked", profileId],
+    queryFn: async () => (await supabase.from("cakto_events").select("*").eq("seller_profile_id", profileId!).eq("action", "pending").order("received_at", { ascending: false }).limit(100)).data ?? [],
   });
 
   async function ignoreEvent(id: string) {
-    await supabase.from("cakto_events").update({ action: "ignored" }).eq("id", id);
+    await supabase.from("cakto_events").update({ action: "ignored" }).eq("id", id).eq("seller_profile_id", profileId!);
     qc.invalidateQueries({ queryKey: ["cakto_events_unlinked"] });
   }
   async function reprocessEvent(id: string) {
-    await supabase.from("cakto_events").update({ action: "reprocessed" }).eq("id", id);
+    await supabase.from("cakto_events").update({ action: "reprocessed" }).eq("id", id).eq("seller_profile_id", profileId!);
     toast.info("Marcado para reprocessamento. Configure o webhook da Cakto para ativar reprocessamento automático.");
     qc.invalidateQueries({ queryKey: ["cakto_events_unlinked"] });
   }

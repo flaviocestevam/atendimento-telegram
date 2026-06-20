@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useActiveProfile } from "@/lib/active-profile";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,9 +19,11 @@ export const Route = createFileRoute("/_authenticated/funis")({ component: Funis
 
 function FunisPage() {
   const qc = useQueryClient();
+  const { profileId } = useActiveProfile();
   const list = useQuery({
-    queryKey: ["funnels"],
-    queryFn: async () => (await supabase.from("funnels").select("*").order("created_at", { ascending: false })).data ?? [],
+    enabled: !!profileId,
+    queryKey: ["funnels", profileId],
+    queryFn: async () => (await supabase.from("funnels").select("*").eq("seller_profile_id", profileId!).order("created_at", { ascending: false })).data ?? [],
   });
 
   const [open, setOpen] = useState(false);
@@ -29,14 +32,17 @@ function FunisPage() {
   function newOne() { setF({ name: "", description: "", goal: "", type: "comercial", status: "active", ia_mode: "off", steps: [] }); setOpen(true); }
   function edit(r: any) { setF({ ...r, steps: r.steps ?? [] }); setOpen(true); }
   async function save() {
+    if (!profileId) return toast.error("Selecione um perfil");
     const payload = { name: f.name, description: f.description, goal: f.goal, type: f.type, status: f.status, ia_mode: f.ia_mode, steps: f.steps };
-    const res = f.id ? await supabase.from("funnels").update(payload).eq("id", f.id) : await supabase.from("funnels").insert(payload);
+    const res = f.id
+      ? await supabase.from("funnels").update(payload).eq("id", f.id).eq("seller_profile_id", profileId)
+      : await supabase.from("funnels").insert({ ...payload, seller_profile_id: profileId });
     if (res.error) return toast.error(res.error.message);
     setOpen(false); toast.success("Funil salvo"); qc.invalidateQueries({ queryKey: ["funnels"] });
   }
   async function remove(id: string) {
     if (!confirm("Excluir funil?")) return;
-    await supabase.from("funnels").delete().eq("id", id);
+    await supabase.from("funnels").delete().eq("id", id).eq("seller_profile_id", profileId!);
     qc.invalidateQueries({ queryKey: ["funnels"] });
   }
   function addStep() { setF({ ...f, steps: [...f.steps, { message: "", delay_minutes: 0 }] }); }

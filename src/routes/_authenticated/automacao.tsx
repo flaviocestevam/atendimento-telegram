@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useActiveProfile } from "@/lib/active-profile";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,11 +33,13 @@ const empty: F = { name: "", type: "expiry_reminder", timing_value: "1", timing_
 
 function Automacao() {
   const qc = useQueryClient();
+  const { profileId } = useActiveProfile();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<F>(empty);
   const q = useQuery({
-    queryKey: ["automation_rules"],
-    queryFn: async () => (await supabase.from("automation_rules").select("*").order("created_at", { ascending: false })).data ?? [],
+    enabled: !!profileId,
+    queryKey: ["automation_rules", profileId],
+    queryFn: async () => (await supabase.from("automation_rules").select("*").eq("seller_profile_id", profileId!).order("created_at", { ascending: false })).data ?? [],
   });
 
   function openNew() { setForm(empty); setOpen(true); }
@@ -45,22 +48,23 @@ function Automacao() {
     setOpen(true);
   }
   async function save() {
+    if (!profileId) return toast.error("Selecione um perfil");
     const payload = { ...form, timing_value: parseInt(form.timing_value || "0", 10) };
     delete (payload as any).id;
     const res = form.id
-      ? await supabase.from("automation_rules").update(payload).eq("id", form.id)
-      : await supabase.from("automation_rules").insert(payload);
+      ? await supabase.from("automation_rules").update(payload).eq("id", form.id).eq("seller_profile_id", profileId)
+      : await supabase.from("automation_rules").insert({ ...payload, seller_profile_id: profileId });
     if (res.error) return toast.error(res.error.message);
     setOpen(false); toast.success("Salvo");
     qc.invalidateQueries({ queryKey: ["automation_rules"] });
   }
   async function remove(id: string) {
     if (!confirm("Excluir regra?")) return;
-    await supabase.from("automation_rules").delete().eq("id", id);
+    await supabase.from("automation_rules").delete().eq("id", id).eq("seller_profile_id", profileId!);
     qc.invalidateQueries({ queryKey: ["automation_rules"] });
   }
   async function toggle(r: any) {
-    await supabase.from("automation_rules").update({ is_active: !r.is_active }).eq("id", r.id);
+    await supabase.from("automation_rules").update({ is_active: !r.is_active }).eq("id", r.id).eq("seller_profile_id", profileId!);
     qc.invalidateQueries({ queryKey: ["automation_rules"] });
   }
 
