@@ -12,7 +12,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { relTime, dateTimeBR, BRL } from "@/lib/format";
-import { Send, Sparkles, UserCheck, Pause, Play, Search } from "lucide-react";
+import { Send, Sparkles, UserCheck, Pause, Play, Search, Languages } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -92,6 +93,56 @@ function ConversasPage() {
       return { totalPago, ultimo, grant: grant.data };
     },
   });
+
+  const leadQ = useQuery({
+    enabled: !!selected?.telegram_user_id && !!profileId,
+    queryKey: ["lead-lang", profileId, selected?.telegram_user_id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("leads")
+        .select("id,preferred_language,language_confirmed_at,language_detection_source")
+        .eq("seller_profile_id", profileId!)
+        .eq("telegram_user_id", selected!.telegram_user_id as string)
+        .maybeSingle();
+      return data;
+    },
+  });
+
+  async function setLeadLanguage(lang: "pt" | "en" | "es", source: "manual" | "confirmed" = "manual") {
+    if (!leadQ.data?.id) return toast.error("Lead não encontrado para este usuário");
+    const { error } = await supabase
+      .from("leads")
+      .update({
+        preferred_language: lang,
+        language_confirmed_at: new Date().toISOString(),
+        language_detection_source: source,
+      })
+      .eq("id", leadQ.data.id);
+    if (error) return toast.error(error.message);
+    toast.success(`Idioma definido: ${lang.toUpperCase()}`);
+    qc.invalidateQueries({ queryKey: ["lead-lang", profileId, selected?.telegram_user_id] });
+  }
+
+  async function askLanguage(lang: "en" | "es") {
+    if (!selected || !profileId) return;
+    const text = lang === "en"
+      ? "I noticed you wrote in English. Would you like me to continue our conversation in English?"
+      : "Vi que escribiste en español. ¿Prefieres que siga conversando contigo en español?";
+    const { error } = await supabase.from("messages").insert({
+      seller_profile_id: profileId,
+      conversation_id: selected.id,
+      telegram_user_id: selected.telegram_user_id,
+      direction: "outbound",
+      sender_type: "admin",
+      sender: "admin",
+      kind: "text",
+      text,
+    });
+    if (error) return toast.error(error.message);
+    await supabase.from("conversations").update({ last_message_at: new Date().toISOString() }).eq("id", selected.id);
+    qc.invalidateQueries({ queryKey: ["messages", selected.id] });
+    toast.success("Pergunta enviada");
+  }
 
   async function sendReply() {
     if (!reply.trim() || !selected || !profileId) return;
@@ -182,6 +233,31 @@ function ConversasPage() {
                     {selected.ai_enabled ? <><Pause className="h-3 w-3 mr-1"/>Pausar IA</> : <><Play className="h-3 w-3 mr-1"/>Ativar IA</>}
                   </Button>
                   <Button size="sm" variant="outline"><UserCheck className="h-3 w-3 mr-1"/>Assumir</Button>
+                </div>
+              </div>
+              <div className="px-4 py-2 border-b border-border flex items-center gap-2 flex-wrap text-xs">
+                <Languages className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-muted-foreground">Idioma:</span>
+                <span className="font-medium uppercase">{leadQ.data?.preferred_language ?? "pt"}</span>
+                {leadQ.data?.language_confirmed_at ? (
+                  <span className="text-muted-foreground">· confirmado {relTime(leadQ.data.language_confirmed_at)}</span>
+                ) : (
+                  <span className="text-muted-foreground">· padrão do perfil</span>
+                )}
+                <div className="ml-auto flex items-center gap-1">
+                  <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => askLanguage("en")}>Perguntar EN</Button>
+                  <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => askLanguage("es")}>Perguntar ES</Button>
+                  <Select
+                    value={leadQ.data?.preferred_language ?? "pt"}
+                    onValueChange={(v) => setLeadLanguage(v as "pt" | "en" | "es", "manual")}
+                  >
+                    <SelectTrigger className="h-7 w-[120px] text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pt">Português</SelectItem>
+                      <SelectItem value="en">English</SelectItem>
+                      <SelectItem value="es">Español</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <ScrollArea className="flex-1 p-4">
