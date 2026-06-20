@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BRL, relTime } from "@/lib/format";
+import { BRL, BRLCompact, relTime } from "@/lib/format";
 import {
   Users, DollarSign, CreditCard, MessagesSquare, AlertTriangle, Package,
   Plus, FileBox, Bot, Send, ArrowUp, ArrowDown, Sparkles, ThumbsUp, Clock,
@@ -45,7 +45,7 @@ function StatCard({
           <Icon className="h-4 w-4 text-primary-foreground" />
         </div>
       </div>
-      <p className="relative mt-2 font-bold tabular-nums leading-tight text-[clamp(1.1rem,2.2vw,1.6rem)] break-words">
+      <p className="relative mt-2 font-bold tabular-nums leading-tight text-[clamp(1rem,1.7vw,1.5rem)] whitespace-nowrap overflow-hidden text-ellipsis">
         {value}
       </p>
       {showDelta && (
@@ -281,10 +281,10 @@ function Dashboard() {
         <StatCard icon={Users} label="Assinantes ativos" value={(s?.ativos ?? 0).toLocaleString("pt-BR")}
           accent="linear-gradient(135deg,oklch(0.62 0.22 295),oklch(0.55 0.22 280))"
           delta={s?.ativosDelta} deltaLabel="vs últimos 30 dias" />
-        <StatCard icon={DollarSign} label="Receita mensal" value={BRL(s?.receitaMes ?? 0)}
+        <StatCard icon={DollarSign} label="Receita mensal" value={BRLCompact(s?.receitaMes ?? 0)}
           accent="linear-gradient(135deg,oklch(0.70 0.18 155),oklch(0.55 0.18 160))"
           delta={s?.receitaMesDelta} deltaLabel="vs últimos 30 dias" />
-        <StatCard icon={CreditCard} label="Pagamentos hoje" value={BRL(s?.receitaHoje ?? 0)}
+        <StatCard icon={CreditCard} label="Pagamentos hoje" value={BRLCompact(s?.receitaHoje ?? 0)}
           accent="linear-gradient(135deg,oklch(0.65 0.20 240),oklch(0.55 0.20 250))"
           delta={s?.receitaHojeDelta} deltaLabel="vs ontem" />
         <StatCard icon={MessagesSquare} label="Conversas hoje" value={(s?.conversas ?? 0).toLocaleString("pt-BR")}
