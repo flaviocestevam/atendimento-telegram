@@ -276,6 +276,8 @@ function Dashboard() {
         }
       />
 
+      {sp && <IntegrationStatusCard profileId={sp} />}
+
       {/* Top stat row — 6 cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
         <StatCard icon={Users} label="Assinantes ativos" value={(s?.ativos ?? 0).toLocaleString("pt-BR")}
