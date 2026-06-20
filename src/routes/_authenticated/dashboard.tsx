@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BRL, relTime } from "@/lib/format";
+import { BRL, BRLCompact, relTime } from "@/lib/format";
 import {
   Users, DollarSign, CreditCard, MessagesSquare, AlertTriangle, Package,
   Plus, FileBox, Bot, Send, ArrowUp, ArrowDown, Sparkles, ThumbsUp, Clock,
