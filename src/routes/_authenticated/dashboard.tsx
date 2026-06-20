@@ -67,8 +67,8 @@ function FunnelChart({ rows }: { rows: { label: string; value: number; color: st
   // Funil decorativo: larguras fixas, sempre afunilando — independente dos valores
   const widthAt = (i: number) => W - (W * 0.55) * (i / n);
   return (
-    <div className="flex items-center gap-6">
-      <svg viewBox={`0 0 ${W} ${H}`} className="shrink-0" style={{ width: 220, height: 200 }}>
+    <div className="flex items-center gap-4 min-w-0">
+      <svg viewBox={`0 0 ${W} ${H}`} className="shrink-0" style={{ width: 180, height: 180 }}>
         {rows.map((r, i) => {
           const topW = widthAt(i);
           const botW = widthAt(i + 1);
@@ -100,15 +100,15 @@ function FunnelChart({ rows }: { rows: { label: string; value: number; color: st
           );
         })}
       </svg>
-      <div className="flex-1 space-y-3">
+      <div className="flex-1 min-w-0 space-y-2.5">
         {rows.map((r, i) => {
           const p = top ? (r.value / top) * 100 : 0;
           return (
-            <div key={i} className="flex items-center justify-between text-sm gap-3">
-              <span className="text-muted-foreground truncate">{r.label}</span>
-              <span className="tabular-nums whitespace-nowrap">
+            <div key={i} className="flex items-center justify-between gap-2 text-sm min-w-0">
+              <span className="text-muted-foreground truncate min-w-0">{r.label}</span>
+              <span className="tabular-nums whitespace-nowrap shrink-0 text-xs sm:text-sm">
                 <span className="font-semibold">{r.value.toLocaleString("pt-BR")}</span>{" "}
-                <span className="text-xs text-muted-foreground">{p.toFixed(1)}%</span>
+                <span className="text-[10px] sm:text-xs text-muted-foreground">{p.toFixed(1)}%</span>
               </span>
             </div>
           );
