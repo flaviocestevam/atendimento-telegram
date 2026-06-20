@@ -131,6 +131,7 @@ function NovoPerfilWizard() {
         description: plan.description.trim() || null,
         price_cents: cents,
         duration_days: parseInt(plan.duration_days, 10) || 30,
+        access_type: "telegram_group",
         is_active: true,
       });
       if (error) throw error;
