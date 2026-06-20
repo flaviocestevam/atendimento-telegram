@@ -27,7 +27,7 @@ export type Database = {
           order_id: string | null
           plan_id: string | null
           revoked_at: string | null
-          seller_profile_id: string | null
+          seller_profile_id: string
           starts_at: string
           status: string
           telegram_group_id: string | null
@@ -45,7 +45,7 @@ export type Database = {
           order_id?: string | null
           plan_id?: string | null
           revoked_at?: string | null
-          seller_profile_id?: string | null
+          seller_profile_id: string
           starts_at?: string
           status?: string
           telegram_group_id?: string | null
@@ -63,7 +63,7 @@ export type Database = {
           order_id?: string | null
           plan_id?: string | null
           revoked_at?: string | null
-          seller_profile_id?: string | null
+          seller_profile_id?: string
           starts_at?: string
           status?: string
           telegram_group_id?: string | null
@@ -313,7 +313,7 @@ export type Database = {
           is_active: boolean
           message: string | null
           name: string
-          seller_profile_id: string | null
+          seller_profile_id: string
           timing_unit: string | null
           timing_value: number | null
           trigger: Database["public"]["Enums"]["automation_trigger"] | null
@@ -331,7 +331,7 @@ export type Database = {
           is_active?: boolean
           message?: string | null
           name: string
-          seller_profile_id?: string | null
+          seller_profile_id: string
           timing_unit?: string | null
           timing_value?: number | null
           trigger?: Database["public"]["Enums"]["automation_trigger"] | null
@@ -349,7 +349,7 @@ export type Database = {
           is_active?: boolean
           message?: string | null
           name?: string
-          seller_profile_id?: string | null
+          seller_profile_id?: string
           timing_unit?: string | null
           timing_value?: number | null
           trigger?: Database["public"]["Enums"]["automation_trigger"] | null
@@ -1786,7 +1786,7 @@ export type Database = {
           plan_id: string | null
           provider: string | null
           provider_order_id: string | null
-          seller_profile_id: string | null
+          seller_profile_id: string
           status: string
           telegram_user_id: string | null
         }
@@ -1805,7 +1805,7 @@ export type Database = {
           plan_id?: string | null
           provider?: string | null
           provider_order_id?: string | null
-          seller_profile_id?: string | null
+          seller_profile_id: string
           status?: string
           telegram_user_id?: string | null
         }
@@ -1824,7 +1824,7 @@ export type Database = {
           plan_id?: string | null
           provider?: string | null
           provider_order_id?: string | null
-          seller_profile_id?: string | null
+          seller_profile_id?: string
           status?: string
           telegram_user_id?: string | null
         }
@@ -1887,7 +1887,7 @@ export type Database = {
           provider_order_id: string | null
           provider_payment_id: string | null
           raw_payload: Json | null
-          seller_profile_id: string | null
+          seller_profile_id: string
           status: string
         }
         Insert: {
@@ -1910,7 +1910,7 @@ export type Database = {
           provider_order_id?: string | null
           provider_payment_id?: string | null
           raw_payload?: Json | null
-          seller_profile_id?: string | null
+          seller_profile_id: string
           status?: string
         }
         Update: {
@@ -1933,7 +1933,7 @@ export type Database = {
           provider_order_id?: string | null
           provider_payment_id?: string | null
           raw_payload?: Json | null
-          seller_profile_id?: string | null
+          seller_profile_id?: string
           status?: string
         }
         Relationships: [
@@ -2045,7 +2045,7 @@ export type Database = {
           created_at: string
           id: string
           reply_type: string | null
-          seller_profile_id: string | null
+          seller_profile_id: string
           title: string
           type: string
           updated_at: string
@@ -2060,7 +2060,7 @@ export type Database = {
           created_at?: string
           id?: string
           reply_type?: string | null
-          seller_profile_id?: string | null
+          seller_profile_id: string
           title: string
           type?: string
           updated_at?: string
@@ -2075,7 +2075,7 @@ export type Database = {
           created_at?: string
           id?: string
           reply_type?: string | null
-          seller_profile_id?: string | null
+          seller_profile_id?: string
           title?: string
           type?: string
           updated_at?: string
