@@ -95,7 +95,8 @@ function IAPage() {
     qc.invalidateQueries({ queryKey: ["knowledge_base"] });
   }
 
-  if (!form) return <div>Carregando...</div>;
+  if (settings.isLoading) return <div className="p-6 text-muted-foreground">Carregando...</div>;
+  if (!form) return <div className="p-6 text-muted-foreground">Nenhuma configuração de IA encontrada para este perfil.</div>;
 
   return (
     <div>
