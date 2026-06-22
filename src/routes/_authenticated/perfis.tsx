@@ -119,7 +119,7 @@ function PerfisPage() {
         actions={
           <div className="flex gap-2">
             <Button asChild>
-              <a href="/perfis/novo"><Plus className="h-4 w-4 mr-2" />Nova vendedora (wizard)</a>
+              <Link to="/perfis/novo"><Plus className="h-4 w-4 mr-2" />Nova vendedora (wizard)</Link>
             </Button>
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
