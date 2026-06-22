@@ -118,7 +118,6 @@ function ConversasPage() {
     queryKey: ["lead-context", leadQ.data?.id, selected?.telegram_user_id],
     queryFn: async () => {
       const leadId = leadQ.data!.id as string;
-      const tgUserId = selected!.telegram_user_id as string;
       const [mems, stories] = await Promise.all([
         supabase.from("lead_memories").select("id,title,content,memory_type,importance").eq("lead_id", leadId).eq("is_active", true).order("importance", { ascending: false }).limit(8),
         supabase.from("story_leads").select("id,story_id,current_step,last_step_at,stories(name)").eq("lead_id", leadId).order("last_step_at", { ascending: false }).limit(8),
