@@ -43,7 +43,7 @@ function IAPage() {
   const objections = useQuery({
     enabled: !!profileId,
     queryKey: ["objections", profileId],
-    queryFn: async () => (await supabase.from("objections").select("*, leads(display_name, username)").eq("seller_profile_id", profileId!).order("created_at", { ascending: false }).limit(50)).data ?? [],
+    queryFn: async () => (await supabase.from("objections").select("*, leads(display_name, telegram_user_id, telegram_users(username))").eq("seller_profile_id", profileId!).order("created_at", { ascending: false }).limit(50)).data ?? [],
   });
   const learnings = useQuery({
     enabled: !!profileId,
@@ -95,7 +95,8 @@ function IAPage() {
     qc.invalidateQueries({ queryKey: ["knowledge_base"] });
   }
 
-  if (!form) return <div>Carregando...</div>;
+  if (settings.isLoading) return <div className="p-6 text-muted-foreground">Carregando...</div>;
+  if (!form) return <div className="p-6 text-muted-foreground">Nenhuma configuração de IA encontrada para este perfil.</div>;
 
   return (
     <div>

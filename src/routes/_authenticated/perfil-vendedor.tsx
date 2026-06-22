@@ -62,7 +62,8 @@ function PerfilPage() {
     qc.invalidateQueries({ queryKey: ["seller_platform_settings"] });
   }
 
-  if (!f) return <div>Carregando...</div>;
+  if (profile.isLoading) return <div className="p-6 text-muted-foreground">Carregando...</div>;
+  if (!f) return <div className="p-6 text-muted-foreground">Perfil não encontrado.</div>;
 
   return (
     <div>

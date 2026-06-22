@@ -1,4 +1,4 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, useRouter, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -119,7 +119,7 @@ function PerfisPage() {
         actions={
           <div className="flex gap-2">
             <Button asChild>
-              <a href="/perfis/novo"><Plus className="h-4 w-4 mr-2" />Nova vendedora (wizard)</a>
+              <Link to="/perfis/novo"><Plus className="h-4 w-4 mr-2" />Nova vendedora (wizard)</Link>
             </Button>
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
