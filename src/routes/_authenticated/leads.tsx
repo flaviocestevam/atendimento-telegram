@@ -13,7 +13,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { BRL, dateTimeBR } from "@/lib/format";
 import { Search } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/leads")({ component: LeadsPage });
+type LeadsSearch = { q?: string };
+export const Route = createFileRoute("/_authenticated/leads")({
+  validateSearch: (s: Record<string, unknown>): LeadsSearch => ({ q: typeof s.q === "string" ? s.q : undefined }),
+  component: LeadsPage,
+});
 
 const statusFilters = [
   { id: "all", label: "Todos" },
