@@ -11,57 +11,60 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PageHeader } from "@/components/admin/PageHeader";
 import { Sparkles, Lock } from "lucide-react";
 import { toast } from "sonner";
+import { useActiveProfile } from "@/lib/active-profile";
 
 export const Route = createFileRoute("/_authenticated/perfil-vendedor")({ component: PerfilPage });
 
-function formatWhen(v?: string | null) {
-  if (!v) return "ainda não atualizado pelo Grok";
-  try {
-    return new Date(v).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
-  } catch {
-    return v;
-  }
-}
-
 function PerfilPage() {
   const qc = useQueryClient();
+  const { profileId, refetch: refetchActive } = useActiveProfile();
+
   const profile = useQuery({
-    queryKey: ["seller_profile"],
-    queryFn: async () => (await supabase.from("seller_profile").select("*").limit(1).maybeSingle()).data,
-  });
-  const platform = useQuery({
-    queryKey: ["seller_platform_settings"],
-    queryFn: async () => (await supabase.from("seller_platform_settings").select("*").limit(1).maybeSingle()).data,
+    enabled: !!profileId,
+    queryKey: ["seller_profile_full", profileId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("seller_profiles")
+        .select("*")
+        .eq("id", profileId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
   });
 
   const [f, setF] = useState<any>(null);
   const [defaultLanguage, setDefaultLanguage] = useState<string>("pt-BR");
 
-  useEffect(() => { if (profile.data && !f) setF(profile.data); }, [profile.data, f]);
-  useEffect(() => { if (platform.data?.default_language) setDefaultLanguage(platform.data.default_language); }, [platform.data]);
+  // Re-hydrate form whenever the active profile changes
+  useEffect(() => {
+    if (profile.data) {
+      setF(profile.data);
+      setDefaultLanguage(profile.data.default_language ?? "pt-BR");
+    } else {
+      setF(null);
+    }
+  }, [profile.data, profileId]);
 
   async function save() {
-    if (!f) return;
-    const { error } = await supabase.from("seller_profile").update({
-      display_name: f.display_name, avatar_url: f.avatar_url, bio: f.bio,
+    if (!f || !profileId) return;
+    const { error } = await supabase.from("seller_profiles").update({
+      display_name: f.display_name,
+      avatar_url: f.avatar_url,
+      short_bio: f.short_bio,
       public_description: f.public_description,
-      away_message: f.away_message, return_message: f.return_message,
-      language: defaultLanguage,
-    }).eq("id", f.id);
+      away_message: f.away_message,
+      return_message: f.return_message,
+      default_language: defaultLanguage,
+    }).eq("id", profileId);
     if (error) return toast.error(error.message);
-
-    if (platform.data?.id) {
-      const { error: pErr } = await supabase
-        .from("seller_platform_settings")
-        .update({ default_language: defaultLanguage })
-        .eq("id", platform.data.id);
-      if (pErr) return toast.error(pErr.message);
-    }
     toast.success("Perfil salvo.");
-    qc.invalidateQueries({ queryKey: ["seller_profile"] });
-    qc.invalidateQueries({ queryKey: ["seller_platform_settings"] });
+    qc.invalidateQueries({ queryKey: ["seller_profile_full"] });
+    qc.invalidateQueries({ queryKey: ["seller_profiles_list"] });
+    refetchActive();
   }
 
+  if (!profileId) return <div className="p-6 text-muted-foreground">Selecione uma influenciadora no topo.</div>;
   if (profile.isLoading) return <div className="p-6 text-muted-foreground">Carregando...</div>;
   if (!f) return <div className="p-6 text-muted-foreground">Perfil não encontrado.</div>;
 
@@ -78,7 +81,7 @@ function PerfilPage() {
           <h3 className="font-semibold">Identidade pública</h3>
           <div><Label>Nome exibido</Label><Input value={f.display_name ?? ""} onChange={(e) => setF({ ...f, display_name: e.target.value })} /></div>
           <div><Label>Avatar (URL)</Label><Input value={f.avatar_url ?? ""} onChange={(e) => setF({ ...f, avatar_url: e.target.value })} /></div>
-          <div><Label>Bio curta</Label><Input value={f.bio ?? ""} onChange={(e) => setF({ ...f, bio: e.target.value })} /></div>
+          <div><Label>Bio curta</Label><Input value={f.short_bio ?? ""} onChange={(e) => setF({ ...f, short_bio: e.target.value })} /></div>
           <div><Label>Descrição pública</Label><Textarea rows={3} value={f.public_description ?? ""} onChange={(e) => setF({ ...f, public_description: e.target.value })} /></div>
           <div>
             <Label>Idioma padrão do perfil</Label>
@@ -117,13 +120,7 @@ function PerfilPage() {
           </p>
 
           <div>
-            <div className="flex items-center justify-between mb-1">
-              <Label>Regras comerciais</Label>
-              <span className="text-[11px] text-muted-foreground">
-                Última atualização: {formatWhen(f.commercial_rules_updated_at)}
-                {f.commercial_rules_updated_by ? ` · por ${f.commercial_rules_updated_by}` : ""}
-              </span>
-            </div>
+            <Label>Regras comerciais</Label>
             <Textarea
               rows={5}
               readOnly
@@ -134,13 +131,7 @@ function PerfilPage() {
           </div>
 
           <div>
-            <div className="flex items-center justify-between mb-1">
-              <Label>Regras emocionais</Label>
-              <span className="text-[11px] text-muted-foreground">
-                Última atualização: {formatWhen(f.emotional_rules_updated_at)}
-                {f.emotional_rules_updated_by ? ` · por ${f.emotional_rules_updated_by}` : ""}
-              </span>
-            </div>
+            <Label>Regras emocionais</Label>
             <Textarea
               rows={5}
               readOnly
