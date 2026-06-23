@@ -218,9 +218,20 @@ function IAPage() {
 
         <TabsContent value="objections" className="mt-4">
           <Card className="bg-card border-border overflow-hidden">
-            <div className="p-4 border-b border-border"><p className="text-sm text-muted-foreground">Objeções detectadas em conversas reais. A IA usa esses padrões para preparar respostas melhores.</p></div>
+            <div className="p-4 border-b border-border space-y-3">
+              <p className="text-sm text-muted-foreground">Objeções detectadas em conversas reais. A IA usa esses padrões para preparar respostas melhores.</p>
+              <div className="relative max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input value={objSearch} onChange={(e) => setObjSearch(e.target.value)} placeholder="Buscar por lead, tipo ou resposta..." className="pl-9" />
+              </div>
+            </div>
             <div className="divide-y divide-border">
-              {(objections.data ?? []).map((o: any) => (
+              {(objections.data ?? []).filter((o: any) => {
+                if (!objSearch) return true;
+                const q = objSearch.toLowerCase();
+                return [o.leads?.display_name, o.leads?.telegram_users?.username, o.type, o.status, o.suggested_reply]
+                  .some((v) => (v ?? "").toString().toLowerCase().includes(q));
+              }).map((o: any) => (
                 <div key={o.id} className="p-4 grid grid-cols-12 gap-3 items-center">
                   <div className="col-span-3">
                     {(() => {
@@ -257,7 +268,13 @@ function IAPage() {
 
         <TabsContent value="learnings" className="mt-4">
           <Card className="bg-card border-border overflow-hidden">
-            <div className="p-4 border-b border-border"><p className="text-sm text-muted-foreground">Sugestões da IA esperando aprovação. Você decide quais virar regra.</p></div>
+            <div className="p-4 border-b border-border space-y-3">
+              <p className="text-sm text-muted-foreground">Sugestões da IA esperando aprovação. Você decide quais virar regra.</p>
+              <div className="relative max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input value={lrnSearch} onChange={(e) => setLrnSearch(e.target.value)} placeholder="Buscar por tipo ou conteúdo..." className="pl-9" />
+              </div>
+            </div>
             <div className="divide-y divide-border">
               {(learnings.data ?? []).map((l: any) => (
                 <div key={l.id} className="p-4 flex items-start justify-between gap-4">
