@@ -204,7 +204,7 @@ function IAPage() {
                 <li>Nunca prometer resultado.</li>
                 <li>Se perguntarem se é IA, responder com transparência.</li>
                 <li>Se detectar necessidade humana, marcar conversa como "precisa de humano".</li>
-                <li>Respeitar tom, idioma e regras do perfil do vendedor.</li>
+                <li>Respeitar tom, idioma e regras do perfil da influenciadora.</li>
               </ul>
               <p className="text-[11px] text-muted-foreground mt-3">Essas regras são aplicadas antes de cada resposta automática.</p>
             </Card>
