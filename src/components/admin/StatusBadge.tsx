@@ -48,6 +48,11 @@ export function StatusBadge({ status }: { status: string }) {
     cold: { label: "Frio", variant: "muted" },
     warm: { label: "Morno", variant: "warning" },
     hot: { label: "Quente", variant: "destructive" },
+    // objeções
+    dismissed: { label: "Descartada", variant: "muted" },
+    handled: { label: "Tratada", variant: "success" },
+    detected: { label: "Detectada", variant: "warning" },
+    suggested: { label: "Sugerida", variant: "info" },
   };
   const cfg = map[status] ?? { label: status, variant: "muted" as Variant };
   return (
