@@ -96,7 +96,7 @@ function LeadsPage() {
             {(leads.data ?? []).map((l: any) => (
               <TableRow key={l.id} className="cursor-pointer hover:bg-muted/40">
                 <TableCell>
-                  <Link to="/conversas" className="block">
+                  <Link to="/conversas" search={{ user: l.username || String(l.telegram_id) }} className="block">
                     <div className="font-medium">{l.first_name} {l.last_name}</div>
                     <div className="text-xs text-muted-foreground">@{l.username ?? l.telegram_id}</div>
                   </Link>
