@@ -29,7 +29,7 @@ const groups: { label: string; items: { to: string; label: string; icon: any }[]
     label: "Inteligência",
     items: [
       { to: "/ia", label: "IA / Grok", icon: Bot },
-      { to: "/perfil-vendedor", label: "Perfil do vendedor", icon: UserCircle },
+      { to: "/perfil-vendedor", label: "Perfil da influenciadora", icon: UserCircle },
       { to: "/respostas-rapidas", label: "Respostas rápidas", icon: Zap },
       { to: "/automacao", label: "Automações", icon: Workflow },
       { to: "/funis", label: "Funis", icon: GitBranch },

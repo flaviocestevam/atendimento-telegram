@@ -68,7 +68,7 @@ function PerfilPage() {
   return (
     <div>
       <PageHeader
-        title="Perfil do vendedor"
+        title="Perfil da influenciadora"
         subtitle="O Grok atende como extensão de você — tom, estilo e regras são aprendidos automaticamente."
         actions={<Button onClick={save}>Salvar</Button>}
       />
