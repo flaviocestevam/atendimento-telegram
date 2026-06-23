@@ -14,7 +14,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { StatusBadge } from "@/components/admin/StatusBadge";
-import { Bot, Sparkles, Plus, Pencil, Trash2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Bot, Sparkles, Plus, Pencil, Trash2, AlertCircle, CheckCircle2, Search } from "lucide-react";
 import { toast } from "sonner";
 import { SECRETS_STATUS } from "@/lib/config";
 
@@ -74,6 +74,11 @@ function IAPage() {
     if (error) return toast.error(error.message);
     toast.success("Configurações da IA atualizadas");
   }
+
+  // Search filters per tab
+  const [objSearch, setObjSearch] = useState("");
+  const [lrnSearch, setLrnSearch] = useState("");
+  const [kbSearch, setKbSearch] = useState("");
 
   // Knowledge base CRUD
   const [kbOpen, setKbOpen] = useState(false);
@@ -213,9 +218,20 @@ function IAPage() {
 
         <TabsContent value="objections" className="mt-4">
           <Card className="bg-card border-border overflow-hidden">
-            <div className="p-4 border-b border-border"><p className="text-sm text-muted-foreground">Objeções detectadas em conversas reais. A IA usa esses padrões para preparar respostas melhores.</p></div>
+            <div className="p-4 border-b border-border space-y-3">
+              <p className="text-sm text-muted-foreground">Objeções detectadas em conversas reais. A IA usa esses padrões para preparar respostas melhores.</p>
+              <div className="relative max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input value={objSearch} onChange={(e) => setObjSearch(e.target.value)} placeholder="Buscar por lead, tipo ou resposta..." className="pl-9" />
+              </div>
+            </div>
             <div className="divide-y divide-border">
-              {(objections.data ?? []).map((o: any) => (
+              {(objections.data ?? []).filter((o: any) => {
+                if (!objSearch) return true;
+                const q = objSearch.toLowerCase();
+                return [o.leads?.display_name, o.leads?.telegram_users?.username, o.type, o.status, o.suggested_reply]
+                  .some((v) => (v ?? "").toString().toLowerCase().includes(q));
+              }).map((o: any) => (
                 <div key={o.id} className="p-4 grid grid-cols-12 gap-3 items-center">
                   <div className="col-span-3">
                     {(() => {
@@ -252,9 +268,19 @@ function IAPage() {
 
         <TabsContent value="learnings" className="mt-4">
           <Card className="bg-card border-border overflow-hidden">
-            <div className="p-4 border-b border-border"><p className="text-sm text-muted-foreground">Sugestões da IA esperando aprovação. Você decide quais virar regra.</p></div>
+            <div className="p-4 border-b border-border space-y-3">
+              <p className="text-sm text-muted-foreground">Sugestões da IA esperando aprovação. Você decide quais virar regra.</p>
+              <div className="relative max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input value={lrnSearch} onChange={(e) => setLrnSearch(e.target.value)} placeholder="Buscar por tipo ou conteúdo..." className="pl-9" />
+              </div>
+            </div>
             <div className="divide-y divide-border">
-              {(learnings.data ?? []).map((l: any) => (
+              {(learnings.data ?? []).filter((l: any) => {
+                if (!lrnSearch) return true;
+                const q = lrnSearch.toLowerCase();
+                return [l.kind, l.content].some((v) => (v ?? "").toString().toLowerCase().includes(q));
+              }).map((l: any) => (
                 <div key={l.id} className="p-4 flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{l.kind}</p>
@@ -272,9 +298,19 @@ function IAPage() {
         </TabsContent>
 
         <TabsContent value="kb" className="mt-4">
-          <div className="flex justify-end mb-3"><Button onClick={newKb}><Plus className="h-4 w-4 mr-1" />Nova entrada</Button></div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+            <div className="relative max-w-md flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input value={kbSearch} onChange={(e) => setKbSearch(e.target.value)} placeholder="Buscar por título ou conteúdo..." className="pl-9" />
+            </div>
+            <Button onClick={newKb}><Plus className="h-4 w-4 mr-1" />Nova entrada</Button>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {(kb.data ?? []).map((k: any) => (
+            {(kb.data ?? []).filter((k: any) => {
+              if (!kbSearch) return true;
+              const q = kbSearch.toLowerCase();
+              return [k.title, k.content].some((v) => (v ?? "").toString().toLowerCase().includes(q));
+            }).map((k: any) => (
               <Card key={k.id} className="p-5 bg-card border-border">
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="font-semibold">{k.title}</h3>
