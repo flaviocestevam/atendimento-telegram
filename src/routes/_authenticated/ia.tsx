@@ -298,9 +298,19 @@ function IAPage() {
         </TabsContent>
 
         <TabsContent value="kb" className="mt-4">
-          <div className="flex justify-end mb-3"><Button onClick={newKb}><Plus className="h-4 w-4 mr-1" />Nova entrada</Button></div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+            <div className="relative max-w-md flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input value={kbSearch} onChange={(e) => setKbSearch(e.target.value)} placeholder="Buscar por título ou conteúdo..." className="pl-9" />
+            </div>
+            <Button onClick={newKb}><Plus className="h-4 w-4 mr-1" />Nova entrada</Button>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {(kb.data ?? []).map((k: any) => (
+            {(kb.data ?? []).filter((k: any) => {
+              if (!kbSearch) return true;
+              const q = kbSearch.toLowerCase();
+              return [k.title, k.content].some((v) => (v ?? "").toString().toLowerCase().includes(q));
+            }).map((k: any) => (
               <Card key={k.id} className="p-5 bg-card border-border">
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="font-semibold">{k.title}</h3>
