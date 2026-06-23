@@ -218,19 +218,26 @@ function IAPage() {
               {(objections.data ?? []).map((o: any) => (
                 <div key={o.id} className="p-4 grid grid-cols-12 gap-3 items-center">
                   <div className="col-span-3">
-                    {o.leads?.display_name || o.leads?.telegram_users?.username ? (
-                      <Link
-                        to="/leads"
-                        search={{ q: o.leads?.display_name || o.leads?.telegram_users?.username || "" }}
-                        className="font-medium text-primary hover:underline"
-                      >
-                        {o.leads?.display_name ?? `@${o.leads?.telegram_users?.username}`}
-                      </Link>
-                    ) : (
-                      <div className="font-medium">Lead</div>
-                    )}
+                    {(() => {
+                      const username = o.leads?.telegram_users?.username as string | undefined;
+                      const name = o.leads?.display_name as string | undefined;
+                      const searchTerm = username || name || "";
+                      const label = name || (username ? `@${username}` : "Lead");
+                      return searchTerm ? (
+                        <Link
+                          to="/leads"
+                          search={{ q: searchTerm }}
+                          className="font-medium text-primary hover:underline"
+                        >
+                          {label}
+                        </Link>
+                      ) : (
+                        <div className="font-medium">Lead</div>
+                      );
+                    })()}
                     <div className="text-xs text-muted-foreground">@{o.leads?.telegram_users?.username ?? "—"}</div>
                   </div>
+
                   <div className="col-span-2"><StatusBadge status={o.status} /></div>
                   <div className="col-span-2 text-xs"><span className="text-muted-foreground">Tipo:</span> <span className="font-medium">{o.type}</span></div>
                   <div className="col-span-2 text-xs"><span className="text-muted-foreground">Confiança:</span> {Math.round((o.confidence ?? 0) * 100)}%</div>
