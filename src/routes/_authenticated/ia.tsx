@@ -225,8 +225,8 @@ function IAPage() {
                       const label = name || (username ? `@${username}` : "Lead");
                       return searchTerm ? (
                         <Link
-                          to="/leads"
-                          search={{ q: searchTerm }}
+                          to="/conversas"
+                          search={{ user: searchTerm }}
                           className="font-medium text-primary hover:underline"
                         >
                           {label}
@@ -237,6 +237,7 @@ function IAPage() {
                     })()}
                     <div className="text-xs text-muted-foreground">@{o.leads?.telegram_users?.username ?? "—"}</div>
                   </div>
+
 
                   <div className="col-span-2"><StatusBadge status={o.status} /></div>
                   <div className="col-span-2 text-xs"><span className="text-muted-foreground">Tipo:</span> <span className="font-medium">{o.type}</span></div>
