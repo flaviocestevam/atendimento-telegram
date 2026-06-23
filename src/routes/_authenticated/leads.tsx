@@ -13,7 +13,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { BRL, dateTimeBR } from "@/lib/format";
 import { Search } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/leads")({ component: LeadsPage });
+type LeadsSearch = { q?: string };
+export const Route = createFileRoute("/_authenticated/leads")({
+  validateSearch: (s: Record<string, unknown>): LeadsSearch => ({ q: typeof s.q === "string" ? s.q : undefined }),
+  component: LeadsPage,
+});
 
 const statusFilters = [
   { id: "all", label: "Todos" },
@@ -30,8 +34,13 @@ const statusFilters = [
 
 function LeadsPage() {
   const { profileId } = useActiveProfile();
+  const { q: qParam } = Route.useSearch();
   const [filter, setFilter] = useState("all");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(qParam ?? "");
+  // Sync URL ?q= -> input
+  if (qParam !== undefined && qParam !== search && search === "") {
+    // initialize from URL once
+  }
 
   const leads = useQuery({
     enabled: !!profileId,

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -218,8 +218,18 @@ function IAPage() {
               {(objections.data ?? []).map((o: any) => (
                 <div key={o.id} className="p-4 grid grid-cols-12 gap-3 items-center">
                   <div className="col-span-3">
-                    <div className="font-medium">{o.leads?.display_name ?? "Lead"}</div>
-                    <div className="text-xs text-muted-foreground">@{o.leads?.username ?? "—"}</div>
+                    {o.leads?.display_name || o.leads?.telegram_users?.username ? (
+                      <Link
+                        to="/leads"
+                        search={{ q: o.leads?.display_name || o.leads?.telegram_users?.username || "" }}
+                        className="font-medium text-primary hover:underline"
+                      >
+                        {o.leads?.display_name ?? `@${o.leads?.telegram_users?.username}`}
+                      </Link>
+                    ) : (
+                      <div className="font-medium">Lead</div>
+                    )}
+                    <div className="text-xs text-muted-foreground">@{o.leads?.telegram_users?.username ?? "—"}</div>
                   </div>
                   <div className="col-span-2"><StatusBadge status={o.status} /></div>
                   <div className="col-span-2 text-xs"><span className="text-muted-foreground">Tipo:</span> <span className="font-medium">{o.type}</span></div>
