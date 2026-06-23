@@ -75,6 +75,11 @@ function IAPage() {
     toast.success("Configurações da IA atualizadas");
   }
 
+  // Search filters per tab
+  const [objSearch, setObjSearch] = useState("");
+  const [lrnSearch, setLrnSearch] = useState("");
+  const [kbSearch, setKbSearch] = useState("");
+
   // Knowledge base CRUD
   const [kbOpen, setKbOpen] = useState(false);
   const [kbForm, setKbForm] = useState<{ id?: string; title: string; content: string; is_active: boolean }>({ title: "", content: "", is_active: true });
