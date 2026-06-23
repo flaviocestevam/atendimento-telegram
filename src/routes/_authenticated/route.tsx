@@ -32,7 +32,7 @@ const labels: Record<string, string> = {
   historias: "Histórias",
   "respostas-rapidas": "Respostas rápidas",
   "perfil-vendedor": "Perfil da influenciadora",
-  perfis: "Perfis / Vendedores",
+  perfis: "Perfis / Influenciadoras",
   configuracoes: "Configurações",
 };
 

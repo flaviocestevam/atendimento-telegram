@@ -159,7 +159,7 @@ function NovoPerfilWizard() {
   });
 
   const finalize = () => {
-    toast.success("Vendedora pronta para operar 🎉");
+    toast.success("Influenciadora pronta para operar 🎉");
     nav({ to: "/dashboard" });
   };
 
@@ -171,7 +171,7 @@ function NovoPerfilWizard() {
   return (
     <div className="p-6 max-w-3xl space-y-5">
       <PageHeader
-        title="Nova vendedora"
+        title="Nova influenciadora"
         subtitle="Wizard guiado: perfil → Telegram → Cakto → catálogo → IA."
         actions={
           <Button asChild variant="outline" size="sm">
@@ -299,7 +299,7 @@ function NovoPerfilWizard() {
             <p className="text-xs text-muted-foreground">Configure a chave xAI/Grok ou use a chave global do sistema. Pode pular.</p>
             <div className="space-y-3">
               <div><Label>XAI API Key (opcional — usa a global se vazio)</Label><Input type="password" value={grok.xai_api_key} onChange={(e) => setGrok({ ...grok, xai_api_key: e.target.value })} placeholder="xai-…" /></div>
-              <div><Label>System prompt (personalidade)</Label><Textarea rows={4} value={grok.system_prompt} onChange={(e) => setGrok({ ...grok, system_prompt: e.target.value })} placeholder="Você é a Lara, vendedora simpática…" /></div>
+              <div><Label>System prompt (personalidade)</Label><Textarea rows={4} value={grok.system_prompt} onChange={(e) => setGrok({ ...grok, system_prompt: e.target.value })} placeholder="Você é a Lara, influenciadora simpática…" /></div>
               <label className="flex items-center gap-2 text-sm">
                 <input type="checkbox" checked={grok.enable} onChange={(e) => setGrok({ ...grok, enable: e.target.checked })} />
                 Ativar IA em modo auto (por funil)

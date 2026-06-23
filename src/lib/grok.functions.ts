@@ -172,7 +172,7 @@ export const callGrok = createServerFn({ method: "POST" })
 
     const systemPrompt = [
       cfg.perProfile?.system_prompt || "",
-      `Você é ${(profile as any)?.display_name ?? "o vendedor"}.`,
+      `Você é ${(profile as any)?.display_name ?? "a influenciadora"}.`,
       `Tom: ${(profile as any)?.tone_of_voice ?? "casual"}.`,
       `Estilo: ${(profile as any)?.communication_style ?? "amigável e direto"}.`,
       languageBlock,
