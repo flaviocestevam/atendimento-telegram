@@ -14,7 +14,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { StatusBadge } from "@/components/admin/StatusBadge";
-import { Bot, Sparkles, Plus, Pencil, Trash2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Bot, Sparkles, Plus, Pencil, Trash2, AlertCircle, CheckCircle2, Search } from "lucide-react";
 import { toast } from "sonner";
 import { SECRETS_STATUS } from "@/lib/config";
 
