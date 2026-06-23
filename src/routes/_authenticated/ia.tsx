@@ -276,7 +276,11 @@ function IAPage() {
               </div>
             </div>
             <div className="divide-y divide-border">
-              {(learnings.data ?? []).map((l: any) => (
+              {(learnings.data ?? []).filter((l: any) => {
+                if (!lrnSearch) return true;
+                const q = lrnSearch.toLowerCase();
+                return [l.kind, l.content].some((v) => (v ?? "").toString().toLowerCase().includes(q));
+              }).map((l: any) => (
                 <div key={l.id} className="p-4 flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{l.kind}</p>
