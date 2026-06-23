@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useActiveProfile } from "@/lib/active-profile";
 import { Card } from "@/components/ui/card";
@@ -37,10 +37,7 @@ function LeadsPage() {
   const { q: qParam } = Route.useSearch();
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState(qParam ?? "");
-  // Sync URL ?q= -> input
-  if (qParam !== undefined && qParam !== search && search === "") {
-    // initialize from URL once
-  }
+  useEffect(() => { if (qParam !== undefined) setSearch(qParam); }, [qParam]);
 
   const leads = useQuery({
     enabled: !!profileId,
