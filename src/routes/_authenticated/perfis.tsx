@@ -114,12 +114,12 @@ function PerfisPage() {
   return (
     <div className="p-6 max-w-6xl">
       <PageHeader
-        title="Perfis / Vendedores"
+        title="Perfis / Influenciadoras"
         subtitle="Cada perfil tem seu próprio bot, Cakto, IA, planos, leads e configurações."
         actions={
           <div className="flex gap-2">
             <Button asChild>
-              <Link to="/perfis/novo"><Plus className="h-4 w-4 mr-2" />Nova vendedora (wizard)</Link>
+              <Link to="/perfis/novo"><Plus className="h-4 w-4 mr-2" />Nova influenciadora (wizard)</Link>
             </Button>
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>

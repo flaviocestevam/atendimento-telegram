@@ -505,7 +505,7 @@ function SegurancaTab() {
             <li>• Tokens e API keys são mascarados no painel.</li>
             <li>• Operações sensíveis acontecem no backend (server functions).</li>
             <li>• Cada perfil tem seu próprio conjunto de credenciais isoladas.</li>
-            <li>• Webhooks por perfil identificam o vendedor pela URL.</li>
+            <li>• Webhooks por perfil identificam a influenciadora pela URL.</li>
           </ul>
         </div>
       </div>
