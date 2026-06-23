@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { callGrok } from "@/lib/grok.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useActiveProfile } from "@/lib/active-profile";
@@ -19,7 +19,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
+type ConversasSearch = { user?: string };
 export const Route = createFileRoute("/_authenticated/conversas")({
+  validateSearch: (s: Record<string, unknown>): ConversasSearch => ({ user: typeof s.user === "string" ? s.user : undefined }),
   component: ConversasPage,
 });
 
@@ -35,9 +37,11 @@ const filters = [
 
 function ConversasPage() {
   const { profileId } = useActiveProfile();
+  const { user: userParam } = Route.useSearch();
   const [filter, setFilter] = useState("all");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(userParam ?? "");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  useEffect(() => { if (userParam) setSearch(userParam); }, [userParam]);
   const [reply, setReply] = useState("");
   const qc = useQueryClient();
   const callGrokFn = useServerFn(callGrok);
