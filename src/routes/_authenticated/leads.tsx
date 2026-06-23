@@ -34,8 +34,13 @@ const statusFilters = [
 
 function LeadsPage() {
   const { profileId } = useActiveProfile();
+  const { q: qParam } = Route.useSearch();
   const [filter, setFilter] = useState("all");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(qParam ?? "");
+  // Sync URL ?q= -> input
+  if (qParam !== undefined && qParam !== search && search === "") {
+    // initialize from URL once
+  }
 
   const leads = useQuery({
     enabled: !!profileId,
