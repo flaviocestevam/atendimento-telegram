@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRespostasRapidasRouteImport } from './routes/_authenticated/respostas-rapidas'
+import { Route as AuthenticatedPostagensRouteImport } from './routes/_authenticated/postagens'
 import { Route as AuthenticatedPlanosRouteImport } from './routes/_authenticated/planos'
 import { Route as AuthenticatedPerfisRouteImport } from './routes/_authenticated/perfis'
 import { Route as AuthenticatedPerfilVendedorRouteImport } from './routes/_authenticated/perfil-vendedor'
@@ -55,6 +56,11 @@ const AuthenticatedRespostasRapidasRoute =
     path: '/respostas-rapidas',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedPostagensRoute = AuthenticatedPostagensRouteImport.update({
+  id: '/postagens',
+  path: '/postagens',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPlanosRoute = AuthenticatedPlanosRouteImport.update({
   id: '/planos',
   path: '/planos',
@@ -185,6 +191,7 @@ export interface FileRoutesByFullPath {
   '/perfil-vendedor': typeof AuthenticatedPerfilVendedorRoute
   '/perfis': typeof AuthenticatedPerfisRouteWithChildren
   '/planos': typeof AuthenticatedPlanosRoute
+  '/postagens': typeof AuthenticatedPostagensRoute
   '/respostas-rapidas': typeof AuthenticatedRespostasRapidasRoute
   '/perfis/novo': typeof AuthenticatedPerfisNovoRoute
   '/api/public/cakto/webhook': typeof ApiPublicCaktoWebhookRouteWithChildren
@@ -211,6 +218,7 @@ export interface FileRoutesByTo {
   '/perfil-vendedor': typeof AuthenticatedPerfilVendedorRoute
   '/perfis': typeof AuthenticatedPerfisRouteWithChildren
   '/planos': typeof AuthenticatedPlanosRoute
+  '/postagens': typeof AuthenticatedPostagensRoute
   '/respostas-rapidas': typeof AuthenticatedRespostasRapidasRoute
   '/perfis/novo': typeof AuthenticatedPerfisNovoRoute
   '/api/public/cakto/webhook': typeof ApiPublicCaktoWebhookRouteWithChildren
@@ -239,6 +247,7 @@ export interface FileRoutesById {
   '/_authenticated/perfil-vendedor': typeof AuthenticatedPerfilVendedorRoute
   '/_authenticated/perfis': typeof AuthenticatedPerfisRouteWithChildren
   '/_authenticated/planos': typeof AuthenticatedPlanosRoute
+  '/_authenticated/postagens': typeof AuthenticatedPostagensRoute
   '/_authenticated/respostas-rapidas': typeof AuthenticatedRespostasRapidasRoute
   '/_authenticated/perfis/novo': typeof AuthenticatedPerfisNovoRoute
   '/api/public/cakto/webhook': typeof ApiPublicCaktoWebhookRouteWithChildren
@@ -267,6 +276,7 @@ export interface FileRouteTypes {
     | '/perfil-vendedor'
     | '/perfis'
     | '/planos'
+    | '/postagens'
     | '/respostas-rapidas'
     | '/perfis/novo'
     | '/api/public/cakto/webhook'
@@ -293,6 +303,7 @@ export interface FileRouteTypes {
     | '/perfil-vendedor'
     | '/perfis'
     | '/planos'
+    | '/postagens'
     | '/respostas-rapidas'
     | '/perfis/novo'
     | '/api/public/cakto/webhook'
@@ -320,6 +331,7 @@ export interface FileRouteTypes {
     | '/_authenticated/perfil-vendedor'
     | '/_authenticated/perfis'
     | '/_authenticated/planos'
+    | '/_authenticated/postagens'
     | '/_authenticated/respostas-rapidas'
     | '/_authenticated/perfis/novo'
     | '/api/public/cakto/webhook'
@@ -366,6 +378,13 @@ declare module '@tanstack/react-router' {
       path: '/respostas-rapidas'
       fullPath: '/respostas-rapidas'
       preLoaderRoute: typeof AuthenticatedRespostasRapidasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/postagens': {
+      id: '/_authenticated/postagens'
+      path: '/postagens'
+      fullPath: '/postagens'
+      preLoaderRoute: typeof AuthenticatedPostagensRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/planos': {
@@ -545,6 +564,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPerfilVendedorRoute: typeof AuthenticatedPerfilVendedorRoute
   AuthenticatedPerfisRoute: typeof AuthenticatedPerfisRouteWithChildren
   AuthenticatedPlanosRoute: typeof AuthenticatedPlanosRoute
+  AuthenticatedPostagensRoute: typeof AuthenticatedPostagensRoute
   AuthenticatedRespostasRapidasRoute: typeof AuthenticatedRespostasRapidasRoute
 }
 
@@ -564,6 +584,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPerfilVendedorRoute: AuthenticatedPerfilVendedorRoute,
   AuthenticatedPerfisRoute: AuthenticatedPerfisRouteWithChildren,
   AuthenticatedPlanosRoute: AuthenticatedPlanosRoute,
+  AuthenticatedPostagensRoute: AuthenticatedPostagensRoute,
   AuthenticatedRespostasRapidasRoute: AuthenticatedRespostasRapidasRoute,
 }
 
