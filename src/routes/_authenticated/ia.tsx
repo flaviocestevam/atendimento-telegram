@@ -81,7 +81,7 @@ function IAPage() {
   async function toggleGuardrail(key: "enable_auto_reply" | "require_approval_for_offers" | "require_approval_for_funnel_changes", value: boolean) {
     if (!form) return;
     setForm({ ...form, [key]: value });
-    const { error } = await supabase.from("ai_settings").update({ [key]: value }).eq("id", form.id);
+    const { error } = await supabase.from("ai_settings").update({ [key]: value } as any).eq("id", form.id);
     if (error) toast.error(error.message);
   }
 
