@@ -381,6 +381,21 @@ function ConversasPage() {
                     {grokLoading ? "Gerando..." : "Sugerir"}
                   </Button>
                 </div>
+                {(quickReplies.data?.length ?? 0) > 0 && (
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <Zap className="h-3 w-3 text-muted-foreground shrink-0" />
+                    {(quickReplies.data ?? []).map((qr: any) => (
+                      <button
+                        key={qr.id}
+                        onClick={() => useQuickReply(qr)}
+                        className="text-xs px-2 py-1 rounded-full bg-muted hover:bg-primary/20 border border-border transition-colors"
+                        title={qr.body}
+                      >
+                        {qr.title}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 <div className="flex gap-2">
                   <Textarea
                     rows={2}
@@ -389,7 +404,7 @@ function ConversasPage() {
                     onChange={(e) => setReply(e.target.value)}
                     className="flex-1 resize-none"
                   />
-                  <Button onClick={sendReply}><Send className="h-4 w-4"/></Button>
+                  <Button onClick={sendReply} disabled={sending}><Send className="h-4 w-4"/></Button>
                 </div>
               </div>
             </>
