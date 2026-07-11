@@ -2,7 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard, MessagesSquare, Users, Package, FileBox,
   CreditCard, Send, Bot, Workflow, Settings, UserCircle,
-  GitBranch, BookOpen, Zap, X,
+  GitBranch, BookOpen, Zap, X, CalendarClock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +23,7 @@ const groups: { label: string; items: { to: string; label: string; icon: any }[]
       { to: "/conteudos", label: "Conteúdos", icon: FileBox },
       { to: "/assinantes", label: "Assinantes", icon: Users },
       { to: "/grupos", label: "Grupos Telegram", icon: Send },
+      { to: "/postagens", label: "Postagens agendadas", icon: CalendarClock },
     ],
   },
   {

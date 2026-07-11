@@ -2284,6 +2284,63 @@ export type Database = {
           },
         ]
       }
+      scheduled_posts: {
+        Row: {
+          created_at: string
+          error: string | null
+          id: string
+          message: string
+          result: Json | null
+          scheduled_at: string
+          seller_profile_id: string
+          sent_at: string | null
+          status: string
+          telegram_group_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          message: string
+          result?: Json | null
+          scheduled_at: string
+          seller_profile_id: string
+          sent_at?: string | null
+          status?: string
+          telegram_group_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          message?: string
+          result?: Json | null
+          scheduled_at?: string
+          seller_profile_id?: string
+          sent_at?: string | null
+          status?: string
+          telegram_group_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_posts_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_posts_telegram_group_id_fkey"
+            columns: ["telegram_group_id"]
+            isOneToOne: false
+            referencedRelation: "telegram_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       seller_bots: {
         Row: {
           bot_name: string | null

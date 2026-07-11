@@ -26,6 +26,7 @@ const labels: Record<string, string> = {
   conteudos: "Conteúdos",
   pagamentos: "Pagamentos",
   grupos: "Grupos Telegram",
+  postagens: "Postagens agendadas",
   ia: "IA / Grok",
   automacao: "Automações",
   funis: "Funis",

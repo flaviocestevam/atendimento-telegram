@@ -23,7 +23,7 @@ async function resolveBot(sellerProfileId?: string | null) {
   return { kind: "none" as const, botRow: null };
 }
 
-async function tgCall(method: string, body: unknown, sellerProfileId?: string | null) {
+export async function tgCall(method: string, body: unknown, sellerProfileId?: string | null) {
   const bot = await resolveBot(sellerProfileId);
   if (bot.kind === "none") return { ok: false, error: "telegram_not_configured" };
 
