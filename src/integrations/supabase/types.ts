@@ -135,6 +135,13 @@ export type Database = {
             foreignKeyName: "access_grants_telegram_user_id_fkey"
             columns: ["telegram_user_id"]
             isOneToOne: false
+            referencedRelation: "parasocial_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "access_grants_telegram_user_id_fkey"
+            columns: ["telegram_user_id"]
+            isOneToOne: false
             referencedRelation: "telegram_users"
             referencedColumns: ["id"]
           },
@@ -181,6 +188,13 @@ export type Database = {
             columns: ["telegram_user_id"]
             isOneToOne: false
             referencedRelation: "lead_conversation_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_logs_telegram_user_id_fkey"
+            columns: ["telegram_user_id"]
+            isOneToOne: false
+            referencedRelation: "parasocial_overview"
             referencedColumns: ["id"]
           },
           {
@@ -582,6 +596,13 @@ export type Database = {
             foreignKeyName: "cancellation_events_telegram_user_id_fkey"
             columns: ["telegram_user_id"]
             isOneToOne: false
+            referencedRelation: "parasocial_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cancellation_events_telegram_user_id_fkey"
+            columns: ["telegram_user_id"]
+            isOneToOne: false
             referencedRelation: "telegram_users"
             referencedColumns: ["id"]
           },
@@ -913,6 +934,13 @@ export type Database = {
             foreignKeyName: "conversations_telegram_user_id_fkey"
             columns: ["telegram_user_id"]
             isOneToOne: false
+            referencedRelation: "parasocial_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_telegram_user_id_fkey"
+            columns: ["telegram_user_id"]
+            isOneToOne: false
             referencedRelation: "telegram_users"
             referencedColumns: ["id"]
           },
@@ -1009,6 +1037,52 @@ export type Database = {
             columns: ["seller_profile_id"]
             isOneToOne: false
             referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      emotional_moments: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          lead_id: string | null
+          moment_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          lead_id?: string | null
+          moment_type: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          lead_id?: string | null
+          moment_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emotional_moments_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "lead_conversation_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "emotional_moments_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "parasocial_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "emotional_moments_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "telegram_users"
             referencedColumns: ["id"]
           },
         ]
@@ -1135,6 +1209,13 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "lead_conversation_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funnel_leads_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "parasocial_overview"
             referencedColumns: ["id"]
           },
           {
@@ -1588,6 +1669,13 @@ export type Database = {
             foreignKeyName: "leads_telegram_user_id_fkey"
             columns: ["telegram_user_id"]
             isOneToOne: true
+            referencedRelation: "parasocial_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_telegram_user_id_fkey"
+            columns: ["telegram_user_id"]
+            isOneToOne: true
             referencedRelation: "telegram_users"
             referencedColumns: ["id"]
           },
@@ -1717,6 +1805,13 @@ export type Database = {
             columns: ["telegram_user_id"]
             isOneToOne: false
             referencedRelation: "lead_conversation_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_telegram_user_id_fkey"
+            columns: ["telegram_user_id"]
+            isOneToOne: false
+            referencedRelation: "parasocial_overview"
             referencedColumns: ["id"]
           },
           {
@@ -2017,6 +2112,65 @@ export type Database = {
           {
             foreignKeyName: "orders_telegram_user_id_fkey"
             columns: ["telegram_user_id"]
+            isOneToOne: false
+            referencedRelation: "parasocial_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_telegram_user_id_fkey"
+            columns: ["telegram_user_id"]
+            isOneToOne: false
+            referencedRelation: "telegram_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      parasocial_suggestions: {
+        Row: {
+          confidence: number | null
+          created_at: string | null
+          id: string
+          lead_id: string | null
+          suggested_message: string
+          type: string
+          used: boolean | null
+        }
+        Insert: {
+          confidence?: number | null
+          created_at?: string | null
+          id?: string
+          lead_id?: string | null
+          suggested_message: string
+          type: string
+          used?: boolean | null
+        }
+        Update: {
+          confidence?: number | null
+          created_at?: string | null
+          id?: string
+          lead_id?: string | null
+          suggested_message?: string
+          type?: string
+          used?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parasocial_suggestions_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "lead_conversation_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parasocial_suggestions_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "parasocial_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parasocial_suggestions_lead_id_fkey"
+            columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "telegram_users"
             referencedColumns: ["id"]
@@ -3282,6 +3436,13 @@ export type Database = {
             foreignKeyName: "story_leads_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
+            referencedRelation: "parasocial_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_leads_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
             referencedRelation: "telegram_users"
             referencedColumns: ["id"]
           },
@@ -3619,6 +3780,15 @@ export type Database = {
           alta_conexao_com_compra: number | null
           media_conexao: number | null
           total_leads: number | null
+        }
+        Relationships: []
+      }
+      parasocial_overview: {
+        Row: {
+          emotional_moments_count: number | null
+          id: string | null
+          parasocial_strength: number | null
+          suggestions_used: number | null
         }
         Relationships: []
       }
