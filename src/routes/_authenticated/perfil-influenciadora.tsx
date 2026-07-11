@@ -13,7 +13,7 @@ import { Sparkles, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { useActiveProfile } from "@/lib/active-profile";
 
-export const Route = createFileRoute("/_authenticated/perfil-vendedor")({ component: PerfilPage });
+export const Route = createFileRoute("/_authenticated/perfil-influenciadora")({ component: PerfilPage });
 
 function PerfilPage() {
   const qc = useQueryClient();
