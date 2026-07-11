@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useActiveProfile } from "@/lib/active-profile";
@@ -9,10 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { BRL, dateBR } from "@/lib/format";
-import { MoreVertical, Search } from "lucide-react";
+import { MoreVertical, Search, Pause, TrendingDown, X, Heart } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { requestCancellation, recordRetentionOutcome } from "@/lib/cakto.functions";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/assinantes")({
   component: Assinantes,
@@ -22,6 +26,13 @@ function Assinantes() {
   const { profileId } = useActiveProfile();
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const qc = useQueryClient();
+  const reqCancel = useServerFn(requestCancellation);
+  const recRetention = useServerFn(recordRetentionOutcome);
+  const [retentionOpen, setRetentionOpen] = useState(false);
+  const [target, setTarget] = useState<{ grantId: string; name: string; plan: string } | null>(null);
+  const [cancellationId, setCancellationId] = useState<string | null>(null);
+  const [step, setStep] = useState<"offer" | "confirm">("offer");
 
   const q = useQuery({
     enabled: !!profileId,
@@ -36,7 +47,7 @@ function Assinantes() {
 
       const { data: grants } = await supabase
         .from("access_grants")
-        .select("telegram_user_id,expires_at,status,plans(name)")
+        .select("id,telegram_user_id,expires_at,status,plans(name)")
         .eq("seller_profile_id", sp)
         .eq("status", "active");
 
@@ -53,7 +64,7 @@ function Assinantes() {
         if (u.is_blocked) status = "blocked";
         else if (g) status = "active";
         else if (totalPago > 0) status = "expired";
-        return { ...u, status, plano: g?.plans?.name ?? "—", vencimento: g?.expires_at, totalPago, ultimo: ultimo?.paid_at };
+        return { ...u, status, plano: g?.plans?.name ?? "—", vencimento: g?.expires_at, grantId: g?.id ?? null, totalPago, ultimo: ultimo?.paid_at };
       });
       return list.filter((r: any) => {
         if (filter !== "all" && r.status !== filter) return false;
@@ -122,7 +133,20 @@ function Assinantes() {
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem>Ver perfil</DropdownMenuItem>
                       <DropdownMenuItem>Prorrogar acesso</DropdownMenuItem>
-                      <DropdownMenuItem>Remover acesso</DropdownMenuItem>
+                      {r.grantId && (
+                        <DropdownMenuItem
+                          onClick={async () => {
+                            const res: any = await reqCancel({ data: { grantId: r.grantId } });
+                            if (!res?.ok) return toast.error(res?.error ?? "Falha");
+                            setCancellationId(res.cancellationEventId);
+                            setTarget({ grantId: r.grantId, name: `${r.first_name ?? ""} ${r.last_name ?? ""}`.trim() || r.username || "assinante", plan: r.plano });
+                            setStep("offer");
+                            setRetentionOpen(true);
+                          }}
+                        >
+                          Cancelar com retenção
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem className="text-destructive">Bloquear</DropdownMenuItem>
                       <DropdownMenuItem>Ver pagamentos</DropdownMenuItem>
                     </DropdownMenuContent>
@@ -136,6 +160,77 @@ function Assinantes() {
           </TableBody>
         </Table>
       </Card>
+
+      <Dialog open={retentionOpen} onOpenChange={setRetentionOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{step === "offer" ? "Antes de cancelar..." : "Confirmar cancelamento"}</DialogTitle>
+            <DialogDescription>
+              {step === "offer"
+                ? `Escolha uma oferta de retenção para ${target?.name} (${target?.plan}).`
+                : "Sem problemas. O acesso continua até o fim do período pago."}
+            </DialogDescription>
+          </DialogHeader>
+
+          {step === "offer" ? (
+            <div className="space-y-2">
+              {[
+                { key: "pause_30d", icon: Pause, title: "Pausar por 30 dias", desc: "Mantém a assinatura, sem cobrança este mês." },
+                { key: "discount_50", icon: TrendingDown, title: "50% de desconto no próximo mês", desc: "Cobrança reduzida na próxima renovação." },
+                { key: "downgrade", icon: Heart, title: "Trocar para um plano mais leve", desc: "Menos conteúdo, preço menor." },
+              ].map((o) => (
+                <button
+                  key={o.key}
+                  className="w-full flex items-start gap-3 p-3 rounded-lg border border-border hover:bg-muted text-left transition"
+                  onClick={async () => {
+                    if (!cancellationId) return;
+                    await recRetention({ data: { cancellationEventId: cancellationId, offerShown: o.key, outcome: "retained" } });
+                    toast.success("Oferta aceita — assinante retido");
+                    setRetentionOpen(false);
+                    qc.invalidateQueries({ queryKey: ["assinantes"] });
+                  }}
+                >
+                  <o.icon className="h-5 w-5 text-primary shrink-0 mt-0.5"/>
+                  <div>
+                    <div className="font-medium">{o.title}</div>
+                    <div className="text-xs text-muted-foreground">{o.desc}</div>
+                  </div>
+                </button>
+              ))}
+              <button
+                className="w-full flex items-center gap-3 p-3 rounded-lg text-muted-foreground hover:bg-muted text-left transition"
+                onClick={() => setStep("confirm")}
+              >
+                <X className="h-4 w-4"/> <span className="text-sm">Nenhuma dessas — cancelar mesmo assim</span>
+              </button>
+            </div>
+          ) : (
+            <div className="text-sm text-muted-foreground">
+              A assinatura será marcada como cancelada. Nenhuma nova cobrança será feita.
+            </div>
+          )}
+
+          <DialogFooter>
+            {step === "confirm" && (
+              <>
+                <Button variant="outline" onClick={() => setStep("offer")}>Voltar</Button>
+                <Button
+                  variant="destructive"
+                  onClick={async () => {
+                    if (!cancellationId) return;
+                    await recRetention({ data: { cancellationEventId: cancellationId, outcome: "canceled" } });
+                    toast.success("Cancelamento registrado");
+                    setRetentionOpen(false);
+                    qc.invalidateQueries({ queryKey: ["assinantes"] });
+                  }}
+                >
+                  Confirmar cancelamento
+                </Button>
+              </>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
