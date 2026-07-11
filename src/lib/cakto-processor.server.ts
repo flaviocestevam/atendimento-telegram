@@ -61,17 +61,17 @@ export async function processCaktoEvent(input: ProcessInput) {
   // 2) Renovação de assinatura → tratar SEPARADAMENTE (não vincula a um payment novo pelo id)
   if (normalized === "subscription_renewed" && caktoSubId) {
     const renewalRes = await handleRenewal({ subscriptionId: caktoSubId, payload, amount, sellerProfileId });
-    if (rawEventId) await markRawProcessed(rawEventId, renewalRes.ok ? null : renewalRes.error);
-    if (event) await supabaseAdmin.from("cakto_events").update({ action: renewalRes.ok ? "renewed" : "pending" }).eq("id", event.id);
-    return { ok: renewalRes.ok, event_id: event?.id, kind: "renewal", ...renewalRes };
+    if (rawEventId) await markRawProcessed(rawEventId, renewalRes.ok ? null : (renewalRes.error ?? null));
+    if (event) await supabaseAdmin.from("cakto_events").update({ action: (renewalRes.ok ? "renewed" : "pending") as any }).eq("id", event.id);
+    return { event_id: event?.id, kind: "renewal" as const, ...renewalRes };
   }
 
   // 3) Cancelamento de assinatura → grant continua ativo até expires_at
   if (normalized === "subscription_canceled" && caktoSubId) {
     const cancelRes = await handleSubscriptionCanceled({ subscriptionId: caktoSubId, payload, sellerProfileId });
-    if (rawEventId) await markRawProcessed(rawEventId, cancelRes.ok ? null : cancelRes.error);
-    if (event) await supabaseAdmin.from("cakto_events").update({ action: "sub_canceled" }).eq("id", event.id);
-    return { ok: cancelRes.ok, event_id: event?.id, kind: "sub_canceled", ...cancelRes };
+    if (rawEventId) await markRawProcessed(rawEventId, cancelRes.ok ? null : (cancelRes.error ?? null));
+    if (event) await supabaseAdmin.from("cakto_events").update({ action: "sub_canceled" as any }).eq("id", event.id);
+    return { event_id: event?.id, kind: "sub_canceled" as const, ...cancelRes };
   }
 
   // 4) Fluxo comum: vincular ao payment
