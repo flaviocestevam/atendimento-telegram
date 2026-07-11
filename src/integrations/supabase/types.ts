@@ -128,6 +128,13 @@ export type Database = {
             foreignKeyName: "access_grants_telegram_user_id_fkey"
             columns: ["telegram_user_id"]
             isOneToOne: false
+            referencedRelation: "lead_conversation_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "access_grants_telegram_user_id_fkey"
+            columns: ["telegram_user_id"]
+            isOneToOne: false
             referencedRelation: "telegram_users"
             referencedColumns: ["id"]
           },
@@ -167,6 +174,13 @@ export type Database = {
             columns: ["seller_profile_id"]
             isOneToOne: false
             referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_logs_telegram_user_id_fkey"
+            columns: ["telegram_user_id"]
+            isOneToOne: false
+            referencedRelation: "lead_conversation_summary"
             referencedColumns: ["id"]
           },
           {
@@ -561,6 +575,13 @@ export type Database = {
             foreignKeyName: "cancellation_events_telegram_user_id_fkey"
             columns: ["telegram_user_id"]
             isOneToOne: false
+            referencedRelation: "lead_conversation_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cancellation_events_telegram_user_id_fkey"
+            columns: ["telegram_user_id"]
+            isOneToOne: false
             referencedRelation: "telegram_users"
             referencedColumns: ["id"]
           },
@@ -885,6 +906,13 @@ export type Database = {
             foreignKeyName: "conversations_telegram_user_id_fkey"
             columns: ["telegram_user_id"]
             isOneToOne: false
+            referencedRelation: "lead_conversation_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_telegram_user_id_fkey"
+            columns: ["telegram_user_id"]
+            isOneToOne: false
             referencedRelation: "telegram_users"
             referencedColumns: ["id"]
           },
@@ -1100,6 +1128,13 @@ export type Database = {
             columns: ["funnel_id"]
             isOneToOne: false
             referencedRelation: "funnels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funnel_leads_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "lead_conversation_summary"
             referencedColumns: ["id"]
           },
           {
@@ -1546,6 +1581,13 @@ export type Database = {
             foreignKeyName: "leads_telegram_user_id_fkey"
             columns: ["telegram_user_id"]
             isOneToOne: true
+            referencedRelation: "lead_conversation_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_telegram_user_id_fkey"
+            columns: ["telegram_user_id"]
+            isOneToOne: true
             referencedRelation: "telegram_users"
             referencedColumns: ["id"]
           },
@@ -1668,6 +1710,13 @@ export type Database = {
             columns: ["seller_profile_id"]
             isOneToOne: false
             referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_telegram_user_id_fkey"
+            columns: ["telegram_user_id"]
+            isOneToOne: false
+            referencedRelation: "lead_conversation_summary"
             referencedColumns: ["id"]
           },
           {
@@ -1956,6 +2005,13 @@ export type Database = {
             columns: ["seller_profile_id"]
             isOneToOne: false
             referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_telegram_user_id_fkey"
+            columns: ["telegram_user_id"]
+            isOneToOne: false
+            referencedRelation: "lead_conversation_summary"
             referencedColumns: ["id"]
           },
           {
@@ -3219,6 +3275,13 @@ export type Database = {
             foreignKeyName: "story_leads_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
+            referencedRelation: "lead_conversation_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_leads_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
             referencedRelation: "telegram_users"
             referencedColumns: ["id"]
           },
@@ -3526,7 +3589,30 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      lead_conversation_summary: {
+        Row: {
+          connection_badge: string | null
+          first_name: string | null
+          id: string | null
+          parasocial_strength: number | null
+          telegram_id: string | null
+        }
+        Insert: {
+          connection_badge?: never
+          first_name?: string | null
+          id?: string | null
+          parasocial_strength?: number | null
+          telegram_id?: string | null
+        }
+        Update: {
+          connection_badge?: never
+          first_name?: string | null
+          id?: string | null
+          parasocial_strength?: number | null
+          telegram_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       calc_buyer_tier: { Args: { total_brl: number }; Returns: string }
