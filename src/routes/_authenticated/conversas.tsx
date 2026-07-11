@@ -47,7 +47,10 @@ function ConversasPage() {
   const [reply, setReply] = useState("");
   const qc = useQueryClient();
   const callGrokFn = useServerFn(callGrok);
+  const sendTgFn = useServerFn(sendTelegramMessage);
   const [grokLoading, setGrokLoading] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [applyOpen, setApplyOpen] = useState(false);
 
 
   const convs = useQuery({
