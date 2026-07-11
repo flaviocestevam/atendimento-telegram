@@ -2148,6 +2148,45 @@ export type Database = {
           },
         ]
       }
+      presentinho_catalog: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          description: string | null
+          emoji: string | null
+          id: string
+          image_url: string | null
+          name: string
+          price_cents: number
+          sort_order: number | null
+          suggested_message: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          emoji?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          price_cents: number
+          sort_order?: number | null
+          suggested_message?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          emoji?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          price_cents?: number
+          sort_order?: number | null
+          suggested_message?: string | null
+        }
+        Relationships: []
+      }
       quick_replies: {
         Row: {
           active: boolean
