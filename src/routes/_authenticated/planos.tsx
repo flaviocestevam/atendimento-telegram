@@ -70,6 +70,7 @@ function Planos() {
       price_cents: Math.round(parseFloat(form.price_reais || "0") * 100),
       duration_days: parseInt(form.duration_days || "0", 10),
       access_type: form.access_type,
+      billing_type: form.billing_type,
       telegram_group_id: form.telegram_group_id,
       post_purchase_message: form.post_purchase_message || null,
       is_active: form.is_active,
