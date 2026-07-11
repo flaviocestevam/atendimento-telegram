@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, useEffect } from "react";
 import { callGrok } from "@/lib/grok.functions";
+import { sendTelegramMessage } from "@/lib/telegram.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useActiveProfile } from "@/lib/active-profile";
 import { Card } from "@/components/ui/card";
