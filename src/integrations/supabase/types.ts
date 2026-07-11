@@ -3613,6 +3613,15 @@ export type Database = {
         }
         Relationships: []
       }
+      parasocial_dashboard: {
+        Row: {
+          alta_conexao: number | null
+          alta_conexao_com_compra: number | null
+          media_conexao: number | null
+          total_leads: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       calc_buyer_tier: { Args: { total_brl: number }; Returns: string }
