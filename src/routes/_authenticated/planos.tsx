@@ -114,7 +114,7 @@ function Planos() {
               <div className="text-3xl font-bold" style={{ backgroundImage: "var(--gradient-brand)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                 {BRL(p.price_cents)}
               </div>
-              <div className="text-xs text-muted-foreground">{p.duration_days} dias · {p.access_type === "group" ? "Grupo" : "Canal"}</div>
+              <div className="text-xs text-muted-foreground">{p.duration_days} dias · {p.access_type === "group" ? "Grupo" : "Canal"} · {p.billing_type === "subscription" ? "Recorrente" : "Único"}</div>
             </div>
             <div className="text-xs text-muted-foreground mt-2 truncate">→ {p.telegram_groups?.name ?? "Sem grupo"}</div>
             <div className="flex gap-2 mt-4">
