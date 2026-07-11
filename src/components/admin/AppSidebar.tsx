@@ -23,6 +23,7 @@ const groups: { label: string; items: { to: string; label: string; icon: any }[]
       { to: "/conteudos", label: "Conteúdos", icon: FileBox },
       { to: "/assinantes", label: "Assinantes", icon: Users },
       { to: "/grupos", label: "Grupos Telegram", icon: Send },
+      { to: "/postagens", label: "Postagens agendadas", icon: CalendarClock },
     ],
   },
   {
