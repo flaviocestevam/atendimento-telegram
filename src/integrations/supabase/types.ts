@@ -1438,6 +1438,7 @@ export type Database = {
           lead_stage: string
           next_best_action: string | null
           notes: string | null
+          parasocial_strength: number
           preferred_language: string
           purchase_intent_score: number
           relationship_score: number
@@ -1476,6 +1477,7 @@ export type Database = {
           lead_stage?: string
           next_best_action?: string | null
           notes?: string | null
+          parasocial_strength?: number
           preferred_language?: string
           purchase_intent_score?: number
           relationship_score?: number
@@ -1514,6 +1516,7 @@ export type Database = {
           lead_stage?: string
           next_best_action?: string | null
           notes?: string | null
+          parasocial_strength?: number
           preferred_language?: string
           purchase_intent_score?: number
           relationship_score?: number
@@ -3342,6 +3345,7 @@ export type Database = {
           last_name: string | null
           last_purchase_at: string | null
           origin: string | null
+          parasocial_strength: number
           score_buy: number
           score_relationship: number
           seller_profile_id: string | null
@@ -3363,6 +3367,7 @@ export type Database = {
           last_name?: string | null
           last_purchase_at?: string | null
           origin?: string | null
+          parasocial_strength?: number
           score_buy?: number
           score_relationship?: number
           seller_profile_id?: string | null
@@ -3384,6 +3389,7 @@ export type Database = {
           last_name?: string | null
           last_purchase_at?: string | null
           origin?: string | null
+          parasocial_strength?: number
           score_buy?: number
           score_relationship?: number
           seller_profile_id?: string | null
