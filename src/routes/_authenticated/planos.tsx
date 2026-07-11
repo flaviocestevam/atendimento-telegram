@@ -164,6 +164,17 @@ function Planos() {
                 </Select>
               </div>
             </div>
+            <div>
+              <Label>Cobrança</Label>
+              <Select value={form.billing_type} onValueChange={(v: any) => setForm({ ...form, billing_type: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="one_shot">Pagamento único</SelectItem>
+                  <SelectItem value="subscription">Assinatura recorrente</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">Recorrente: renova automaticamente na Cakto até o cliente cancelar.</p>
+            </div>
             <div><Label>Mensagem pós-compra</Label><Textarea rows={2} value={form.post_purchase_message} onChange={(e) => setForm({ ...form, post_purchase_message: e.target.value })}/></div>
             <div className="flex items-center justify-between p-3 rounded bg-muted">
               <Label>Plano ativo</Label>
