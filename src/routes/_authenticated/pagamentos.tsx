@@ -65,9 +65,31 @@ function Pagamentos() {
     qc.invalidateQueries({ queryKey: ["cakto_events_unlinked"] });
   }
 
+  const [reconciling, setReconciling] = useState(false);
+  async function reconcile() {
+    if (!profileId) return;
+    setReconciling(true);
+    try {
+      const { reconcileCakto } = await import("@/lib/cakto.functions");
+      const res: any = await reconcileCakto({ data: { sellerProfileId: profileId, limit: 100 } });
+      toast.success(`Reconciliação: ${res?.processed ?? 0} eventos processados`);
+      qc.invalidateQueries({ queryKey: ["payments"] });
+      qc.invalidateQueries({ queryKey: ["cakto_events_unlinked"] });
+    } catch (e: any) {
+      toast.error("Falha ao reconciliar: " + (e?.message ?? e));
+    } finally {
+      setReconciling(false);
+    }
+  }
+
   return (
     <div>
-      <PageHeader title="Pagamentos" subtitle="Pagamentos recebidos via Cakto e eventos pendentes de vinculação" />
+      <PageHeader
+        title="Pagamentos"
+        subtitle="Pagamentos recebidos via Cakto e eventos pendentes de vinculação"
+        actions={<Button variant="outline" size="sm" onClick={reconcile} disabled={reconciling}><RefreshCw className={"h-4 w-4 mr-2 " + (reconciling ? "animate-spin" : "")} />Reconciliar Cakto</Button>}
+      />
+
 
       <Tabs defaultValue="payments">
         <TabsList>

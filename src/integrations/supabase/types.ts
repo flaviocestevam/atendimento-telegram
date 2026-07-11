@@ -17,6 +17,8 @@ export type Database = {
       access_grants: {
         Row: {
           access_type: string
+          cakto_subscription_id: string | null
+          cancel_requested_at: string | null
           content_id: string | null
           created_at: string
           delivery_payload: string | null
@@ -24,8 +26,10 @@ export type Database = {
           id: string
           invite_link: string | null
           lead_id: string | null
+          next_charge_at: string | null
           order_id: string | null
           plan_id: string | null
+          renewal_count: number
           revoked_at: string | null
           seller_profile_id: string
           starts_at: string
@@ -35,6 +39,8 @@ export type Database = {
         }
         Insert: {
           access_type: string
+          cakto_subscription_id?: string | null
+          cancel_requested_at?: string | null
           content_id?: string | null
           created_at?: string
           delivery_payload?: string | null
@@ -42,8 +48,10 @@ export type Database = {
           id?: string
           invite_link?: string | null
           lead_id?: string | null
+          next_charge_at?: string | null
           order_id?: string | null
           plan_id?: string | null
+          renewal_count?: number
           revoked_at?: string | null
           seller_profile_id: string
           starts_at?: string
@@ -53,6 +61,8 @@ export type Database = {
         }
         Update: {
           access_type?: string
+          cakto_subscription_id?: string | null
+          cancel_requested_at?: string | null
           content_id?: string | null
           created_at?: string
           delivery_payload?: string | null
@@ -60,8 +70,10 @@ export type Database = {
           id?: string
           invite_link?: string | null
           lead_id?: string | null
+          next_charge_at?: string | null
           order_id?: string | null
           plan_id?: string | null
+          renewal_count?: number
           revoked_at?: string | null
           seller_profile_id?: string
           starts_at?: string
@@ -479,6 +491,77 @@ export type Database = {
             columns: ["seller_profile_id"]
             isOneToOne: false
             referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cancellation_events: {
+        Row: {
+          access_grant_id: string | null
+          created_at: string
+          id: string
+          lead_id: string | null
+          metadata: Json | null
+          offer_shown: string | null
+          outcome: string | null
+          reason: string | null
+          seller_profile_id: string | null
+          stage: string
+          telegram_user_id: string | null
+        }
+        Insert: {
+          access_grant_id?: string | null
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          metadata?: Json | null
+          offer_shown?: string | null
+          outcome?: string | null
+          reason?: string | null
+          seller_profile_id?: string | null
+          stage?: string
+          telegram_user_id?: string | null
+        }
+        Update: {
+          access_grant_id?: string | null
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          metadata?: Json | null
+          offer_shown?: string | null
+          outcome?: string | null
+          reason?: string | null
+          seller_profile_id?: string | null
+          stage?: string
+          telegram_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cancellation_events_access_grant_id_fkey"
+            columns: ["access_grant_id"]
+            isOneToOne: false
+            referencedRelation: "access_grants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cancellation_events_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cancellation_events_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cancellation_events_telegram_user_id_fkey"
+            columns: ["telegram_user_id"]
+            isOneToOne: false
+            referencedRelation: "telegram_users"
             referencedColumns: ["id"]
           },
         ]
@@ -1888,10 +1971,12 @@ export type Database = {
           approved_at_legacy: string | null
           cakto_order_id: string | null
           cakto_payment_id: string | null
+          cakto_subscription_id: string | null
           checkout_url: string | null
           created_at: string
           event_payload: Json | null
           id: string
+          is_renewal: boolean
           lead_id: string | null
           method: string
           order_id: string | null
@@ -1911,10 +1996,12 @@ export type Database = {
           approved_at_legacy?: string | null
           cakto_order_id?: string | null
           cakto_payment_id?: string | null
+          cakto_subscription_id?: string | null
           checkout_url?: string | null
           created_at?: string
           event_payload?: Json | null
           id?: string
+          is_renewal?: boolean
           lead_id?: string | null
           method?: string
           order_id?: string | null
@@ -1934,10 +2021,12 @@ export type Database = {
           approved_at_legacy?: string | null
           cakto_order_id?: string | null
           cakto_payment_id?: string | null
+          cakto_subscription_id?: string | null
           checkout_url?: string | null
           created_at?: string
           event_payload?: Json | null
           id?: string
+          is_renewal?: boolean
           lead_id?: string | null
           method?: string
           order_id?: string | null
@@ -1978,6 +2067,7 @@ export type Database = {
       plans: {
         Row: {
           access_type: string
+          billing_type: string
           cakto_checkout_url: string | null
           cakto_offer_id: string | null
           created_at: string
@@ -1993,10 +2083,12 @@ export type Database = {
           renewal_message: string | null
           seller_profile_id: string | null
           telegram_group_id: string | null
+          trial_days: number | null
           updated_at: string
         }
         Insert: {
           access_type: string
+          billing_type?: string
           cakto_checkout_url?: string | null
           cakto_offer_id?: string | null
           created_at?: string
@@ -2012,10 +2104,12 @@ export type Database = {
           renewal_message?: string | null
           seller_profile_id?: string | null
           telegram_group_id?: string | null
+          trial_days?: number | null
           updated_at?: string
         }
         Update: {
           access_type?: string
+          billing_type?: string
           cakto_checkout_url?: string | null
           cakto_offer_id?: string | null
           created_at?: string
@@ -2031,6 +2125,7 @@ export type Database = {
           renewal_message?: string | null
           seller_profile_id?: string | null
           telegram_group_id?: string | null
+          trial_days?: number | null
           updated_at?: string
         }
         Relationships: [

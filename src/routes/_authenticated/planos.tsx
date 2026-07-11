@@ -26,11 +26,12 @@ type Form = {
   name: string; description: string;
   price_reais: string; duration_days: string;
   access_type: "group" | "channel";
+  billing_type: "one_shot" | "subscription";
   telegram_group_id: string | null;
   post_purchase_message: string; is_active: boolean;
 };
 
-const empty: Form = { name: "", description: "", price_reais: "", duration_days: "30", access_type: "group", telegram_group_id: null, post_purchase_message: "", is_active: true };
+const empty: Form = { name: "", description: "", price_reais: "", duration_days: "30", access_type: "group", billing_type: "one_shot", telegram_group_id: null, post_purchase_message: "", is_active: true };
 
 function Planos() {
   const qc = useQueryClient();
@@ -55,6 +56,7 @@ function Planos() {
       id: p.id, name: p.name, description: p.description ?? "",
       price_reais: (p.price_cents / 100).toFixed(2),
       duration_days: String(p.duration_days), access_type: p.access_type,
+      billing_type: p.billing_type ?? "one_shot",
       telegram_group_id: p.telegram_group_id, post_purchase_message: p.post_purchase_message ?? "", is_active: p.is_active,
     });
     setOpen(true);
@@ -68,6 +70,7 @@ function Planos() {
       price_cents: Math.round(parseFloat(form.price_reais || "0") * 100),
       duration_days: parseInt(form.duration_days || "0", 10),
       access_type: form.access_type,
+      billing_type: form.billing_type,
       telegram_group_id: form.telegram_group_id,
       post_purchase_message: form.post_purchase_message || null,
       is_active: form.is_active,
@@ -111,7 +114,7 @@ function Planos() {
               <div className="text-3xl font-bold" style={{ backgroundImage: "var(--gradient-brand)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                 {BRL(p.price_cents)}
               </div>
-              <div className="text-xs text-muted-foreground">{p.duration_days} dias · {p.access_type === "group" ? "Grupo" : "Canal"}</div>
+              <div className="text-xs text-muted-foreground">{p.duration_days} dias · {p.access_type === "group" ? "Grupo" : "Canal"} · {p.billing_type === "subscription" ? "Recorrente" : "Único"}</div>
             </div>
             <div className="text-xs text-muted-foreground mt-2 truncate">→ {p.telegram_groups?.name ?? "Sem grupo"}</div>
             <div className="flex gap-2 mt-4">
@@ -160,6 +163,17 @@ function Planos() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+            <div>
+              <Label>Cobrança</Label>
+              <Select value={form.billing_type} onValueChange={(v: any) => setForm({ ...form, billing_type: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="one_shot">Pagamento único</SelectItem>
+                  <SelectItem value="subscription">Assinatura recorrente</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">Recorrente: renova automaticamente na Cakto até o cliente cancelar.</p>
             </div>
             <div><Label>Mensagem pós-compra</Label><Textarea rows={2} value={form.post_purchase_message} onChange={(e) => setForm({ ...form, post_purchase_message: e.target.value })}/></div>
             <div className="flex items-center justify-between p-3 rounded bg-muted">
