@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, useEffect } from "react";
 import { callGrok } from "@/lib/grok.functions";
+import { sendTelegramMessage } from "@/lib/telegram.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useActiveProfile } from "@/lib/active-profile";
 import { Card } from "@/components/ui/card";
@@ -14,7 +15,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { relTime, dateTimeBR, BRL } from "@/lib/format";
-import { Send, Sparkles, UserCheck, Pause, Play, Search, Languages } from "lucide-react";
+import { Send, Sparkles, UserCheck, Pause, Play, Search, Languages, Zap, GitBranch } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -45,7 +47,10 @@ function ConversasPage() {
   const [reply, setReply] = useState("");
   const qc = useQueryClient();
   const callGrokFn = useServerFn(callGrok);
+  const sendTgFn = useServerFn(sendTelegramMessage);
   const [grokLoading, setGrokLoading] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [applyOpen, setApplyOpen] = useState(false);
 
 
   const convs = useQuery({
@@ -183,23 +188,73 @@ function ConversasPage() {
   }
 
   async function sendReply() {
-    if (!reply.trim() || !selected || !profileId) return;
-    const { error } = await supabase.from("messages").insert({
+    if (!reply.trim() || !selected) return;
+    setSending(true);
+    try {
+      const res: any = await sendTgFn({ data: { conversationId: selected.id, text: reply } });
+      if (!res?.ok) {
+        toast.error("Falha ao enviar: " + (res?.error ?? "desconhecido"));
+        return;
+      }
+      setReply("");
+      qc.invalidateQueries({ queryKey: ["messages", selected.id] });
+      qc.invalidateQueries({ queryKey: ["conversations"] });
+      toast.success("Enviado");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  const quickReplies = useQuery({
+    enabled: !!profileId,
+    queryKey: ["quick_replies", profileId],
+    queryFn: async () => (await supabase.from("quick_replies").select("id,title,body,usage_count").eq("seller_profile_id", profileId!).eq("active", true).order("usage_count", { ascending: false }).limit(12)).data ?? [],
+  });
+
+  const funnelsAndStories = useQuery({
+    enabled: !!profileId && applyOpen,
+    queryKey: ["funnels_stories", profileId],
+    queryFn: async () => {
+      const [f, s] = await Promise.all([
+        supabase.from("funnels").select("id,name,status").eq("seller_profile_id", profileId!).eq("status", "active").order("name"),
+        supabase.from("stories").select("id,name,status").eq("seller_profile_id", profileId!).eq("status", "active").order("name"),
+      ]);
+      return { funnels: f.data ?? [], stories: s.data ?? [] };
+    },
+  });
+
+  async function useQuickReply(qr: any) {
+    setReply((r) => (r ? r + " " : "") + qr.body);
+    await supabase.from("quick_replies").update({ usage_count: (qr.usage_count ?? 0) + 1 }).eq("id", qr.id);
+  }
+
+  async function applyFunnel(funnelId: string) {
+    if (!leadQ.data?.id || !profileId) return toast.error("Lead não encontrado");
+    const { error } = await supabase.from("funnel_memberships").insert({
       seller_profile_id: profileId,
-      conversation_id: selected.id,
-      telegram_user_id: selected.telegram_user_id,
-      direction: "outbound",
-      sender_type: "admin",
-      sender: "admin",
-      kind: "text",
-      text: reply,
+      funnel_id: funnelId,
+      lead_id: leadQ.data.id,
+      status: "active",
     });
     if (error) return toast.error(error.message);
-    await supabase.from("conversations").update({ last_message_at: new Date().toISOString() }).eq("id", selected.id);
-    setReply("");
-    qc.invalidateQueries({ queryKey: ["messages", selected.id] });
-    toast.success("Mensagem enviada (mock — Telegram não conectado)");
+    toast.success("Funil aplicado ao lead");
+    setApplyOpen(false);
   }
+
+  async function applyStory(storyId: string) {
+    if (!leadQ.data?.id) return toast.error("Lead não encontrado");
+    const { error } = await supabase.from("story_leads").insert({
+      story_id: storyId,
+      lead_id: leadQ.data.id,
+      current_step: 0,
+      status: "active",
+    });
+    if (error) return toast.error(error.message);
+    toast.success("História aplicada ao lead");
+    setApplyOpen(false);
+  }
+
+
 
   async function toggleAI() {
     if (!selected) return;
@@ -326,6 +381,21 @@ function ConversasPage() {
                     {grokLoading ? "Gerando..." : "Sugerir"}
                   </Button>
                 </div>
+                {(quickReplies.data?.length ?? 0) > 0 && (
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <Zap className="h-3 w-3 text-muted-foreground shrink-0" />
+                    {(quickReplies.data ?? []).map((qr: any) => (
+                      <button
+                        key={qr.id}
+                        onClick={() => useQuickReply(qr)}
+                        className="text-xs px-2 py-1 rounded-full bg-muted hover:bg-primary/20 border border-border transition-colors"
+                        title={qr.body}
+                      >
+                        {qr.title}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 <div className="flex gap-2">
                   <Textarea
                     rows={2}
@@ -334,7 +404,7 @@ function ConversasPage() {
                     onChange={(e) => setReply(e.target.value)}
                     className="flex-1 resize-none"
                   />
-                  <Button onClick={sendReply}><Send className="h-4 w-4"/></Button>
+                  <Button onClick={sendReply} disabled={sending}><Send className="h-4 w-4"/></Button>
                 </div>
               </div>
             </>
@@ -404,6 +474,9 @@ function ConversasPage() {
                 </div>
               </div>
               <div className="space-y-2">
+                <Button size="sm" variant="outline" className="w-full" onClick={() => setApplyOpen(true)}>
+                  <GitBranch className="h-3 w-3 mr-1"/>Aplicar funil / história
+                </Button>
                 <Button size="sm" variant="outline" className="w-full">Reenviar link</Button>
                 <Button size="sm" variant="outline" className="w-full">Ver pagamentos</Button>
                 <Button size="sm" variant="outline" className="w-full">Liberar manualmente</Button>
@@ -414,6 +487,36 @@ function ConversasPage() {
           )}
         </Card>
       </div>
+
+      <Dialog open={applyOpen} onOpenChange={setApplyOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Aplicar ao lead</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <p className="text-xs uppercase text-muted-foreground mb-2">Funis ativos</p>
+              <div className="space-y-1">
+                {(funnelsAndStories.data?.funnels ?? []).map((f: any) => (
+                  <button key={f.id} onClick={() => applyFunnel(f.id)} className="w-full text-left p-2 rounded hover:bg-muted text-sm">
+                    {f.name}
+                  </button>
+                ))}
+                {(funnelsAndStories.data?.funnels.length ?? 0) === 0 && <p className="text-xs text-muted-foreground">Nenhum funil ativo.</p>}
+              </div>
+            </div>
+            <div>
+              <p className="text-xs uppercase text-muted-foreground mb-2">Histórias ativas</p>
+              <div className="space-y-1">
+                {(funnelsAndStories.data?.stories ?? []).map((s: any) => (
+                  <button key={s.id} onClick={() => applyStory(s.id)} className="w-full text-left p-2 rounded hover:bg-muted text-sm">
+                    {s.name}
+                  </button>
+                ))}
+                {(funnelsAndStories.data?.stories.length ?? 0) === 0 && <p className="text-xs text-muted-foreground">Nenhuma história ativa.</p>}
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
