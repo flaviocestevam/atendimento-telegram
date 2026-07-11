@@ -2,7 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard, MessagesSquare, Users, Package, FileBox,
   CreditCard, Send, Bot, Workflow, Settings, UserCircle,
-  GitBranch, BookOpen, Zap, X,
+  GitBranch, BookOpen, Zap, X, CalendarClock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
