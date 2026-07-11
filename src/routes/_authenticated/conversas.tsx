@@ -188,23 +188,76 @@ function ConversasPage() {
   }
 
   async function sendReply() {
-    if (!reply.trim() || !selected || !profileId) return;
-    const { error } = await supabase.from("messages").insert({
+    if (!reply.trim() || !selected) return;
+    setSending(true);
+    try {
+      const res: any = await sendTgFn({ data: { conversationId: selected.id, text: reply } });
+      if (!res?.ok) {
+        toast.error("Falha ao enviar: " + (res?.error ?? "desconhecido"));
+        return;
+      }
+      setReply("");
+      qc.invalidateQueries({ queryKey: ["messages", selected.id] });
+      qc.invalidateQueries({ queryKey: ["conversations"] });
+      toast.success("Enviado");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  const quickReplies = useQuery({
+    enabled: !!profileId,
+    queryKey: ["quick_replies", profileId],
+    queryFn: async () => (await supabase.from("quick_replies").select("id,label,text,shortcut").eq("seller_profile_id", profileId!).eq("is_active", true).order("usage_count", { ascending: false }).limit(12)).data ?? [],
+  });
+
+  const funnelsAndStories = useQuery({
+    enabled: !!profileId && applyOpen,
+    queryKey: ["funnels_stories", profileId],
+    queryFn: async () => {
+      const [f, s] = await Promise.all([
+        supabase.from("funnels").select("id,name,is_active").eq("seller_profile_id", profileId!).eq("is_active", true).order("name"),
+        supabase.from("stories").select("id,name,is_active").eq("seller_profile_id", profileId!).eq("is_active", true).order("name"),
+      ]);
+      return { funnels: f.data ?? [], stories: s.data ?? [] };
+    },
+  });
+
+  async function useQuickReply(qr: any) {
+    setReply((r) => (r ? r + " " : "") + qr.text);
+    await supabase.from("quick_replies").update({ usage_count: (qr.usage_count ?? 0) + 1, last_used_at: new Date().toISOString() }).eq("id", qr.id);
+  }
+
+  async function applyFunnel(funnelId: string) {
+    if (!leadQ.data?.id || !profileId) return toast.error("Lead não encontrado");
+    const { error } = await supabase.from("funnel_memberships").insert({
       seller_profile_id: profileId,
-      conversation_id: selected.id,
-      telegram_user_id: selected.telegram_user_id,
-      direction: "outbound",
-      sender_type: "admin",
-      sender: "admin",
-      kind: "text",
-      text: reply,
+      funnel_id: funnelId,
+      lead_id: leadQ.data.id,
+      telegram_user_id: selected!.telegram_user_id,
+      current_step: 0,
+      status: "active",
     });
     if (error) return toast.error(error.message);
-    await supabase.from("conversations").update({ last_message_at: new Date().toISOString() }).eq("id", selected.id);
-    setReply("");
-    qc.invalidateQueries({ queryKey: ["messages", selected.id] });
-    toast.success("Mensagem enviada (mock — Telegram não conectado)");
+    toast.success("Funil aplicado ao lead");
+    setApplyOpen(false);
   }
+
+  async function applyStory(storyId: string) {
+    if (!leadQ.data?.id || !profileId) return toast.error("Lead não encontrado");
+    const { error } = await supabase.from("story_leads").insert({
+      seller_profile_id: profileId,
+      story_id: storyId,
+      lead_id: leadQ.data.id,
+      telegram_user_id: selected!.telegram_user_id,
+      current_step: 0,
+      status: "active",
+    });
+    if (error) return toast.error(error.message);
+    toast.success("História aplicada ao lead");
+    setApplyOpen(false);
+  }
+
 
   async function toggleAI() {
     if (!selected) return;
