@@ -56,6 +56,7 @@ function Planos() {
       id: p.id, name: p.name, description: p.description ?? "",
       price_reais: (p.price_cents / 100).toFixed(2),
       duration_days: String(p.duration_days), access_type: p.access_type,
+      billing_type: p.billing_type ?? "one_shot",
       telegram_group_id: p.telegram_group_id, post_purchase_message: p.post_purchase_message ?? "", is_active: p.is_active,
     });
     setOpen(true);
