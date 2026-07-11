@@ -70,9 +70,19 @@ function IAPage() {
       provider: form.provider, model: form.model, system_prompt: form.system_prompt,
       tone: form.tone, fallback_message: form.fallback_message,
       enable_ai: form.enable_ai, max_messages_per_user_per_day: form.max_messages_per_user_per_day,
+      enable_auto_reply: form.enable_auto_reply,
+      require_approval_for_offers: form.require_approval_for_offers,
+      require_approval_for_funnel_changes: form.require_approval_for_funnel_changes,
     }).eq("id", form.id);
     if (error) return toast.error(error.message);
     toast.success("Configurações da IA atualizadas");
+  }
+
+  async function toggleGuardrail(key: "enable_auto_reply" | "require_approval_for_offers" | "require_approval_for_funnel_changes", value: boolean) {
+    if (!form) return;
+    setForm({ ...form, [key]: value });
+    const { error } = await supabase.from("ai_settings").update({ [key]: value }).eq("id", form.id);
+    if (error) toast.error(error.message);
   }
 
   // Search filters per tab
