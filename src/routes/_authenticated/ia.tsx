@@ -206,6 +206,32 @@ function IAPage() {
               </div>
               <div><Label>Mensagem de fallback</Label><Textarea rows={2} value={form.fallback_message ?? ""} onChange={(e) => setForm({ ...form, fallback_message: e.target.value })} /></div>
               <div><Label>Máx. mensagens por usuário/dia</Label><Input type="number" value={form.max_messages_per_user_per_day} onChange={(e) => setForm({ ...form, max_messages_per_user_per_day: parseInt(e.target.value || "0", 10) })} /></div>
+
+              <div className="pt-2 space-y-2 border-t border-border">
+                <p className="text-sm font-semibold">Guardrails</p>
+                <div className="flex items-center justify-between p-3 rounded bg-muted">
+                  <div>
+                    <Label>Enviar respostas automaticamente</Label>
+                    <p className="text-xs text-muted-foreground">Se desligado, a IA só sugere — nunca envia sozinha.</p>
+                  </div>
+                  <Switch checked={!!form.enable_auto_reply} onCheckedChange={(v) => toggleGuardrail("enable_auto_reply", v)} />
+                </div>
+                <div className="flex items-center justify-between p-3 rounded bg-muted">
+                  <div>
+                    <Label>Exigir aprovação para ofertas / descontos</Label>
+                    <p className="text-xs text-muted-foreground">A IA propõe, você aprova antes de enviar ao lead.</p>
+                  </div>
+                  <Switch checked={!!form.require_approval_for_offers} onCheckedChange={(v) => toggleGuardrail("require_approval_for_offers", v)} />
+                </div>
+                <div className="flex items-center justify-between p-3 rounded bg-muted">
+                  <div>
+                    <Label>Exigir aprovação para trocar funil / história</Label>
+                    <p className="text-xs text-muted-foreground">Mudanças de jornada precisam do seu OK.</p>
+                  </div>
+                  <Switch checked={!!form.require_approval_for_funnel_changes} onCheckedChange={(v) => toggleGuardrail("require_approval_for_funnel_changes", v)} />
+                </div>
+              </div>
+
               <div className="flex justify-end"><Button onClick={saveSettings}>Salvar configurações</Button></div>
             </Card>
 
