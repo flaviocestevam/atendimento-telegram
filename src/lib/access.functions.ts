@@ -1,11 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 
 // Libera acesso após pagamento aprovado.
-// - Para plano: cria access_grant, calcula expires_at, gera invite link Telegram, envia.
+// - Para plano: cria access_grant, calcula expires_at, gera invite link Telegram (single-use), envia.
 // - Para conteúdo: cria access_grant e entrega payload (texto/link/arquivo).
+// - Assinatura recorrente (billing_type='subscription'): rastreia cakto_subscription_id + next_charge_at.
 // SEGURANÇA: nunca libera se o payment não estiver `approved`.
 export const grantAccess = createServerFn({ method: "POST" })
-  .inputValidator((input: { paymentId: string }) => input)
+  .inputValidator((input: { paymentId: string; caktoSubscriptionId?: string | null }) => input)
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
@@ -24,33 +25,54 @@ export const grantAccess = createServerFn({ method: "POST" })
     const isPlan = order.item_type === "plan";
     const accessType = isPlan ? "group" : "content";
 
-    // Busca item para descobrir grupo/duração/payload
     const itemTable = isPlan ? "plans" : "contents";
     const itemId = isPlan ? order.plan_id : order.content_id;
     const { data: item } = await supabaseAdmin.from(itemTable).select("*").eq("id", itemId).maybeSingle();
     if (!item) return { ok: false, error: "item_not_found" };
 
+    const isSubscription = isPlan && (item as any).billing_type === "subscription";
+
     let expiresAt: string | null = null;
+    let nextChargeAt: string | null = null;
     if (isPlan && (item as any).duration_days) {
       const d = new Date();
       d.setDate(d.getDate() + (item as any).duration_days);
       expiresAt = d.toISOString();
+      if (isSubscription) nextChargeAt = d.toISOString();
     } else if (!isPlan && !(item as any).lifetime_access && (item as any).access_duration_days) {
       const d = new Date();
       d.setDate(d.getDate() + (item as any).access_duration_days);
       expiresAt = d.toISOString();
     }
 
-    let inviteLink: string | null = isPlan ? null : null;
+    // Invite link: prioriza createChatInviteLink single-use; fallback pro default_invite_link do grupo.
+    let inviteLink: string | null = null;
     if (isPlan) {
-      // tenta criar invite link Telegram pelo grupo configurado
       const { data: group } = await supabaseAdmin
         .from("telegram_groups")
-        .select("*")
+        .select("id, chat_id, default_invite_link")
         .eq("id", (item as any).telegram_group_id)
         .maybeSingle();
-      inviteLink = (group as any)?.default_invite_link ?? null;
-      // (Geração dinâmica via createChatInviteLink fica disponível em telegram.functions.ts)
+
+      if (group?.chat_id) {
+        try {
+          const { createTelegramInviteLink } = await import("@/lib/telegram.functions");
+          const res: any = await createTelegramInviteLink({
+            data: {
+              chatId: group.chat_id,
+              expireSeconds: 60 * 60, // 1h para o lead entrar
+              memberLimit: 1,
+              sellerProfileId: payment.seller_profile_id,
+            },
+          });
+          if (res?.ok && res.data?.result?.invite_link) {
+            inviteLink = res.data.result.invite_link;
+          }
+        } catch (err) {
+          console.error("[grantAccess] createChatInviteLink failed:", err);
+        }
+      }
+      if (!inviteLink) inviteLink = group?.default_invite_link ?? null;
     }
 
     const { data: grant } = await supabaseAdmin
@@ -66,6 +88,8 @@ export const grantAccess = createServerFn({ method: "POST" })
         access_type: accessType,
         status: "active",
         expires_at: expiresAt,
+        next_charge_at: nextChargeAt,
+        cakto_subscription_id: data.caktoSubscriptionId ?? null,
         invite_link: inviteLink,
         delivery_payload: !isPlan ? (item as any).delivery_payload : null,
       })
@@ -75,11 +99,17 @@ export const grantAccess = createServerFn({ method: "POST" })
     await supabaseAdmin.from("activity_logs").insert({
       type: "access_granted",
       telegram_user_id: order.telegram_user_id,
-      description: `Acesso liberado: ${(item as any).name}`,
-      metadata: { grant_id: grant?.id, expires_at: expiresAt, invite_link: inviteLink },
+      description: `Acesso liberado: ${(item as any).name}${isSubscription ? " (assinatura)" : ""}`,
+      metadata: {
+        grant_id: grant?.id,
+        expires_at: expiresAt,
+        invite_link: inviteLink,
+        subscription: isSubscription,
+        cakto_subscription_id: data.caktoSubscriptionId ?? null,
+      },
     });
 
-    return { ok: true, grantId: grant?.id, inviteLink, expiresAt, isPlan, item };
+    return { ok: true, grantId: grant?.id, inviteLink, expiresAt, isPlan, isSubscription, item };
   });
 
 // Marca acessos vencidos (job manual / cron).
