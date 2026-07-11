@@ -26,6 +26,13 @@ function Assinantes() {
   const { profileId } = useActiveProfile();
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const qc = useQueryClient();
+  const reqCancel = useServerFn(requestCancellation);
+  const recRetention = useServerFn(recordRetentionOutcome);
+  const [retentionOpen, setRetentionOpen] = useState(false);
+  const [target, setTarget] = useState<{ grantId: string; name: string; plan: string } | null>(null);
+  const [cancellationId, setCancellationId] = useState<string | null>(null);
+  const [step, setStep] = useState<"offer" | "confirm">("offer");
 
   const q = useQuery({
     enabled: !!profileId,
@@ -40,7 +47,7 @@ function Assinantes() {
 
       const { data: grants } = await supabase
         .from("access_grants")
-        .select("telegram_user_id,expires_at,status,plans(name)")
+        .select("id,telegram_user_id,expires_at,status,plans(name)")
         .eq("seller_profile_id", sp)
         .eq("status", "active");
 
