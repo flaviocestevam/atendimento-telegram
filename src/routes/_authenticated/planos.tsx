@@ -26,11 +26,12 @@ type Form = {
   name: string; description: string;
   price_reais: string; duration_days: string;
   access_type: "group" | "channel";
+  billing_type: "one_shot" | "subscription";
   telegram_group_id: string | null;
   post_purchase_message: string; is_active: boolean;
 };
 
-const empty: Form = { name: "", description: "", price_reais: "", duration_days: "30", access_type: "group", telegram_group_id: null, post_purchase_message: "", is_active: true };
+const empty: Form = { name: "", description: "", price_reais: "", duration_days: "30", access_type: "group", billing_type: "one_shot", telegram_group_id: null, post_purchase_message: "", is_active: true };
 
 function Planos() {
   const qc = useQueryClient();
