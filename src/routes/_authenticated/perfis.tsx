@@ -216,7 +216,7 @@ function PerfisPage() {
                           setProfileId(p.id);
                           qc.invalidateQueries();
                         }
-                        router.navigate({ to: "/perfil-vendedor" });
+                        router.navigate({ to: "/perfil-influenciadora" });
                       }}
                     >
                       <Pencil className="h-3.5 w-3.5 mr-1" />

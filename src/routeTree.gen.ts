@@ -16,7 +16,7 @@ import { Route as AuthenticatedRespostasRapidasRouteImport } from './routes/_aut
 import { Route as AuthenticatedPostagensRouteImport } from './routes/_authenticated/postagens'
 import { Route as AuthenticatedPlanosRouteImport } from './routes/_authenticated/planos'
 import { Route as AuthenticatedPerfisRouteImport } from './routes/_authenticated/perfis'
-import { Route as AuthenticatedPerfilVendedorRouteImport } from './routes/_authenticated/perfil-vendedor'
+import { Route as AuthenticatedPerfilInfluenciadoraRouteImport } from './routes/_authenticated/perfil-influenciadora'
 import { Route as AuthenticatedPagamentosRouteImport } from './routes/_authenticated/pagamentos'
 import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
 import { Route as AuthenticatedIaRouteImport } from './routes/_authenticated/ia'
@@ -71,10 +71,10 @@ const AuthenticatedPerfisRoute = AuthenticatedPerfisRouteImport.update({
   path: '/perfis',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedPerfilVendedorRoute =
-  AuthenticatedPerfilVendedorRouteImport.update({
-    id: '/perfil-vendedor',
-    path: '/perfil-vendedor',
+const AuthenticatedPerfilInfluenciadoraRoute =
+  AuthenticatedPerfilInfluenciadoraRouteImport.update({
+    id: '/perfil-influenciadora',
+    path: '/perfil-influenciadora',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedPagamentosRoute = AuthenticatedPagamentosRouteImport.update({
@@ -188,7 +188,7 @@ export interface FileRoutesByFullPath {
   '/ia': typeof AuthenticatedIaRoute
   '/leads': typeof AuthenticatedLeadsRoute
   '/pagamentos': typeof AuthenticatedPagamentosRoute
-  '/perfil-vendedor': typeof AuthenticatedPerfilVendedorRoute
+  '/perfil-influenciadora': typeof AuthenticatedPerfilInfluenciadoraRoute
   '/perfis': typeof AuthenticatedPerfisRouteWithChildren
   '/planos': typeof AuthenticatedPlanosRoute
   '/postagens': typeof AuthenticatedPostagensRoute
@@ -215,7 +215,7 @@ export interface FileRoutesByTo {
   '/ia': typeof AuthenticatedIaRoute
   '/leads': typeof AuthenticatedLeadsRoute
   '/pagamentos': typeof AuthenticatedPagamentosRoute
-  '/perfil-vendedor': typeof AuthenticatedPerfilVendedorRoute
+  '/perfil-influenciadora': typeof AuthenticatedPerfilInfluenciadoraRoute
   '/perfis': typeof AuthenticatedPerfisRouteWithChildren
   '/planos': typeof AuthenticatedPlanosRoute
   '/postagens': typeof AuthenticatedPostagensRoute
@@ -244,7 +244,7 @@ export interface FileRoutesById {
   '/_authenticated/ia': typeof AuthenticatedIaRoute
   '/_authenticated/leads': typeof AuthenticatedLeadsRoute
   '/_authenticated/pagamentos': typeof AuthenticatedPagamentosRoute
-  '/_authenticated/perfil-vendedor': typeof AuthenticatedPerfilVendedorRoute
+  '/_authenticated/perfil-influenciadora': typeof AuthenticatedPerfilInfluenciadoraRoute
   '/_authenticated/perfis': typeof AuthenticatedPerfisRouteWithChildren
   '/_authenticated/planos': typeof AuthenticatedPlanosRoute
   '/_authenticated/postagens': typeof AuthenticatedPostagensRoute
@@ -273,7 +273,7 @@ export interface FileRouteTypes {
     | '/ia'
     | '/leads'
     | '/pagamentos'
-    | '/perfil-vendedor'
+    | '/perfil-influenciadora'
     | '/perfis'
     | '/planos'
     | '/postagens'
@@ -300,7 +300,7 @@ export interface FileRouteTypes {
     | '/ia'
     | '/leads'
     | '/pagamentos'
-    | '/perfil-vendedor'
+    | '/perfil-influenciadora'
     | '/perfis'
     | '/planos'
     | '/postagens'
@@ -328,7 +328,7 @@ export interface FileRouteTypes {
     | '/_authenticated/ia'
     | '/_authenticated/leads'
     | '/_authenticated/pagamentos'
-    | '/_authenticated/perfil-vendedor'
+    | '/_authenticated/perfil-influenciadora'
     | '/_authenticated/perfis'
     | '/_authenticated/planos'
     | '/_authenticated/postagens'
@@ -401,11 +401,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPerfisRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/perfil-vendedor': {
-      id: '/_authenticated/perfil-vendedor'
-      path: '/perfil-vendedor'
-      fullPath: '/perfil-vendedor'
-      preLoaderRoute: typeof AuthenticatedPerfilVendedorRouteImport
+    '/_authenticated/perfil-influenciadora': {
+      id: '/_authenticated/perfil-influenciadora'
+      path: '/perfil-influenciadora'
+      fullPath: '/perfil-influenciadora'
+      preLoaderRoute: typeof AuthenticatedPerfilInfluenciadoraRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/pagamentos': {
@@ -561,7 +561,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedIaRoute: typeof AuthenticatedIaRoute
   AuthenticatedLeadsRoute: typeof AuthenticatedLeadsRoute
   AuthenticatedPagamentosRoute: typeof AuthenticatedPagamentosRoute
-  AuthenticatedPerfilVendedorRoute: typeof AuthenticatedPerfilVendedorRoute
+  AuthenticatedPerfilInfluenciadoraRoute: typeof AuthenticatedPerfilInfluenciadoraRoute
   AuthenticatedPerfisRoute: typeof AuthenticatedPerfisRouteWithChildren
   AuthenticatedPlanosRoute: typeof AuthenticatedPlanosRoute
   AuthenticatedPostagensRoute: typeof AuthenticatedPostagensRoute
@@ -581,7 +581,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedIaRoute: AuthenticatedIaRoute,
   AuthenticatedLeadsRoute: AuthenticatedLeadsRoute,
   AuthenticatedPagamentosRoute: AuthenticatedPagamentosRoute,
-  AuthenticatedPerfilVendedorRoute: AuthenticatedPerfilVendedorRoute,
+  AuthenticatedPerfilInfluenciadoraRoute:
+    AuthenticatedPerfilInfluenciadoraRoute,
   AuthenticatedPerfisRoute: AuthenticatedPerfisRouteWithChildren,
   AuthenticatedPlanosRoute: AuthenticatedPlanosRoute,
   AuthenticatedPostagensRoute: AuthenticatedPostagensRoute,
