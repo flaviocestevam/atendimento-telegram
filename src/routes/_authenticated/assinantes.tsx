@@ -64,7 +64,7 @@ function Assinantes() {
         if (u.is_blocked) status = "blocked";
         else if (g) status = "active";
         else if (totalPago > 0) status = "expired";
-        return { ...u, status, plano: g?.plans?.name ?? "—", vencimento: g?.expires_at, totalPago, ultimo: ultimo?.paid_at };
+        return { ...u, status, plano: g?.plans?.name ?? "—", vencimento: g?.expires_at, grantId: g?.id ?? null, totalPago, ultimo: ultimo?.paid_at };
       });
       return list.filter((r: any) => {
         if (filter !== "all" && r.status !== filter) return false;
