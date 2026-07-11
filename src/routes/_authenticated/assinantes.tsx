@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useActiveProfile } from "@/lib/active-profile";
@@ -9,10 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { BRL, dateBR } from "@/lib/format";
-import { MoreVertical, Search } from "lucide-react";
+import { MoreVertical, Search, Pause, TrendingDown, X, Heart } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { requestCancellation, recordRetentionOutcome } from "@/lib/cakto.functions";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/assinantes")({
   component: Assinantes,
