@@ -474,6 +474,9 @@ function ConversasPage() {
                 </div>
               </div>
               <div className="space-y-2">
+                <Button size="sm" variant="outline" className="w-full" onClick={() => setApplyOpen(true)}>
+                  <GitBranch className="h-3 w-3 mr-1"/>Aplicar funil / história
+                </Button>
                 <Button size="sm" variant="outline" className="w-full">Reenviar link</Button>
                 <Button size="sm" variant="outline" className="w-full">Ver pagamentos</Button>
                 <Button size="sm" variant="outline" className="w-full">Liberar manualmente</Button>
@@ -484,6 +487,36 @@ function ConversasPage() {
           )}
         </Card>
       </div>
+
+      <Dialog open={applyOpen} onOpenChange={setApplyOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Aplicar ao lead</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <p className="text-xs uppercase text-muted-foreground mb-2">Funis ativos</p>
+              <div className="space-y-1">
+                {(funnelsAndStories.data?.funnels ?? []).map((f: any) => (
+                  <button key={f.id} onClick={() => applyFunnel(f.id)} className="w-full text-left p-2 rounded hover:bg-muted text-sm">
+                    {f.name}
+                  </button>
+                ))}
+                {(funnelsAndStories.data?.funnels.length ?? 0) === 0 && <p className="text-xs text-muted-foreground">Nenhum funil ativo.</p>}
+              </div>
+            </div>
+            <div>
+              <p className="text-xs uppercase text-muted-foreground mb-2">Histórias ativas</p>
+              <div className="space-y-1">
+                {(funnelsAndStories.data?.stories ?? []).map((s: any) => (
+                  <button key={s.id} onClick={() => applyStory(s.id)} className="w-full text-left p-2 rounded hover:bg-muted text-sm">
+                    {s.name}
+                  </button>
+                ))}
+                {(funnelsAndStories.data?.stories.length ?? 0) === 0 && <p className="text-xs text-muted-foreground">Nenhuma história ativa.</p>}
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
