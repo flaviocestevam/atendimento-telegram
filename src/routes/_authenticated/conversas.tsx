@@ -208,7 +208,7 @@ function ConversasPage() {
   const quickReplies = useQuery({
     enabled: !!profileId,
     queryKey: ["quick_replies", profileId],
-    queryFn: async () => (await supabase.from("quick_replies").select("id,label,text,shortcut").eq("seller_profile_id", profileId!).eq("is_active", true).order("usage_count", { ascending: false }).limit(12)).data ?? [],
+    queryFn: async () => (await supabase.from("quick_replies").select("id,title,body,usage_count").eq("seller_profile_id", profileId!).eq("active", true).order("usage_count", { ascending: false }).limit(12)).data ?? [],
   });
 
   const funnelsAndStories = useQuery({
@@ -216,16 +216,16 @@ function ConversasPage() {
     queryKey: ["funnels_stories", profileId],
     queryFn: async () => {
       const [f, s] = await Promise.all([
-        supabase.from("funnels").select("id,name,is_active").eq("seller_profile_id", profileId!).eq("is_active", true).order("name"),
-        supabase.from("stories").select("id,name,is_active").eq("seller_profile_id", profileId!).eq("is_active", true).order("name"),
+        supabase.from("funnels").select("id,name,status").eq("seller_profile_id", profileId!).eq("status", "active").order("name"),
+        supabase.from("stories").select("id,name,status").eq("seller_profile_id", profileId!).eq("status", "active").order("name"),
       ]);
       return { funnels: f.data ?? [], stories: s.data ?? [] };
     },
   });
 
   async function useQuickReply(qr: any) {
-    setReply((r) => (r ? r + " " : "") + qr.text);
-    await supabase.from("quick_replies").update({ usage_count: (qr.usage_count ?? 0) + 1, last_used_at: new Date().toISOString() }).eq("id", qr.id);
+    setReply((r) => (r ? r + " " : "") + qr.body);
+    await supabase.from("quick_replies").update({ usage_count: (qr.usage_count ?? 0) + 1 }).eq("id", qr.id);
   }
 
   async function applyFunnel(funnelId: string) {
@@ -234,8 +234,6 @@ function ConversasPage() {
       seller_profile_id: profileId,
       funnel_id: funnelId,
       lead_id: leadQ.data.id,
-      telegram_user_id: selected!.telegram_user_id,
-      current_step: 0,
       status: "active",
     });
     if (error) return toast.error(error.message);
@@ -244,12 +242,10 @@ function ConversasPage() {
   }
 
   async function applyStory(storyId: string) {
-    if (!leadQ.data?.id || !profileId) return toast.error("Lead não encontrado");
+    if (!leadQ.data?.id) return toast.error("Lead não encontrado");
     const { error } = await supabase.from("story_leads").insert({
-      seller_profile_id: profileId,
       story_id: storyId,
       lead_id: leadQ.data.id,
-      telegram_user_id: selected!.telegram_user_id,
       current_step: 0,
       status: "active",
     });
@@ -257,6 +253,7 @@ function ConversasPage() {
     toast.success("História aplicada ao lead");
     setApplyOpen(false);
   }
+
 
 
   async function toggleAI() {
