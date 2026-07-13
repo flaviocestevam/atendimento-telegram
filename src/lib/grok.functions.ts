@@ -71,8 +71,9 @@ export const pingGrok = createServerFn({ method: "POST" })
 export const callGrok = createServerFn({ method: "POST" })
   .inputValidator((input: {
     conversationId: string;
-    mode: "suggest" | "auto";
+    mode: "suggest" | "auto" | "variants";
   }) => input)
+
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
