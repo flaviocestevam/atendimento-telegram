@@ -42,7 +42,7 @@ const filters = [
 function ConversasPage() {
   const { profileId } = useActiveProfile();
   const { user: userParam } = Route.useSearch();
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState("next");
   const [search, setSearch] = useState(userParam ?? "");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   useEffect(() => { if (userParam) setSearch(userParam); }, [userParam]);
@@ -51,8 +51,11 @@ function ConversasPage() {
   const callGrokFn = useServerFn(callGrok);
   const sendTgFn = useServerFn(sendTelegramMessage);
   const [grokLoading, setGrokLoading] = useState(false);
+  const [variantsLoading, setVariantsLoading] = useState(false);
+  const [variants, setVariants] = useState<string[]>([]);
   const [sending, setSending] = useState(false);
   const [applyOpen, setApplyOpen] = useState(false);
+
 
 
   const convs = useQuery({
