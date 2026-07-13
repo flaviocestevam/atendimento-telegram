@@ -71,8 +71,9 @@ export const pingGrok = createServerFn({ method: "POST" })
 export const callGrok = createServerFn({ method: "POST" })
   .inputValidator((input: {
     conversationId: string;
-    mode: "suggest" | "auto";
+    mode: "suggest" | "auto" | "variants";
   }) => input)
+
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
@@ -190,6 +191,10 @@ export const callGrok = createServerFn({ method: "POST" })
       content: m.text ?? "",
     }));
 
+    const variantsInstruction = data.mode === "variants"
+      ? `\n\nMODO VARIANTES: gere EXATAMENTE 3 opções de resposta curtas e diferentes entre si (tons/ângulos distintos: acolhedora, provocativa, direta). Cada opção com no máximo 2 frases. Separe as opções apenas com uma linha contendo "---" (três hifens). Não numere, não adicione títulos, não explique.`
+      : "";
+
     try {
       const r = await fetch("https://api.x.ai/v1/chat/completions", {
         method: "POST",
@@ -199,14 +204,23 @@ export const callGrok = createServerFn({ method: "POST" })
         },
         body: JSON.stringify({
           model: cfg.model,
-          messages: [{ role: "system", content: systemPrompt }, ...history],
-          temperature: 0.7,
+          messages: [{ role: "system", content: systemPrompt + variantsInstruction }, ...history],
+          temperature: data.mode === "variants" ? 0.9 : 0.7,
         }),
       });
       const json: any = await r.json();
       if (!r.ok) return { ok: false, error: json?.error?.message ?? "grok_call_failed" };
 
       const text = json.choices?.[0]?.message?.content ?? "";
+
+      if (data.mode === "variants") {
+        const variants = text
+          .split(/\n\s*-{3,}\s*\n/)
+          .map((s: string) => s.trim())
+          .filter((s: string) => s.length > 0)
+          .slice(0, 3);
+        return { ok: true, variants, mode: data.mode, storyUsed: null };
+      }
 
       let storyUsed: { id: string; name: string; variation: number } | null = null;
       if (chosenStory && text && telegramUserId) {
@@ -243,3 +257,4 @@ export const callGrok = createServerFn({ method: "POST" })
       return { ok: false, error: err?.message ?? "grok_call_exception" };
     }
   });
+

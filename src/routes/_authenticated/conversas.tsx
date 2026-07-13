@@ -15,7 +15,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { relTime, dateTimeBR, BRL } from "@/lib/format";
-import { Send, Sparkles, UserCheck, Pause, Play, Search, Languages, Zap, GitBranch } from "lucide-react";
+import { Send, Sparkles, UserCheck, Pause, Play, Search, Languages, Zap, GitBranch, Flame, ArrowRight } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
@@ -28,6 +28,7 @@ export const Route = createFileRoute("/_authenticated/conversas")({
 });
 
 const filters = [
+  { id: "next", label: "🔥 Próxima ação" },
   { id: "all", label: "Todas" },
   { id: "pending", label: "Aguardando" },
   { id: "ai", label: "IA respondeu" },
@@ -37,10 +38,11 @@ const filters = [
   { id: "blocked", label: "Bloqueados" },
 ];
 
+
 function ConversasPage() {
   const { profileId } = useActiveProfile();
   const { user: userParam } = Route.useSearch();
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState("next");
   const [search, setSearch] = useState(userParam ?? "");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   useEffect(() => { if (userParam) setSearch(userParam); }, [userParam]);
@@ -49,8 +51,11 @@ function ConversasPage() {
   const callGrokFn = useServerFn(callGrok);
   const sendTgFn = useServerFn(sendTelegramMessage);
   const [grokLoading, setGrokLoading] = useState(false);
+  const [variantsLoading, setVariantsLoading] = useState(false);
+  const [variants, setVariants] = useState<string[]>([]);
   const [sending, setSending] = useState(false);
   const [applyOpen, setApplyOpen] = useState(false);
+
 
 
   const convs = useQuery({
@@ -59,24 +64,46 @@ function ConversasPage() {
     queryFn: async () => {
       let q = supabase
         .from("conversations")
-        .select("id,status,ai_enabled,last_message_at,telegram_user_id,telegram_users(id,first_name,last_name,username,telegram_id,is_blocked)")
+        .select("id,status,ai_enabled,last_message_at,needs_human,telegram_user_id,telegram_users(id,first_name,last_name,username,telegram_id,is_blocked,score_buy,parasocial_strength,temperature)")
         .eq("seller_profile_id", profileId!)
         .order("last_message_at", { ascending: false, nullsFirst: false })
-        .limit(50);
+        .limit(80);
       if (filter === "pending") q = q.eq("status", "pending");
       if (filter === "human") q = q.eq("ai_enabled", false);
       if (filter === "ai") q = q.eq("ai_enabled", true);
       if (filter === "blocked") q = q.eq("status", "blocked");
       const { data } = await q;
-      const list = data ?? [];
-      if (!search) return list;
-      const s = search.toLowerCase();
-      return list.filter((c: any) =>
-        (c.telegram_users?.first_name ?? "").toLowerCase().includes(s) ||
-        (c.telegram_users?.username ?? "").toLowerCase().includes(s)
-      );
+      let list: any[] = data ?? [];
+      if (search) {
+        const s = search.toLowerCase();
+        list = list.filter((c: any) =>
+          (c.telegram_users?.first_name ?? "").toLowerCase().includes(s) ||
+          (c.telegram_users?.username ?? "").toLowerCase().includes(s)
+        );
+      }
+      if (filter === "next") {
+        const now = Date.now();
+        const score = (c: any) => {
+          const u = c.telegram_users ?? {};
+          const hoursIdle = c.last_message_at ? (now - +new Date(c.last_message_at)) / 3_600_000 : 999;
+          const recency = Math.max(0, 48 - hoursIdle); // até 48
+          const temp = u.temperature === "hot" ? 40 : u.temperature === "warm" ? 20 : 0;
+          return (c.needs_human ? 100 : 0)
+            + (c.status === "pending" ? 30 : 0)
+            + (u.score_buy ?? 0)
+            + (u.parasocial_strength ?? 0) / 2
+            + temp
+            + recency;
+        };
+        list = list
+          .filter((c: any) => !c.telegram_users?.is_blocked)
+          .map((c: any) => ({ ...c, _priority: Math.round(score(c)) }))
+          .sort((a: any, b: any) => b._priority - a._priority);
+      }
+      return list;
     },
   });
+
 
   const selected = (convs.data ?? []).find((c: any) => c.id === selectedId) ?? (convs.data ?? [])[0];
 
@@ -150,6 +177,34 @@ function ConversasPage() {
       setGrokLoading(false);
     }
   }
+
+  async function suggestVariants() {
+    if (!selected) return;
+    setVariantsLoading(true);
+    setVariants([]);
+    try {
+      const res: any = await callGrokFn({ data: { conversationId: selected.id, mode: "variants" } });
+      if (!res?.ok) return toast.error(res?.error ?? "Falha no Grok");
+      const vs: string[] = res.variants ?? [];
+      if (!vs.length) return toast.error("Grok não retornou variantes");
+      setVariants(vs);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao chamar Grok");
+    } finally {
+      setVariantsLoading(false);
+    }
+  }
+
+  function goNext() {
+    const list = convs.data ?? [];
+    if (!list.length) return toast.info("Fila vazia");
+    const idx = list.findIndex((c: any) => c.id === selected?.id);
+    const next = list[idx + 1] ?? list[0];
+    setSelectedId(next.id);
+    setReply("");
+    setVariants([]);
+  }
+
 
   async function setLeadLanguage(lang: "pt" | "en" | "es", source: "manual" | "confirmed" = "manual") {
     if (!leadQ.data?.id) return toast.error("Lead não encontrado para este usuário");
@@ -294,16 +349,27 @@ function ConversasPage() {
                     )}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-medium truncate">{u?.first_name} {u?.last_name}</span>
+                      <span className="font-medium truncate flex items-center gap-1">
+                        {filter === "next" && c._priority > 80 && <Flame className="h-3 w-3 text-orange-500 shrink-0" />}
+                        {u?.first_name} {u?.last_name}
+                      </span>
                       <span className="text-xs text-muted-foreground shrink-0">{relTime(c.last_message_at)}</span>
                     </div>
                     <div className="flex items-center justify-between gap-2 mt-1">
                       <span className="text-xs text-muted-foreground truncate">@{u?.username ?? u?.telegram_id}</span>
-                      <StatusBadge status={c.ai_enabled ? "ai" : "human"} />
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {filter === "next" && (
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+                            {c._priority}
+                          </span>
+                        )}
+                        <StatusBadge status={c.ai_enabled ? "ai" : "human"} />
+                      </div>
                     </div>
                   </button>
                 );
               })}
+
               {convs.isLoading && <p className="text-sm text-muted-foreground p-3">Carregando...</p>}
               {!convs.isLoading && (convs.data?.length ?? 0) === 0 && (
                 <p className="text-sm text-muted-foreground p-3">Nenhuma conversa.</p>
@@ -326,7 +392,13 @@ function ConversasPage() {
                     {selected.ai_enabled ? <><Pause className="h-3 w-3 mr-1"/>Pausar IA</> : <><Play className="h-3 w-3 mr-1"/>Ativar IA</>}
                   </Button>
                   <Button size="sm" variant="outline"><UserCheck className="h-3 w-3 mr-1"/>Assumir</Button>
+                  {filter === "next" && (
+                    <Button size="sm" onClick={goNext}>
+                      Próximo <ArrowRight className="h-3 w-3 ml-1"/>
+                    </Button>
+                  )}
                 </div>
+
               </div>
               <div className="px-4 py-2 border-b border-border flex items-center gap-2 flex-wrap text-xs">
                 <Languages className="h-3.5 w-3.5 text-muted-foreground" />
@@ -375,12 +447,32 @@ function ConversasPage() {
                   <Sparkles className="h-4 w-4 text-primary mt-0.5"/>
                   <div className="flex-1 text-xs">
                     <p className="font-medium text-primary">Sugestão da IA (Grok)</p>
-                    <p className="text-muted-foreground">Gera resposta usando ficha da influenciadora, memórias do lead e histórias ainda não usadas.</p>
+                    <p className="text-muted-foreground">Uma resposta pronta ou 3 opções em tons diferentes para você escolher.</p>
                   </div>
-                  <Button size="sm" variant="outline" onClick={suggestWithGrok} disabled={grokLoading}>
-                    {grokLoading ? "Gerando..." : "Sugerir"}
-                  </Button>
+                  <div className="flex gap-1 shrink-0">
+                    <Button size="sm" variant="outline" onClick={suggestWithGrok} disabled={grokLoading || variantsLoading}>
+                      {grokLoading ? "..." : "Sugerir"}
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={suggestVariants} disabled={grokLoading || variantsLoading}>
+                      {variantsLoading ? "..." : "3 opções"}
+                    </Button>
+                  </div>
                 </div>
+                {variants.length > 0 && (
+                  <div className="space-y-1.5">
+                    {variants.map((v, i) => (
+                      <button
+                        key={i}
+                        onClick={() => { setReply(v); setVariants([]); }}
+                        className="w-full text-left text-xs p-2.5 rounded-lg bg-muted hover:bg-primary/15 border border-border hover:border-primary/40 transition-colors"
+                      >
+                        <span className="text-[10px] font-semibold text-primary mr-1.5">#{i + 1}</span>
+                        <span className="whitespace-pre-wrap">{v}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 {(quickReplies.data?.length ?? 0) > 0 && (
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <Zap className="h-3 w-3 text-muted-foreground shrink-0" />
