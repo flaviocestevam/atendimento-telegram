@@ -392,7 +392,13 @@ function ConversasPage() {
                     {selected.ai_enabled ? <><Pause className="h-3 w-3 mr-1"/>Pausar IA</> : <><Play className="h-3 w-3 mr-1"/>Ativar IA</>}
                   </Button>
                   <Button size="sm" variant="outline"><UserCheck className="h-3 w-3 mr-1"/>Assumir</Button>
+                  {filter === "next" && (
+                    <Button size="sm" onClick={goNext}>
+                      Próximo <ArrowRight className="h-3 w-3 ml-1"/>
+                    </Button>
+                  )}
                 </div>
+
               </div>
               <div className="px-4 py-2 border-b border-border flex items-center gap-2 flex-wrap text-xs">
                 <Languages className="h-3.5 w-3.5 text-muted-foreground" />
