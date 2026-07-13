@@ -349,16 +349,27 @@ function ConversasPage() {
                     )}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-medium truncate">{u?.first_name} {u?.last_name}</span>
+                      <span className="font-medium truncate flex items-center gap-1">
+                        {filter === "next" && c._priority > 80 && <Flame className="h-3 w-3 text-orange-500 shrink-0" />}
+                        {u?.first_name} {u?.last_name}
+                      </span>
                       <span className="text-xs text-muted-foreground shrink-0">{relTime(c.last_message_at)}</span>
                     </div>
                     <div className="flex items-center justify-between gap-2 mt-1">
                       <span className="text-xs text-muted-foreground truncate">@{u?.username ?? u?.telegram_id}</span>
-                      <StatusBadge status={c.ai_enabled ? "ai" : "human"} />
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {filter === "next" && (
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+                            {c._priority}
+                          </span>
+                        )}
+                        <StatusBadge status={c.ai_enabled ? "ai" : "human"} />
+                      </div>
                     </div>
                   </button>
                 );
               })}
+
               {convs.isLoading && <p className="text-sm text-muted-foreground p-3">Carregando...</p>}
               {!convs.isLoading && (convs.data?.length ?? 0) === 0 && (
                 <p className="text-sm text-muted-foreground p-3">Nenhuma conversa.</p>
