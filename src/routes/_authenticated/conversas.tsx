@@ -178,6 +178,34 @@ function ConversasPage() {
     }
   }
 
+  async function suggestVariants() {
+    if (!selected) return;
+    setVariantsLoading(true);
+    setVariants([]);
+    try {
+      const res: any = await callGrokFn({ data: { conversationId: selected.id, mode: "variants" } });
+      if (!res?.ok) return toast.error(res?.error ?? "Falha no Grok");
+      const vs: string[] = res.variants ?? [];
+      if (!vs.length) return toast.error("Grok não retornou variantes");
+      setVariants(vs);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao chamar Grok");
+    } finally {
+      setVariantsLoading(false);
+    }
+  }
+
+  function goNext() {
+    const list = convs.data ?? [];
+    if (!list.length) return toast.info("Fila vazia");
+    const idx = list.findIndex((c: any) => c.id === selected?.id);
+    const next = list[idx + 1] ?? list[0];
+    setSelectedId(next.id);
+    setReply("");
+    setVariants([]);
+  }
+
+
   async function setLeadLanguage(lang: "pt" | "en" | "es", source: "manual" | "confirmed" = "manual") {
     if (!leadQ.data?.id) return toast.error("Lead não encontrado para este usuário");
     const { error } = await supabase
