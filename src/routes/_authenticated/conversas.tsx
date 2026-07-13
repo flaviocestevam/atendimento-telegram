@@ -28,6 +28,7 @@ export const Route = createFileRoute("/_authenticated/conversas")({
 });
 
 const filters = [
+  { id: "next", label: "🔥 Próxima ação" },
   { id: "all", label: "Todas" },
   { id: "pending", label: "Aguardando" },
   { id: "ai", label: "IA respondeu" },
@@ -36,6 +37,7 @@ const filters = [
   { id: "active", label: "Assinantes" },
   { id: "blocked", label: "Bloqueados" },
 ];
+
 
 function ConversasPage() {
   const { profileId } = useActiveProfile();
