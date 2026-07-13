@@ -64,24 +64,46 @@ function ConversasPage() {
     queryFn: async () => {
       let q = supabase
         .from("conversations")
-        .select("id,status,ai_enabled,last_message_at,telegram_user_id,telegram_users(id,first_name,last_name,username,telegram_id,is_blocked)")
+        .select("id,status,ai_enabled,last_message_at,needs_human,telegram_user_id,telegram_users(id,first_name,last_name,username,telegram_id,is_blocked,score_buy,parasocial_strength,temperature)")
         .eq("seller_profile_id", profileId!)
         .order("last_message_at", { ascending: false, nullsFirst: false })
-        .limit(50);
+        .limit(80);
       if (filter === "pending") q = q.eq("status", "pending");
       if (filter === "human") q = q.eq("ai_enabled", false);
       if (filter === "ai") q = q.eq("ai_enabled", true);
       if (filter === "blocked") q = q.eq("status", "blocked");
       const { data } = await q;
-      const list = data ?? [];
-      if (!search) return list;
-      const s = search.toLowerCase();
-      return list.filter((c: any) =>
-        (c.telegram_users?.first_name ?? "").toLowerCase().includes(s) ||
-        (c.telegram_users?.username ?? "").toLowerCase().includes(s)
-      );
+      let list: any[] = data ?? [];
+      if (search) {
+        const s = search.toLowerCase();
+        list = list.filter((c: any) =>
+          (c.telegram_users?.first_name ?? "").toLowerCase().includes(s) ||
+          (c.telegram_users?.username ?? "").toLowerCase().includes(s)
+        );
+      }
+      if (filter === "next") {
+        const now = Date.now();
+        const score = (c: any) => {
+          const u = c.telegram_users ?? {};
+          const hoursIdle = c.last_message_at ? (now - +new Date(c.last_message_at)) / 3_600_000 : 999;
+          const recency = Math.max(0, 48 - hoursIdle); // até 48
+          const temp = u.temperature === "hot" ? 40 : u.temperature === "warm" ? 20 : 0;
+          return (c.needs_human ? 100 : 0)
+            + (c.status === "pending" ? 30 : 0)
+            + (u.score_buy ?? 0)
+            + (u.parasocial_strength ?? 0) / 2
+            + temp
+            + recency;
+        };
+        list = list
+          .filter((c: any) => !c.telegram_users?.is_blocked)
+          .map((c: any) => ({ ...c, _priority: Math.round(score(c)) }))
+          .sort((a: any, b: any) => b._priority - a._priority);
+      }
+      return list;
     },
   });
+
 
   const selected = (convs.data ?? []).find((c: any) => c.id === selectedId) ?? (convs.data ?? [])[0];
 
