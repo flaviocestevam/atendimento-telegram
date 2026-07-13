@@ -447,12 +447,32 @@ function ConversasPage() {
                   <Sparkles className="h-4 w-4 text-primary mt-0.5"/>
                   <div className="flex-1 text-xs">
                     <p className="font-medium text-primary">Sugestão da IA (Grok)</p>
-                    <p className="text-muted-foreground">Gera resposta usando ficha da influenciadora, memórias do lead e histórias ainda não usadas.</p>
+                    <p className="text-muted-foreground">Uma resposta pronta ou 3 opções em tons diferentes para você escolher.</p>
                   </div>
-                  <Button size="sm" variant="outline" onClick={suggestWithGrok} disabled={grokLoading}>
-                    {grokLoading ? "Gerando..." : "Sugerir"}
-                  </Button>
+                  <div className="flex gap-1 shrink-0">
+                    <Button size="sm" variant="outline" onClick={suggestWithGrok} disabled={grokLoading || variantsLoading}>
+                      {grokLoading ? "..." : "Sugerir"}
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={suggestVariants} disabled={grokLoading || variantsLoading}>
+                      {variantsLoading ? "..." : "3 opções"}
+                    </Button>
+                  </div>
                 </div>
+                {variants.length > 0 && (
+                  <div className="space-y-1.5">
+                    {variants.map((v, i) => (
+                      <button
+                        key={i}
+                        onClick={() => { setReply(v); setVariants([]); }}
+                        className="w-full text-left text-xs p-2.5 rounded-lg bg-muted hover:bg-primary/15 border border-border hover:border-primary/40 transition-colors"
+                      >
+                        <span className="text-[10px] font-semibold text-primary mr-1.5">#{i + 1}</span>
+                        <span className="whitespace-pre-wrap">{v}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 {(quickReplies.data?.length ?? 0) > 0 && (
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <Zap className="h-3 w-3 text-muted-foreground shrink-0" />
