@@ -15,7 +15,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { relTime, dateTimeBR, BRL } from "@/lib/format";
-import { Send, Sparkles, UserCheck, Pause, Play, Search, Languages, Zap, GitBranch } from "lucide-react";
+import { Send, Sparkles, UserCheck, Pause, Play, Search, Languages, Zap, GitBranch, Flame, ArrowRight } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
